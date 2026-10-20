@@ -89,6 +89,7 @@ targets:
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
         AppGroupIdentifier: group.plus.ling.opencloudreve
+        KeychainAccessGroup: $(AppIdentifierPrefix)plus.ling.opencloudreve.shared
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: plus.ling.opencloudreve
@@ -120,6 +121,7 @@ targets:
       properties:
         CFBundleDisplayName: 上传到 OpenCloudreve
         AppGroupIdentifier: group.plus.ling.opencloudreve
+        KeychainAccessGroup: $(AppIdentifierPrefix)plus.ling.opencloudreve.shared
         NSExtension:
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
@@ -159,6 +161,7 @@ targets:
       properties:
         CFBundleDisplayName: OpenCloudreve
         AppGroupIdentifier: group.plus.ling.opencloudreve
+        KeychainAccessGroup: $(AppIdentifierPrefix)plus.ling.opencloudreve.shared
         NSExtension:
           NSExtensionPointIdentifier: com.apple.fileprovider-nonui
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).FileProviderExtension

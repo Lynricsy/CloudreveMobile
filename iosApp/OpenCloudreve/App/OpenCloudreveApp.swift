@@ -3,17 +3,16 @@ import OpenCloudreveCore
 
 @main
 struct OpenCloudreveApp: App {
+    @State private var session: AppSession
+
+    init() {
+        CoreBootstrap.start()
+        _session = State(initialValue: AppSession(accounts: CoreGraph.shared.accounts()))
+    }
+
     var body: some Scene {
         WindowGroup {
-            RootView()
+            RootView(session: session)
         }
-    }
-}
-
-/// 根视图：后续阶段替换为登录/主界面路由
-struct RootView: View {
-    var body: some View {
-        Text(CoreInfo.shared.NAME)
-            .font(.largeTitle)
     }
 }
