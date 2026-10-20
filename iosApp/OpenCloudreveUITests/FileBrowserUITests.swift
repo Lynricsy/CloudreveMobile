@@ -112,7 +112,9 @@ final class FileBrowserUITests: XCTestCase {
             Thread.sleep(forTimeInterval: 0.5)
         }
         if urlField.exists {
-            // 地址框可能已预填（如 https://）：点在右端让光标落到末尾，再逐字删除
+            // 先点元素本身获得键盘焦点；地址框可能已预填（如 https://），再点右端让光标落到末尾后逐字删除
+            XCTAssertTrue(urlField.wait(for: \.isHittable, toEqual: true, timeout: 10), "服务器地址框不可点按")
+            urlField.tap()
             urlField.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
             if let existing = urlField.value as? String, !existing.isEmpty, existing != urlField.placeholderValue {
                 urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: existing.count + 2))
