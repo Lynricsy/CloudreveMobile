@@ -6,6 +6,8 @@ import OpenCloudreveCore
 @Observable
 final class AppSession {
     private(set) var activeAccount: Account?
+    /// 无当前账户时登录页的预填信息（修改密码后设置；再次出现当前账户时清除）
+    var reloginHint: ReloginHint?
     @ObservationIgnored private var task: Task<Void, Never>?
 
     init(accounts: AccountRepository) {
@@ -14,6 +16,7 @@ final class AppSession {
             for await account in accounts.activeAccount {
                 guard let self else { return }
                 self.activeAccount = account
+                if account != nil { self.reloginHint = nil }
             }
         }
     }

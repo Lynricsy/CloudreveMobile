@@ -13,6 +13,7 @@ struct OpenCloudreveApp: App {
     var body: some Scene {
         WindowGroup {
             RootView(session: session)
+                .environment(session)
         }
     }
 }
