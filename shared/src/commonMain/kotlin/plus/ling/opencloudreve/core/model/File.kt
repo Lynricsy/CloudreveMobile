@@ -165,6 +165,10 @@ data class ExplorerView(
         const val VIEW_GRID = "grid"
         const val VIEW_GALLERY = "gallery"
         const val MIN_PAGE_SIZE = 50
+        /** 服务端校验 `gallery_width` 在 50..500（缺省按 0 处理会被拒绝）；与 Web 端窄屏默认值一致 */
+        const val DEFAULT_GALLERY_WIDTH = 110
+        const val MIN_GALLERY_WIDTH = 50
+        const val MAX_GALLERY_WIDTH = 500
     }
 }
 

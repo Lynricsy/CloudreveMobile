@@ -334,6 +334,10 @@ class FileListViewModel(
             orderDirection = s.orderDirection,
             view = s.viewMode,
             thumbnail = s.showThumbnails,
+            // 必须带合法的 gallery_width，否则 PATCH /file/view 返回 40001（GalleryWidth too short）
+            galleryWidth = base.galleryWidth
+                ?.takeIf { it in ExplorerView.MIN_GALLERY_WIDTH..ExplorerView.MAX_GALLERY_WIDTH }
+                ?: ExplorerView.DEFAULT_GALLERY_WIDTH,
         )
         scope.launch {
             try {

@@ -88,6 +88,8 @@ class FileListViewModelTest {
         assertEquals(HttpMethod.Patch, patch.method)
         assertTrue(patch.bodyText().contains("\"order\":\"created_at\""))
         assertTrue(patch.bodyText().contains("\"order_direction\":\"desc\""))
+        // 服务端 binding 要求 gallery_width ≥ 50，缺省会被 40001 拒绝
+        assertTrue(patch.bodyText().contains("\"gallery_width\":110"))
         eventually { env.server.requests.any { it.apiPath == "/file" && it.url.parameters["order_by"] == "created_at" } }
         assertEquals("created_at", vm.state.value.orderBy)
 
