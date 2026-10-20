@@ -1,0 +1,61 @@
+-- 目录列表缓存（File Provider / DocumentsProvider 枚举与离线占位）。json 为 ListResponse 原文
+CREATE TABLE ListingCache (
+    account_id TEXT NOT NULL,
+    uri TEXT NOT NULL,
+    json TEXT NOT NULL,
+    cached_at INTEGER NOT NULL,
+    PRIMARY KEY (account_id, uri)
+);
+
+-- 搜索历史（同一账户同一关键词只保留一条，按最近使用排序）
+CREATE TABLE SearchHistory (
+    account_id TEXT NOT NULL,
+    query TEXT NOT NULL,
+    used_at INTEGER NOT NULL,
+    PRIMARY KEY (account_id, query)
+);
+
+-- 站点配置缓存：account_or_site 登录前为站点地址，登录后为账户 id；section 为 basic/login/explorer/thumb/emojis 等
+CREATE TABLE SiteConfigCache (
+    account_or_site TEXT NOT NULL,
+    section TEXT NOT NULL,
+    json TEXT NOT NULL,
+    cached_at INTEGER NOT NULL,
+    PRIMARY KEY (account_or_site, section)
+);
+
+-- ListingCache
+putListing:
+INSERT OR REPLACE INTO ListingCache (account_id, uri, json, cached_at) VALUES (?, ?, ?, ?);
+
+selectListing:
+SELECT * FROM ListingCache WHERE account_id = ? AND uri = ?;
+
+deleteListing:
+DELETE FROM ListingCache WHERE account_id = ? AND uri = ?;
+
+deleteListingsForAccount:
+DELETE FROM ListingCache WHERE account_id = ?;
+
+-- SearchHistory
+putSearch:
+INSERT OR REPLACE INTO SearchHistory (account_id, query, used_at) VALUES (?, ?, ?);
+
+selectRecentSearches:
+SELECT * FROM SearchHistory WHERE account_id = ? ORDER BY used_at DESC LIMIT :limit;
+
+deleteSearch:
+DELETE FROM SearchHistory WHERE account_id = ? AND query = ?;
+
+deleteSearchesForAccount:
+DELETE FROM SearchHistory WHERE account_id = ?;
+
+-- SiteConfigCache
+putSiteConfig:
+INSERT OR REPLACE INTO SiteConfigCache (account_or_site, section, json, cached_at) VALUES (?, ?, ?, ?);
+
+selectSiteConfig:
+SELECT * FROM SiteConfigCache WHERE account_or_site = ? AND section = ?;
+
+deleteSiteConfigsFor:
+DELETE FROM SiteConfigCache WHERE account_or_site = ?;
