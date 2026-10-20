@@ -35,11 +35,13 @@ class MainActivity : ComponentActivity() {
         handleIntent(intent)
     }
 
-    /** 通知点击（打开传输列表）与系统分享菜单转来的分享链接 */
+    /** 通知点击（打开传输列表）、系统分享菜单转来的分享链接与深链（`opencloudreve://open?url=`、`cloudreve://…@share`） */
     private fun handleIntent(intent: Intent?) {
         when (intent?.action) {
             ACTION_OPEN_TASKS -> MainRequests.post(MainRequest.OpenTasks)
             ACTION_OPEN_SHARE_LINK -> intent.getStringExtra(EXTRA_LINK)?.let { MainRequests.post(MainRequest.OpenShareLink(it)) }
+            // 分享链接解析（含 opencloudreve://open?url= 解包）由 ShareLinkParser 在分享浏览页完成
+            Intent.ACTION_VIEW -> intent.dataString?.let { MainRequests.post(MainRequest.OpenShareLink(it)) }
         }
     }
 

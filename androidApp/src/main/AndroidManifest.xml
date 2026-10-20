@@ -33,6 +33,19 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- 深链：opencloudreve://open?url=<分享链接>、cloudreve://<id>[:<密码>]@share → 分享浏览 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="opencloudreve" android:host="open" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="cloudreve" android:host="share" />
+            </intent-filter>
         </activity>
 
         <!-- 系统分享菜单“上传到 OpenCloudreve”；分享链接文本转交主界面打开 -->
