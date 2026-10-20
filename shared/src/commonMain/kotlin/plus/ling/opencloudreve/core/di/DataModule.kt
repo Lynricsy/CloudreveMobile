@@ -22,6 +22,7 @@ import plus.ling.opencloudreve.core.presentation.files.SearchViewModel
 import plus.ling.opencloudreve.core.settings.UserSettingsRepository
 import plus.ling.opencloudreve.core.share.ShareRepository
 import plus.ling.opencloudreve.core.site.SiteConfigRepository
+import plus.ling.opencloudreve.core.transfer.TransferRepository
 import plus.ling.opencloudreve.core.workflow.WorkflowRepository
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -95,7 +96,8 @@ internal class AccountScoped<T : Any>(private val create: (String) -> T) {
 }
 
 /**
- * 数据分片依赖：需要 authModule（`ApiClientProvider`、`ApiClientRegistry`、`OpenCloudreveDatabase`、`AccountRepository`）。
+ * 数据分片依赖：需要 authModule（`ApiClientProvider`、`ApiClientRegistry`、`OpenCloudreveDatabase`、`AccountRepository`）
+ * 与 transferModule（`TransferRepository`，文件列表据此在本机上传完成后刷新）。
  *
  * 文件浏览 ViewModel 以 `factory` 注册，参数（`parametersOf` 顺序）：
  * - [FileListViewModel]：`(accountId, uri)`
@@ -110,7 +112,10 @@ val dataModule = module {
 
     factory { (accountId: String, uri: String) ->
         val d = get<DataRepositories>()
-        FileListViewModel(accountId, uri, d.files(accountId), d.userSettings(accountId), d.site, d.events(accountId))
+        FileListViewModel(
+            accountId, uri, d.files(accountId), d.userSettings(accountId), d.site, d.events(accountId),
+            uploads = get<TransferRepository>().observeTasks(accountId),
+        )
     }
     factory { (accountId: String) ->
         val d = get<DataRepositories>()

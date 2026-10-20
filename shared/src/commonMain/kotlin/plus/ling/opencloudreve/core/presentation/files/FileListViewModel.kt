@@ -3,6 +3,8 @@ package plus.ling.opencloudreve.core.presentation.files
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import plus.ling.opencloudreve.core.events.EventHub
 import plus.ling.opencloudreve.core.files.FileRepository
@@ -24,6 +26,9 @@ import plus.ling.opencloudreve.core.presentation.UiError
 import plus.ling.opencloudreve.core.presentation.toUiError
 import plus.ling.opencloudreve.core.settings.UserSettingsRepository
 import plus.ling.opencloudreve.core.site.SiteConfigRepository
+import plus.ling.opencloudreve.core.transfer.TransferItem
+import plus.ling.opencloudreve.core.transfer.TransferKind
+import plus.ling.opencloudreve.core.transfer.TransferState
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -99,7 +104,10 @@ sealed interface FileListIntent {
     data object SelectAll : FileListIntent
     data object ExitSelection : FileListIntent
 
-    /** 页面前后台切换：前台订阅目录事件，进入后台 10 秒后断开 */
+    /**
+     * 页面前后台切换：前台订阅目录事件，进入后台 10 秒后断开。
+     * 离开后再回到前台（如从预览器保存返回）会静默重载一次，补上本机修改（不会回流成事件）。
+     */
     data class SetForeground(val foreground: Boolean) : FileListIntent
 
     /** 操作成功后本地移除条目（随后自动刷新） */
@@ -114,6 +122,8 @@ sealed interface FileListEffect {
 /**
  * 文件列表（目录、回收站、与我共享、分享内目录、搜索结果）。
  * 构造后立即加载（先用离线缓存预填）；前台时订阅 SSE，事件防抖 1 秒后刷新。
+ * 本机发起的修改不会回流成 SSE 事件（同一 `X-Cr-Client-Id`），所以另行观察 [uploads]：
+ * 有目标为当前目录的上传完成时同样防抖刷新。
  */
 class FileListViewModel(
     val accountId: String,
@@ -122,6 +132,8 @@ class FileListViewModel(
     private val userSettings: UserSettingsRepository,
     private val site: SiteConfigRepository,
     private val events: EventHub,
+    /** 本账户的传输任务（`TransferManager.observeTasks`） */
+    private val uploads: Flow<List<TransferItem>> = emptyFlow(),
     private val eventDebounce: Duration = 1.seconds,
     private val backgroundGrace: Duration = 10.seconds,
 ) : CoreViewModel<FileListState, FileListIntent, FileListEffect>(initialState(uri)) {
@@ -132,6 +144,8 @@ class FileListViewModel(
     private var eventsJob: Job? = null
     private var backgroundJob: Job? = null
     private var debounceJob: Job? = null
+    /** 曾离开前台（下次回到前台时静默重载） */
+    private var leftForeground = false
     private var localViewSet = false
     private var serverView: ExplorerView? = null
 
@@ -139,6 +153,7 @@ class FileListViewModel(
         scope.launch { userSettings.user.collect { u -> updateState { it.copy(user = u) } } }
         scope.launch { userSettings.capacity.collect { c -> updateState { it.copy(capacity = c) } } }
         scope.launch { loadContext() }
+        scope.launch { watchCompletedUploads() }
         initialLoad()
     }
 
@@ -364,7 +379,12 @@ class FileListViewModel(
             backgroundJob?.cancel()
             backgroundJob = null
             if (eventsJob?.isActive != true) startEvents()
+            if (leftForeground) {
+                leftForeground = false
+                reload(showRefreshing = false)
+            }
         } else {
+            leftForeground = true
             backgroundJob?.cancel()
             backgroundJob = scope.launch {
                 delay(backgroundGrace)
@@ -377,12 +397,28 @@ class FileListViewModel(
     private fun startEvents() {
         if (crUri.fs != CrUri.FS_MY || crUri.isSearch() || events.isDisabled) return
         eventsJob = scope.launch {
-            events.subscribe(currentState.uri).collect {
-                debounceJob?.cancel()
-                debounceJob = scope.launch {
-                    delay(eventDebounce)
-                    reload(showRefreshing = false)
-                }
+            events.subscribe(currentState.uri).collect { scheduleReload() }
+        }
+    }
+
+    private fun scheduleReload() {
+        debounceJob?.cancel()
+        debounceJob = scope.launch {
+            delay(eventDebounce)
+            reload(showRefreshing = false)
+        }
+    }
+
+    /** 首个快照里已完成的任务只做基线；之后新完成、且目标在当前目录的上传触发刷新 */
+    private suspend fun watchCompletedUploads() {
+        if (crUri.isSearch()) return
+        var seen: Set<String>? = null
+        uploads.collect { items ->
+            val done = items.filter { it.kind == TransferKind.UPLOAD && it.state == TransferState.COMPLETED }
+            val previous = seen
+            seen = done.mapTo(HashSet()) { it.id }
+            if (previous != null && done.any { it.id !in previous && CrUri.parse(it.targetUri).parent() == crUri }) {
+                scheduleReload()
             }
         }
     }

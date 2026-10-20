@@ -6,6 +6,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -21,6 +22,9 @@ import plus.ling.opencloudreve.core.files.err
 import plus.ling.opencloudreve.core.files.fileJson
 import plus.ling.opencloudreve.core.files.okData
 import plus.ling.opencloudreve.core.settings.UserSettingsRepository
+import plus.ling.opencloudreve.core.transfer.TransferItem
+import plus.ling.opencloudreve.core.transfer.TransferKind
+import plus.ling.opencloudreve.core.transfer.TransferState
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -106,6 +110,60 @@ class FileListViewModelTest {
         assertEquals(2, vm.state.value.selection.size)
         vm.on(FileListIntent.ExitSelection)
         assertTrue(vm.state.value.selection.isEmpty())
+        vm.dispose()
+    }
+
+    private fun upload(id: String, target: String, state: TransferState) = TransferItem(
+        id = id, accountId = ACCOUNT, kind = TransferKind.UPLOAD, state = state, sourceRef = "src", displayName = id,
+        size = 1, lastModified = null, mimeType = null, targetUri = target, destPath = null, overwrite = false,
+        policyType = "local", chunkSize = 0, chunkCount = 1, bytesDone = 0, errorCode = null, errorMessage = null,
+        createdAt = 0, updatedAt = 0,
+    )
+
+    @Test
+    fun refreshesAfterOwnUploadOrReturningToForeground() = runTest {
+        Dispatchers.setMain(Dispatchers.Unconfined)
+        val env = DataEnv { req ->
+            when (req.apiPath) {
+                "/file" -> okData(listJson)
+                "/user/me" -> okData("""{"id":"u1","email":"u@x","group":{"id":"g","permission":"Bw=="}}""")
+                "/user/capacity" -> okData("""{"total":100,"used":10}""")
+                "/site/config/explorer" -> okData("""{"max_batch_size":500}""")
+                else -> err(404)
+            }
+        }
+        val user = UserSettingsRepository(ACCOUNT, env.clients) { _, _ -> }
+        val hub = EventHub(ACCOUNT, env.clients, initialBackoff = 10_000.milliseconds)
+        // 基线里已完成的任务不触发刷新
+        val uploads = MutableStateFlow(listOf(upload("old", "cloudreve://my/old.bin", TransferState.COMPLETED)))
+        val vm = FileListViewModel(
+            ACCOUNT, "cloudreve://my", env.files, user, env.site, hub,
+            uploads = uploads, eventDebounce = 50.milliseconds,
+        )
+        eventually { vm.state.value.files.size == 2 }
+        fun listCalls() = env.server.requests.count { it.apiPath == "/file" }
+        val before = listCalls()
+
+        // 其他目录的上传完成：不刷新
+        uploads.value = uploads.value + upload("other", "cloudreve://my/b/x.bin", TransferState.COMPLETED)
+        withContext(Dispatchers.Default) { delay(200) }
+        assertEquals(before, listCalls())
+
+        // 当前目录的上传从运行到完成：防抖后刷新
+        uploads.value = uploads.value + upload("new", "cloudreve://my/new.bin", TransferState.RUNNING)
+        withContext(Dispatchers.Default) { delay(200) }
+        assertEquals(before, listCalls())
+        uploads.value = uploads.value.map { if (it.id == "new") it.copy(state = TransferState.COMPLETED) else it }
+        eventually { listCalls() > before }
+
+        // 首次进入前台不额外加载；离开后返回前台静默重载（补上本机在预览器里的保存）
+        val beforeForeground = listCalls()
+        vm.on(FileListIntent.SetForeground(true))
+        withContext(Dispatchers.Default) { delay(100) }
+        assertEquals(beforeForeground, listCalls())
+        vm.on(FileListIntent.SetForeground(false))
+        vm.on(FileListIntent.SetForeground(true))
+        eventually { listCalls() > beforeForeground }
         vm.dispose()
     }
 }
