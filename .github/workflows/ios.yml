@@ -12,6 +12,9 @@ env:
   OCR_SERVER_REF: "4.19.11"
   OCR_TEST_EMAIL: user@example.com
   OCR_TEST_PASSWORD: User@12345
+  # 普通用户（非管理员），用于确认管理入口对普通用户不可见
+  OCR_MEMBER_EMAIL: member@example.com
+  OCR_MEMBER_PASSWORD: Member@12345
 
 jobs:
   build:
@@ -61,6 +64,12 @@ jobs:
             -d "{\"email\":\"$OCR_TEST_EMAIL\",\"password\":\"$OCR_TEST_PASSWORD\"}" \
             http://127.0.0.1:5212/api/v4/user)
           echo "注册：$RESP"
+          echo "$RESP" | grep -q '"code":0'
+          # 新库首个注册用户即管理员；再注册一个普通用户作对照
+          RESP=$(curl -fsS -X POST -H 'Content-Type: application/json' \
+            -d "{\"email\":\"$OCR_MEMBER_EMAIL\",\"password\":\"$OCR_MEMBER_PASSWORD\"}" \
+            http://127.0.0.1:5212/api/v4/user)
+          echo "注册普通用户：$RESP"
           echo "$RESP" | grep -q '"code":0'
       - name: 预置文件浏览测试数据
         # 照片（PNG 缩略图）、文档（65 个文件）等，供 FileBrowserUITests 使用

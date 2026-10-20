@@ -35,6 +35,23 @@
         }
       }
     },
+    "%lld 个版本": {
+      "comment": "版本保留数量",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld versions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个版本"
+          }
+        }
+      }
+    },
     "%lld 个结果": {
       "comment": "搜索结果数量",
       "localizations": {
@@ -137,6 +154,23 @@
         }
       }
     },
+    "%lld 项权限": {
+      "comment": "已授权应用的权限数",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld permissions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 项权限"
+          }
+        }
+      }
+    },
     "%lld+ 项": {
       "comment": "目录条目数（还有更多未加载）",
       "localizations": {
@@ -150,6 +184,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld+ 项"
+          }
+        }
+      }
+    },
+    "30 天前结束的任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended over 30 days ago"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 天前结束的任务"
           }
         }
       }
@@ -170,6 +220,38 @@
         }
       }
     },
+    "7 天前结束的任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended over 7 days ago"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 天前结束的任务"
+          }
+        }
+      }
+    },
+    "App 版本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App version"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App 版本"
+          }
+        }
+      }
+    },
     "Draw.io 图表": {
       "localizations": {
         "en": {
@@ -186,6 +268,54 @@
         }
       }
     },
+    "ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ID"
+          }
+        }
+      }
+    },
+    "IO 密集": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IO intensive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IO 密集"
+          }
+        }
+      }
+    },
+    "Passkey": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passkey"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passkey"
+          }
+        }
+      }
+    },
     "Passkey 验证失败": {
       "localizations": {
         "en": {
@@ -198,6 +328,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Passkey 验证失败"
+          }
+        }
+      }
+    },
+    "WebDAV": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WebDAV"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WebDAV"
+          }
+        }
+      }
+    },
+    "iOS 端暂不支持直接添加 Passkey，请在网页端添加后用于登录。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adding passkeys isn’t supported on iOS yet. Add one on the web, then use it to sign in."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS 端暂不支持直接添加 Passkey，请在网页端添加后用于登录。"
           }
         }
       }
@@ -267,6 +429,22 @@
         }
       }
     },
+    "上传会话检查": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload session check"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上传会话检查"
+          }
+        }
+      }
+    },
     "上传文件": {
       "localizations": {
         "en": {
@@ -295,6 +473,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "上传照片或视频"
+          }
+        }
+      }
+    },
+    "上次使用 %@": {
+      "comment": "日期时间",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last used %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次使用 %@"
           }
         }
       }
@@ -331,6 +526,54 @@
         }
       }
     },
+    "下载次数": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloads"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载次数"
+          }
+        }
+      }
+    },
+    "不展示": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不展示"
+          }
+        }
+      }
+    },
+    "不支持": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not supported"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不支持"
+          }
+        }
+      }
+    },
     "不生成缩略图": {
       "localizations": {
         "en": {
@@ -359,6 +602,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "不能选择被移动的文件夹本身或其子文件夹"
+          }
+        }
+      }
+    },
+    "不限": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlimited"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不限"
           }
         }
       }
@@ -411,6 +670,22 @@
         }
       }
     },
+    "两步验证二维码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two-factor QR code"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "两步验证二维码"
+          }
+        }
+      }
+    },
     "两步验证码不正确": {
       "localizations": {
         "en": {
@@ -423,6 +698,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "两步验证码不正确"
+          }
+        }
+      }
+    },
+    "个人主页展示的分享": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shares on profile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "个人主页展示的分享"
+          }
+        }
+      }
+    },
+    "主机": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Master"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主机"
+          }
+        }
+      }
+    },
+    "主题色": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theme color"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主题色"
           }
         }
       }
@@ -459,6 +782,54 @@
         }
       }
     },
+    "仅公开分享": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Public shares only"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅公开分享"
+          }
+        }
+      }
+    },
+    "仅已分享": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shared only"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅已分享"
+          }
+        }
+      }
+    },
+    "仅有直链": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With direct links only"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅有直链"
+          }
+        }
+      }
+    },
     "仅解除链接（保留存储中的文件）": {
       "localizations": {
         "en": {
@@ -487,6 +858,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "从"
+          }
+        }
+      }
+    },
+    "从机": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slave"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从机"
+          }
+        }
+      }
+    },
+    "从机任务属性": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slave task properties"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从机任务属性"
+          }
+        }
+      }
+    },
+    "从机存储": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slave storage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从机存储"
+          }
+        }
+      }
+    },
+    "从照片中选择": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose from Photos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从照片中选择"
           }
         }
       }
@@ -523,6 +958,22 @@
         }
       }
     },
+    "以目录视图展示": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show as folder view"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以目录视图展示"
+          }
+        }
+      }
+    },
     "任务": {
       "localizations": {
         "en": {
@@ -535,6 +986,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "任务"
+          }
+        }
+      }
+    },
+    "任务详情": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Task Details"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任务详情"
+          }
+        }
+      }
+    },
+    "任务队列": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Task Queue"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任务队列"
           }
         }
       }
@@ -587,6 +1070,22 @@
         }
       }
     },
+    "使用 Gravatar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use Gravatar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 Gravatar"
+          }
+        }
+      }
+    },
     "使用 Passkey / 网页登录": {
       "localizations": {
         "en": {
@@ -603,6 +1102,22 @@
         }
       }
     },
+    "使用此账号连接的设备将无法再访问。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Devices connected with this account will lose access."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用此账号连接的设备将无法再访问。"
+          }
+        }
+      }
+    },
     "例如 `https://cloud.example.com`。未填写协议时默认使用 HTTPS。": {
       "localizations": {
         "en": {
@@ -615,6 +1130,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "例如 `https://cloud.example.com`。未填写协议时默认使用 HTTPS。"
+          }
+        }
+      }
+    },
+    "例如 docx, xlsx, md": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e.g. docx, xlsx, md"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "例如 docx, xlsx, md"
+          }
+        }
+      }
+    },
+    "保存": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存"
           }
         }
       }
@@ -651,6 +1198,38 @@
         }
       }
     },
+    "保存失败": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t Save"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存失败"
+          }
+        }
+      }
+    },
+    "信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Info"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "信息"
+          }
+        }
+      }
+    },
     "修改元数据": {
       "localizations": {
         "en": {
@@ -663,6 +1242,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "修改元数据"
+          }
+        }
+      }
+    },
+    "修改失败": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t Change Password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修改失败"
+          }
+        }
+      }
+    },
+    "修改密码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change Password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修改密码"
           }
         }
       }
@@ -683,6 +1294,22 @@
         }
       }
     },
+    "修改昵称": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change Nickname"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修改昵称"
+          }
+        }
+      }
+    },
     "全文搜索": {
       "localizations": {
         "en": {
@@ -695,6 +1322,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "全文搜索"
+          }
+        }
+      }
+    },
+    "全文索引": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full-text index"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全文索引"
           }
         }
       }
@@ -731,6 +1374,22 @@
         }
       }
     },
+    "全部分享": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All shares"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部分享"
+          }
+        }
+      }
+    },
     "全部复制": {
       "localizations": {
         "en": {
@@ -743,6 +1402,71 @@
           "stringUnit": {
             "state": "translated",
             "value": "全部复制"
+          }
+        }
+      }
+    },
+    "全部已结束的任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All ended tasks"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部已结束的任务"
+          }
+        }
+      }
+    },
+    "共 %lld 项": {
+      "comment": "列表总数",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld items"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共 %lld 项"
+          }
+        }
+      }
+    },
+    "关于": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关于"
+          }
+        }
+      }
+    },
+    "关联 ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correlation ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关联 ID"
           }
         }
       }
@@ -763,6 +1487,70 @@
         }
       }
     },
+    "关闭两步验证": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn Off Two-Factor Authentication"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭两步验证"
+          }
+        }
+      }
+    },
+    "其他用户访问你的个人主页时能看到的分享链接。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share links other users can see on your profile page."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他用户访问你的个人主页时能看到的分享链接。"
+          }
+        }
+      }
+    },
+    "内部状态": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private state"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内部状态"
+          }
+        }
+      }
+    },
+    "出错": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出错"
+          }
+        }
+      }
+    },
     "分享": {
       "localizations": {
         "en": {
@@ -779,6 +1567,22 @@
         }
       }
     },
+    "分享 ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分享 ID"
+          }
+        }
+      }
+    },
     "分享密码": {
       "localizations": {
         "en": {
@@ -791,6 +1595,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "分享密码"
+          }
+        }
+      }
+    },
+    "分享详情": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share Details"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分享详情"
+          }
+        }
+      }
+    },
+    "分享链接": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share link"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分享链接"
           }
         }
       }
@@ -875,6 +1711,22 @@
         }
       }
     },
+    "创建压缩包": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create archive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建压缩包"
+          }
+        }
+      }
+    },
     "创建时间": {
       "localizations": {
         "en": {
@@ -936,6 +1788,215 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除 %lld 个项目？"
+          }
+        }
+      }
+    },
+    "删除任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Task"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除任务"
+          }
+        }
+      }
+    },
+    "删除分享": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Share"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除分享"
+          }
+        }
+      }
+    },
+    "删除后将无法再用它登录。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You won’t be able to sign in with it anymore."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除后将无法再用它登录。"
+          }
+        }
+      }
+    },
+    "删除所选的 %lld 项？": {
+      "comment": "批量删除确认",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete %lld selected items?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除所选的 %lld 项？"
+          }
+        }
+      }
+    },
+    "删除文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete File"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除文件"
+          }
+        }
+      }
+    },
+    "删除此 Passkey？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this passkey?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除此 Passkey？"
+          }
+        }
+      }
+    },
+    "删除此 WebDAV 账号？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this WebDAV account?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除此 WebDAV 账号？"
+          }
+        }
+      }
+    },
+    "删除此任务记录？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this task record?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除此任务记录？"
+          }
+        }
+      }
+    },
+    "删除此分享？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this share?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除此分享？"
+          }
+        }
+      }
+    },
+    "删除此文件？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this file?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除此文件？"
+          }
+        }
+      }
+    },
+    "删除此用户？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this user?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除此用户？"
+          }
+        }
+      }
+    },
+    "删除用户": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete User"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除用户"
+          }
+        }
+      }
+    },
+    "删除用户会同时删除其全部文件，且不可恢复。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleting a user also deletes all of their files. This can’t be undone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除用户会同时删除其全部文件，且不可恢复。"
           }
         }
       }
@@ -1020,6 +2081,38 @@
         }
       }
     },
+    "剩余下载次数": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remaining downloads"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩余下载次数"
+          }
+        }
+      }
+    },
+    "加密存储": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encrypted"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加密存储"
+          }
+        }
+      }
+    },
     "升序": {
       "localizations": {
         "en": {
@@ -1032,6 +2125,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "升序"
+          }
+        }
+      }
+    },
+    "单个文件最大 %@": {
+      "comment": "容量",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Max file size %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "单个文件最大 %@"
           }
         }
       }
@@ -1101,6 +2211,54 @@
         }
       }
     },
+    "原始数据": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raw Data"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原始数据"
+          }
+        }
+      }
+    },
+    "反向代理": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reverse proxy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "反向代理"
+          }
+        }
+      }
+    },
+    "反向代理：下载经由服务器中转。阻止上传系统文件：忽略 .DS_Store、Thumbs.db 等系统生成的文件。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reverse proxy: downloads are relayed through the server. Block system files: ignore files generated by the system such as .DS_Store and Thumbs.db."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "反向代理：下载经由服务器中转。阻止上传系统文件：忽略 .DS_Store、Thumbs.db 等系统生成的文件。"
+          }
+        }
+      }
+    },
     "发生未知错误": {
       "localizations": {
         "en": {
@@ -1166,6 +2324,22 @@
         }
       }
     },
+    "取消全选": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deselect All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消全选"
+          }
+        }
+      }
+    },
     "取消固定": {
       "localizations": {
         "en": {
@@ -1182,6 +2356,38 @@
         }
       }
     },
+    "只读": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read-only"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只读"
+          }
+        }
+      }
+    },
+    "同步文件视图设置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync View Settings"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同步文件视图设置"
+          }
+        }
+      }
+    },
     "名称": {
       "localizations": {
         "en": {
@@ -1194,6 +2400,102 @@
           "stringUnit": {
             "state": "translated",
             "value": "名称"
+          }
+        }
+      }
+    },
+    "否": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "否"
+          }
+        }
+      }
+    },
+    "启用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用"
+          }
+        }
+      }
+    },
+    "启用两步验证": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Two-Factor Authentication"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用两步验证"
+          }
+        }
+      }
+    },
+    "启用版本保留": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Versions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用版本保留"
+          }
+        }
+      }
+    },
+    "回收": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recycle"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回收"
+          }
+        }
+      }
+    },
+    "回收存储": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage recycling"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回收存储"
           }
         }
       }
@@ -1294,6 +2596,22 @@
         }
       }
     },
+    "图表样式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chart style"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图表样式"
+          }
+        }
+      }
+    },
     "在侧栏中选择要浏览的位置。": {
       "localizations": {
         "en": {
@@ -1306,6 +2624,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "在侧栏中选择要浏览的位置。"
+          }
+        }
+      }
+    },
+    "在支持 WebDAV 的应用中使用以上地址、用户名和账号密码连接。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect from any WebDAV app with the address and username above and the account’s password."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在支持 WebDAV 的应用中使用以上地址、用户名和账号密码连接。"
           }
         }
       }
@@ -1374,6 +2708,70 @@
         }
       }
     },
+    "在网页中添加 Passkey": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Passkey on the Web"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在网页中添加 Passkey"
+          }
+        }
+      }
+    },
+    "在网页后台打开": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in Web Dashboard"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在网页后台打开"
+          }
+        }
+      }
+    },
+    "在验证器 App 中打开": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in Authenticator App"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在验证器 App 中打开"
+          }
+        }
+      }
+    },
+    "地址": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Address"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "地址"
+          }
+        }
+      }
+    },
     "基本信息": {
       "localizations": {
         "en": {
@@ -1386,6 +2784,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "基本信息"
+          }
+        }
+      }
+    },
+    "处理中": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Processing"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "处理中"
           }
         }
       }
@@ -1418,6 +2832,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "复制到"
+          }
+        }
+      }
+    },
+    "外观": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外观"
           }
         }
       }
@@ -1470,6 +2900,22 @@
         }
       }
     },
+    "媒体信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Media metadata"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体信息"
+          }
+        }
+      }
+    },
     "存储": {
       "localizations": {
         "en": {
@@ -1482,6 +2928,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "存储"
+          }
+        }
+      }
+    },
+    "存储实体": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blobs"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储实体"
           }
         }
       }
@@ -1530,6 +2992,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "存储策略"
+          }
+        }
+      }
+    },
+    "安全": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Security"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安全"
           }
         }
       }
@@ -1599,6 +3077,54 @@
         }
       }
     },
+    "密钥": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Secret Key"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "密钥"
+          }
+        }
+      }
+    },
+    "导入文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入文件"
+          }
+        }
+      }
+    },
+    "将删除已完成、出错和已取消的任务记录。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed, failed and canceled task records will be deleted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将删除已完成、出错和已取消的任务记录。"
+          }
+        }
+      }
+    },
     "将撤销此设备上的登录凭证，账户数据保留在服务器上。": {
       "localizations": {
         "en": {
@@ -1611,6 +3137,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "将撤销此设备上的登录凭证，账户数据保留在服务器上。"
+          }
+        }
+      }
+    },
+    "尚未添加 Passkey": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No passkeys yet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未添加 Passkey"
+          }
+        }
+      }
+    },
+    "工作中 %lld · 已提交 %lld · 成功 %lld · 失败 %lld · 挂起 %lld": {
+      "comment": "任务队列指标",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Busy %lld · Submitted %lld · Succeeded %lld · Failed %lld · Suspended %lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作中 %lld · 已提交 %lld · 成功 %lld · 失败 %lld · 挂起 %lld"
+          }
+        }
+      }
+    },
+    "已使用 %@，共 %@": {
+      "comment": "已用容量与总容量",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ used of %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已使用 %@，共 %@"
           }
         }
       }
@@ -1631,6 +3207,22 @@
         }
       }
     },
+    "已关闭": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已关闭"
+          }
+        }
+      }
+    },
     "已分享": {
       "localizations": {
         "en": {
@@ -1643,6 +3235,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "已分享"
+          }
+        }
+      }
+    },
+    "已取消": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Canceled"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已取消"
           }
         }
       }
@@ -1680,6 +3288,118 @@
         }
       }
     },
+    "已完成": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已完成"
+          }
+        }
+      }
+    },
+    "已封禁": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Banned"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已封禁"
+          }
+        }
+      }
+    },
+    "已开启": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已开启"
+          }
+        }
+      }
+    },
+    "已开启两步验证": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two-factor authentication on"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已开启两步验证"
+          }
+        }
+      }
+    },
+    "已挂起": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suspended"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已挂起"
+          }
+        }
+      }
+    },
+    "已授权的应用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authorized Apps"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已授权的应用"
+          }
+        }
+      }
+    },
+    "已清理旧任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Old tasks cleaned up"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已清理旧任务"
+          }
+        }
+      }
+    },
     "已用 %@，共 %@": {
       "comment": "存储容量，参数为已用与总量",
       "localizations": {
@@ -1693,6 +3413,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "已用 %@，共 %@"
+          }
+        }
+      }
+    },
+    "已用空间": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Used"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用空间"
+          }
+        }
+      }
+    },
+    "已用空间与实际文件不一致时，可重新计算。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recalculate if the used space doesn’t match the actual files."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用空间与实际文件不一致时，可重新计算。"
           }
         }
       }
@@ -1714,6 +3466,38 @@
         }
       }
     },
+    "开启同步后，排序、列表/网格等视图设置会保存到服务器，在其他设备上保持一致。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When on, sorting and list/grid view settings are saved to the server and stay consistent across devices."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开启同步后，排序、列表/网格等视图设置会保存到服务器，在其他设备上保持一致。"
+          }
+        }
+      }
+    },
+    "开源许可": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Source Licenses"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开源许可"
+          }
+        }
+      }
+    },
     "强制解锁并重试": {
       "localizations": {
         "en": {
@@ -1726,6 +3510,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "强制解锁并重试"
+          }
+        }
+      }
+    },
+    "当前密码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前密码"
+          }
+        }
+      }
+    },
+    "当前用户组未启用 WebDAV": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WebDAV isn’t enabled for your user group"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前用户组未启用 WebDAV"
           }
         }
       }
@@ -1826,6 +3642,22 @@
         }
       }
     },
+    "总容量": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "总容量"
+          }
+        }
+      }
+    },
     "我们会向该邮箱发送重置密码的链接。": {
       "localizations": {
         "en": {
@@ -1870,6 +3702,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "我的文件"
+          }
+        }
+      }
+    },
+    "所有者": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Owner"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有者"
           }
         }
       }
@@ -1922,6 +3770,38 @@
         }
       }
     },
+    "执行": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Execution"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "执行"
+          }
+        }
+      }
+    },
+    "执行耗时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Execution time"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "执行耗时"
+          }
+        }
+      }
+    },
     "找回密码": {
       "localizations": {
         "en": {
@@ -1938,6 +3818,22 @@
         }
       }
     },
+    "折线": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Line"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "折线"
+          }
+        }
+      }
+    },
     "拍照上传": {
       "localizations": {
         "en": {
@@ -1950,6 +3846,102 @@
           "stringUnit": {
             "state": "translated",
             "value": "拍照上传"
+          }
+        }
+      }
+    },
+    "拷贝": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷贝"
+          }
+        }
+      }
+    },
+    "拷贝全部连接信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy All Connection Info"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷贝全部连接信息"
+          }
+        }
+      }
+    },
+    "拷贝地址": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Address"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷贝地址"
+          }
+        }
+      }
+    },
+    "拷贝密码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷贝密码"
+          }
+        }
+      }
+    },
+    "拷贝密钥": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Secret Key"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷贝密钥"
+          }
+        }
+      }
+    },
+    "拷贝用户名": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Username"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷贝用户名"
           }
         }
       }
@@ -2034,6 +4026,38 @@
         }
       }
     },
+    "排队中": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queued"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "排队中"
+          }
+        }
+      }
+    },
+    "提取媒体信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract media metadata"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提取媒体信息"
+          }
+        }
+      }
+    },
     "搜索": {
       "localizations": {
         "en": {
@@ -2114,6 +4138,70 @@
         }
       }
     },
+    "摘要": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Summary"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "摘要"
+          }
+        }
+      }
+    },
+    "撤销": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revoke"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "撤销"
+          }
+        }
+      }
+    },
+    "撤销授权": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revoke Access"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "撤销授权"
+          }
+        }
+      }
+    },
+    "撤销此应用的授权？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revoke access for this app?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "撤销此应用的授权？"
+          }
+        }
+      }
+    },
     "操作失败": {
       "localizations": {
         "en": {
@@ -2126,6 +4214,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "操作失败"
+          }
+        }
+      }
+    },
+    "支持": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supported"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支持"
+          }
+        }
+      }
+    },
+    "数量": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Count"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "数量"
           }
         }
       }
@@ -2146,6 +4266,22 @@
         }
       }
     },
+    "文件 ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件 ID"
+          }
+        }
+      }
+    },
     "文件名": {
       "localizations": {
         "en": {
@@ -2158,6 +4294,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "文件名"
+          }
+        }
+      }
+    },
+    "文件地址（1 小时内有效）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File URL (valid for 1 hour)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件地址（1 小时内有效）"
           }
         }
       }
@@ -2210,6 +4362,22 @@
         }
       }
     },
+    "文件将被永久删除，且不可恢复。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file will be permanently deleted. This can’t be undone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件将被永久删除，且不可恢复。"
+          }
+        }
+      }
+    },
     "文件已在其他地方被修改": {
       "localizations": {
         "en": {
@@ -2238,6 +4406,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "文件已被锁定"
+          }
+        }
+      }
+    },
+    "文件扩展名": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File Extensions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件扩展名"
+          }
+        }
+      }
+    },
+    "文件管理": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件管理"
+          }
+        }
+      }
+    },
+    "文件详情": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File Details"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件详情"
           }
         }
       }
@@ -2290,6 +4506,118 @@
         }
       }
     },
+    "新增分享": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New shares"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增分享"
+          }
+        }
+      }
+    },
+    "新增文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增文件"
+          }
+        }
+      }
+    },
+    "新增用户": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New users"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增用户"
+          }
+        }
+      }
+    },
+    "新密码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新密码"
+          }
+        }
+      }
+    },
+    "新密码至少 6 位": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New password must be at least 6 characters"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新密码至少 6 位"
+          }
+        }
+      }
+    },
+    "新密码至少 6 位。修改后需要重新登录。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At least 6 characters. You’ll need to sign in again after changing it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新密码至少 6 位。修改后需要重新登录。"
+          }
+        }
+      }
+    },
+    "新密码（留空不修改）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New password (leave empty to keep)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新密码（留空不修改）"
+          }
+        }
+      }
+    },
     "新建": {
       "localizations": {
         "en": {
@@ -2302,6 +4630,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建"
+          }
+        }
+      }
+    },
+    "新建 WebDAV 账号": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New WebDAV Account"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建 WebDAV 账号"
           }
         }
       }
@@ -2334,6 +4678,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "新建文件夹"
+          }
+        }
+      }
+    },
+    "新建账号": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Account"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建账号"
           }
         }
       }
@@ -2386,6 +4746,39 @@
         }
       }
     },
+    "无法打开网页": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t open the web page"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法打开网页"
+          }
+        }
+      }
+    },
+    "无法打开网页：%@": {
+      "comment": "会话交接失败的原因",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t open the web page: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法打开网页：%@"
+          }
+        }
+      }
+    },
     "无法显示说明文件": {
       "localizations": {
         "en": {
@@ -2398,6 +4791,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法显示说明文件"
+          }
+        }
+      }
+    },
+    "无法生成二维码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t generate QR code"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法生成二维码"
+          }
+        }
+      }
+    },
+    "无法获取": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unavailable"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法获取"
           }
         }
       }
@@ -2418,6 +4843,70 @@
         }
       }
     },
+    "日期": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Date"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日期"
+          }
+        }
+      }
+    },
+    "是": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "是"
+          }
+        }
+      }
+    },
+    "昵称": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nickname"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "昵称"
+          }
+        }
+      }
+    },
+    "显示 README": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show README"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示 README"
+          }
+        }
+      }
+    },
     "显示缩略图": {
       "localizations": {
         "en": {
@@ -2434,6 +4923,22 @@
         }
       }
     },
+    "暂停": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suspended"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂停"
+          }
+        }
+      }
+    },
     "更多": {
       "localizations": {
         "en": {
@@ -2446,6 +4951,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "更多"
+          }
+        }
+      }
+    },
+    "更换头像": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change Avatar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更换头像"
+          }
+        }
+      }
+    },
+    "更新时间": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新时间"
+          }
+        }
+      }
+    },
+    "最多保留": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep at most"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最多保留"
           }
         }
       }
@@ -2494,6 +5047,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "最近搜索"
+          }
+        }
+      }
+    },
+    "有密码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Password protected"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有密码"
           }
         }
       }
@@ -2563,6 +5132,22 @@
         }
       }
     },
+    "服务端版本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server version"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务端版本"
+          }
+        }
+      }
+    },
     "服务端版本 %@": {
       "comment": "登录页显示的服务端版本号",
       "localizations": {
@@ -2576,6 +5161,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "服务端版本 %@"
+          }
+        }
+      }
+    },
+    "未开启": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未开启"
+          }
+        }
+      }
+    },
+    "未激活": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inactive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未激活"
           }
         }
       }
@@ -2608,6 +5225,71 @@
           "stringUnit": {
             "state": "translated",
             "value": "未能生成"
+          }
+        }
+      }
+    },
+    "本机存储": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local storage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本机存储"
+          }
+        }
+      }
+    },
+    "权重": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "权重"
+          }
+        }
+      }
+    },
+    "权重 %lld": {
+      "comment": "节点权重",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight %lld"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "权重 %lld"
+          }
+        }
+      }
+    },
+    "柱状": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "柱状"
           }
         }
       }
@@ -2660,6 +5342,38 @@
         }
       }
     },
+    "根目录": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Root Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "根目录"
+          }
+        }
+      }
+    },
+    "概览": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "概览"
+          }
+        }
+      }
+    },
     "正在加载更多": {
       "localizations": {
         "en": {
@@ -2692,6 +5406,22 @@
         }
       }
     },
+    "正常": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正常"
+          }
+        }
+      }
+    },
     "此分享受密码保护": {
       "localizations": {
         "en": {
@@ -2704,6 +5434,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "此分享受密码保护"
+          }
+        }
+      }
+    },
+    "此操作不可撤销。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This can’t be undone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此操作不可撤销。"
           }
         }
       }
@@ -2740,6 +5486,22 @@
         }
       }
     },
+    "此账户未设置密码（仅通过 Passkey 或第三方登录）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This account has no password (signs in with passkeys or third-party login only)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此账户未设置密码（仅通过 Passkey 或第三方登录）"
+          }
+        }
+      }
+    },
     "此链接来自其他站点，正在用当前账户的站点打开。": {
       "localizations": {
         "en": {
@@ -2752,6 +5514,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "此链接来自其他站点，正在用当前账户的站点打开。"
+          }
+        }
+      }
+    },
+    "每个账号有独立的密码和根目录；长按账号可拷贝连接信息。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each account has its own password and root folder. Touch and hold an account to copy its connection info."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每个账号有独立的密码和根目录；长按账号可拷贝连接信息。"
+          }
+        }
+      }
+    },
+    "永不过期": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Never"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "永不过期"
           }
         }
       }
@@ -2772,6 +5566,22 @@
         }
       }
     },
+    "没有可用的存储策略": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No storage policies available"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可用的存储策略"
+          }
+        }
+      }
+    },
     "没有子文件夹": {
       "localizations": {
         "en": {
@@ -2784,6 +5594,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有子文件夹"
+          }
+        }
+      }
+    },
+    "没有已授权的应用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No authorized apps"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有已授权的应用"
           }
         }
       }
@@ -2816,6 +5642,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有权限执行此操作"
+          }
+        }
+      }
+    },
+    "没有符合条件的项目": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No matching items"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有符合条件的项目"
           }
         }
       }
@@ -2868,6 +5710,104 @@
         }
       }
     },
+    "注册时间": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registered"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "注册时间"
+          }
+        }
+      }
+    },
+    "测试连接": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test Connection"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "测试连接"
+          }
+        }
+      }
+    },
+    "浏览 %lld · 下载 %lld": {
+      "comment": "分享的浏览与下载次数",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld views · %lld downloads"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览 %lld · 下载 %lld"
+          }
+        }
+      }
+    },
+    "浏览次数": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Views"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览次数"
+          }
+        }
+      }
+    },
+    "浏览此用户的文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Browse This User’s Files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览此用户的文件"
+          }
+        }
+      }
+    },
+    "添加于 %@": {
+      "comment": "日期时间",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加于 %@"
+          }
+        }
+      }
+    },
     "添加账户": {
       "localizations": {
         "en": {
@@ -2880,6 +5820,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "添加账户"
+          }
+        }
+      }
+    },
+    "清理": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clean Up"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理"
+          }
+        }
+      }
+    },
+    "清理旧任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clean Up Old Tasks"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理旧任务"
+          }
+        }
+      }
+    },
+    "清理旧任务？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clean up old tasks?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清理旧任务？"
           }
         }
       }
@@ -2916,6 +5904,38 @@
         }
       }
     },
+    "清除两步验证": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset two-factor authentication"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除两步验证"
+          }
+        }
+      }
+    },
+    "清除全部过滤条件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear All Filters"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除全部过滤条件"
+          }
+        }
+      }
+    },
     "清除搜索历史": {
       "localizations": {
         "en": {
@@ -2928,6 +5948,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "清除搜索历史"
+          }
+        }
+      }
+    },
+    "源代码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source Code"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "源代码"
           }
         }
       }
@@ -2964,6 +6000,38 @@
         }
       }
     },
+    "版本与实体": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versions & Blobs"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本与实体"
+          }
+        }
+      }
+    },
+    "版本保留": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version Retention"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本保留"
+          }
+        }
+      }
+    },
     "版本管理": {
       "localizations": {
         "en": {
@@ -2976,6 +6044,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "版本管理"
+          }
+        }
+      }
+    },
+    "状态": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "状态"
           }
         }
       }
@@ -2996,6 +6080,38 @@
         }
       }
     },
+    "用于区分不同设备或应用，例如“电脑”“播放器”。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helps tell devices or apps apart, e.g. “Laptop” or “Player”."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于区分不同设备或应用，例如“电脑”“播放器”。"
+          }
+        }
+      }
+    },
+    "用户": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Users"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用户"
+          }
+        }
+      }
+    },
     "用户 %@ 的文件": {
       "comment": "管理员查看他人文件时的根目录标题，参数为用户 id",
       "localizations": {
@@ -3009,6 +6125,134 @@
           "stringUnit": {
             "state": "translated",
             "value": "用户 %@ 的文件"
+          }
+        }
+      }
+    },
+    "用户 ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User ID"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用户 ID"
+          }
+        }
+      }
+    },
+    "用户名": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Username"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用户名"
+          }
+        }
+      }
+    },
+    "用户的全部文件将被一并删除，且不可恢复。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All of the user’s files will be deleted as well. This can’t be undone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用户的全部文件将被一并删除，且不可恢复。"
+          }
+        }
+      }
+    },
+    "用户组": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User Group"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用户组"
+          }
+        }
+      }
+    },
+    "用逗号分隔；留空表示所有文件。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separate with commas. Leave empty for all files."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用逗号分隔；留空表示所有文件。"
+          }
+        }
+      }
+    },
+    "用验证器 App（如“密码”App、Google Authenticator）扫描二维码。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan the QR code with an authenticator app (such as Passwords or Google Authenticator)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用验证器 App（如“密码”App、Google Authenticator）扫描二维码。"
+          }
+        }
+      }
+    },
+    "界面语言": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "界面语言"
+          }
+        }
+      }
+    },
+    "界面语言同时用于服务端发送的邮件，重新打开 App 后生效。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The language is also used for emails from the server. It takes effect the next time you open the app."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "界面语言同时用于服务端发送的邮件，重新打开 App 后生效。"
           }
         }
       }
@@ -3045,6 +6289,22 @@
         }
       }
     },
+    "登录时除密码外还需输入验证器 App 生成的 6 位验证码。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When signing in, enter a 6-digit code from your authenticator app in addition to your password."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录时除密码外还需输入验证器 App 生成的 6 位验证码。"
+          }
+        }
+      }
+    },
     "白板": {
       "localizations": {
         "en": {
@@ -3073,6 +6333,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "直链"
+          }
+        }
+      }
+    },
+    "直链 %@": {
+      "comment": "直链 ID",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct link %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直链 %@"
           }
         }
       }
@@ -3121,6 +6398,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "确认密码"
+          }
+        }
+      }
+    },
+    "确认新密码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm new password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "确认新密码"
+          }
+        }
+      }
+    },
+    "离线下载": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remote download"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "离线下载"
           }
         }
       }
@@ -3189,6 +6498,38 @@
         }
       }
     },
+    "站点": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Site"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "站点"
+          }
+        }
+      }
+    },
+    "站点地址": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Site URL"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "站点地址"
+          }
+        }
+      }
+    },
     "站点未启用此功能": {
       "localizations": {
         "en": {
@@ -3201,6 +6542,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "站点未启用此功能"
+          }
+        }
+      }
+    },
+    "管理": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Admin"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "管理"
+          }
+        }
+      }
+    },
+    "类别": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Category"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "类别"
           }
         }
       }
@@ -3221,6 +6594,22 @@
         }
       }
     },
+    "系统封禁": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Banned by system"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统封禁"
+          }
+        }
+      }
+    },
     "约 %lld 个文件包含该内容": {
       "comment": "全文搜索命中数量",
       "localizations": {
@@ -3234,6 +6623,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "约 %lld 个文件包含该内容"
+          }
+        }
+      }
+    },
+    "统计于 %@": {
+      "comment": "统计生成时间",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generated %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "统计于 %@"
           }
         }
       }
@@ -3286,6 +6692,70 @@
         }
       }
     },
+    "编辑": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑"
+          }
+        }
+      }
+    },
+    "编辑 WebDAV 账号": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit WebDAV Account"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑 WebDAV 账号"
+          }
+        }
+      }
+    },
+    "编辑用户": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit User"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑用户"
+          }
+        }
+      }
+    },
+    "缩略图": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thumbnails"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缩略图"
+          }
+        }
+      }
+    },
     "网格": {
       "localizations": {
         "en": {
@@ -3302,6 +6772,102 @@
         }
       }
     },
+    "能力": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capabilities"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "能力"
+          }
+        }
+      }
+    },
+    "节点": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "节点"
+          }
+        }
+      }
+    },
+    "节点详情": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Node Details"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "节点详情"
+          }
+        }
+      }
+    },
+    "节点连接失败": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Node connection failed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "节点连接失败"
+          }
+        }
+      }
+    },
+    "节点连接正常": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Node is reachable"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "节点连接正常"
+          }
+        }
+      }
+    },
+    "获取下载地址": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get Download URL"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获取下载地址"
+          }
+        }
+      }
+    },
     "获取直链": {
       "localizations": {
         "en": {
@@ -3314,6 +6880,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "获取直链"
+          }
+        }
+      }
+    },
+    "覆盖上传同名文件时保留旧版本，可在文件信息中查看和恢复。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep older versions when a file is overwritten. You can view and restore them in file info."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "覆盖上传同名文件时保留旧版本，可在文件信息中查看和恢复。"
           }
         }
       }
@@ -3366,6 +6948,22 @@
         }
       }
     },
+    "解压缩": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract archive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解压缩"
+          }
+        }
+      }
+    },
     "解锁": {
       "localizations": {
         "en": {
@@ -3378,6 +6976,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "解锁"
+          }
+        }
+      }
+    },
+    "设置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置"
+          }
+        }
+      }
+    },
+    "该应用将无法再访问你的账户，直到重新授权。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app won’t be able to access your account until you authorize it again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该应用将无法再访问你的账户，直到重新授权。"
           }
         }
       }
@@ -3558,6 +7188,38 @@
         }
       }
     },
+    "负载均衡": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load balancing"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "负载均衡"
+          }
+        }
+      }
+    },
+    "账号": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accounts"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账号"
+          }
+        }
+      }
+    },
     "账户": {
       "localizations": {
         "en": {
@@ -3586,6 +7248,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "账户受限，无法执行此操作"
+          }
+        }
+      }
+    },
+    "账户安全": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Security"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账户安全"
           }
         }
       }
@@ -3670,6 +7348,70 @@
         }
       }
     },
+    "输入验证器 App 中的验证码以关闭两步验证。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the code from your authenticator app to turn off two-factor authentication."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入验证器 App 中的验证码以关闭两步验证。"
+          }
+        }
+      }
+    },
+    "过期时间": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expires"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "过期时间"
+          }
+        }
+      }
+    },
+    "过滤与排序": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter & Sort"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "过滤与排序"
+          }
+        }
+      }
+    },
+    "近 12 天新增": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New in the Last 12 Days"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "近 12 天新增"
+          }
+        }
+      }
+    },
     "返回": {
       "localizations": {
         "en": {
@@ -3698,6 +7440,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "还原"
+          }
+        }
+      }
+    },
+    "还没有 WebDAV 账号": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No WebDAV accounts yet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有 WebDAV 账号"
+          }
+        }
+      }
+    },
+    "连接信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection Info"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接信息"
           }
         }
       }
@@ -3798,6 +7572,22 @@
         }
       }
     },
+    "选择根目录": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Root Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择根目录"
+          }
+        }
+      }
+    },
     "选择此文件夹": {
       "localizations": {
         "en": {
@@ -3810,6 +7600,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择此文件夹"
+          }
+        }
+      }
+    },
+    "选项": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Options"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选项"
+          }
+        }
+      }
+    },
+    "通过此账号只能访问根目录及其子目录。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This account can only access the root folder and its subfolders."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通过此账号只能访问根目录及其子目录。"
           }
         }
       }
@@ -3910,6 +7732,22 @@
         }
       }
     },
+    "重新计算已用空间": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recalculate Used Space"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新计算已用空间"
+          }
+        }
+      }
+    },
     "重置条件": {
       "localizations": {
         "en": {
@@ -3942,6 +7780,38 @@
         }
       }
     },
+    "重试次数": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retries"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试次数"
+          }
+        }
+      }
+    },
+    "链接": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "链接"
+          }
+        }
+      }
+    },
     "链接已失效": {
       "localizations": {
         "en": {
@@ -3954,6 +7824,71 @@
           "stringUnit": {
             "state": "translated",
             "value": "链接已失效"
+          }
+        }
+      }
+    },
+    "错误历史（%lld）": {
+      "comment": "错误条数",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error history (%lld)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "错误历史（%lld）"
+          }
+        }
+      }
+    },
+    "队列": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queues"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "队列"
+          }
+        }
+      }
+    },
+    "阶段": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phase"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "阶段"
+          }
+        }
+      }
+    },
+    "阻止上传系统文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Block system files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "阻止上传系统文件"
           }
         }
       }
@@ -3974,6 +7909,22 @@
         }
       }
     },
+    "隐私": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐私"
+          }
+        }
+      }
+    },
     "隐私政策": {
       "localizations": {
         "en": {
@@ -3986,6 +7937,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "隐私政策"
+          }
+        }
+      }
+    },
+    "需要服务端 4.19.11 或更高版本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requires server 4.19.11 or later"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要服务端 4.19.11 或更高版本"
           }
         }
       }
@@ -4098,6 +8065,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "验证码不正确"
+          }
+        }
+      }
+    },
+    "默认": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认"
           }
         }
       }
