@@ -125,8 +125,34 @@ internal class RemoteFileReader(
         }
     }
 
+    /**
+     * 整个文件下载到缓存并返回（调用方负责删除）。
+     * 供无法读取代理描述符的场景使用：系统 mediaextractor 没有使用 appfuse 描述符的 SELinux 权限。
+     */
+    fun downloadWhole(): File {
+        var refreshed = false
+        while (true) {
+            http.newCall(Request.Builder().url(currentUrl(force = refreshed)).build()).execute().use { response ->
+                when {
+                    response.isSuccessful -> return writeCache(response)
+                    !refreshed && response.code in REFRESHABLE_CODES -> refreshed = true
+                    else -> throw IOException("HTTP ${response.code}")
+                }
+            }
+        }
+    }
+
     /** 不支持 Range 的直链：把整个响应写入缓存文件 */
     private fun cacheWhole(response: Response) {
+        val target = writeCache(response)
+        localFile = target
+        local = RandomAccessFile(target, "r")
+        block = null
+        blockLength = 0
+        blockStart = -1
+    }
+
+    private fun writeCache(response: Response): File {
         val body = response.body ?: throw IOException("empty body")
         val dir = File(cacheDir, CACHE_DIR).apply { mkdirs() }
         val target = File(dir, UUID.randomUUID().toString())
@@ -136,11 +162,7 @@ internal class RemoteFileReader(
             target.delete()
             throw e
         }
-        localFile = target
-        local = RandomAccessFile(target, "r")
-        block = null
-        blockLength = 0
-        blockStart = -1
+        return target
     }
 
     private fun currentUrl(force: Boolean): String {

@@ -236,12 +236,30 @@ class CloudreveDocumentsProvider : DocumentsProvider() {
         val storage = context!!.getSystemService(StorageManager::class.java)
         val thread = HandlerThread("cr-doc-read").apply { start() }
         val reader = RemoteFileReader(repo, file, account.siteUrl, context!!.cacheDir, TransferRuntime.http, thread)
+        if (needsRealFile(file)) {
+            // 音视频多由系统 mediaextractor 解析，它无权读取 appfuse 代理描述符（SELinux 拒绝，播放器一直转圈）：
+            // 先完整下载到缓存，返回真实文件描述符；打开后即删除路径，描述符关闭时空间自动回收
+            thread.quitSafely()
+            signal?.throwIfCanceled()
+            val local = guard("download") { reader.downloadWhole() }
+            return try {
+                ParcelFileDescriptor.open(local, ParcelFileDescriptor.MODE_READ_ONLY)
+            } finally {
+                local.delete()
+            }
+        }
         return try {
             storage.openProxyFileDescriptor(ParcelFileDescriptor.MODE_READ_ONLY, reader, Handler(thread.looper))
         } catch (e: IOException) {
             thread.quitSafely()
             throw FileNotFoundException(e.message).apply { initCause(e) }
         }
+    }
+
+    /** 不超过 [MEDIA_LOCAL_COPY_MAX] 的音视频改走本地副本；更大的仍用代理描述符（自带解析器的第三方播放器可读） */
+    private fun needsRealFile(file: FileItem): Boolean {
+        val mime = DocumentRows.mimeOf(file)
+        return (mime.startsWith("video/") || mime.startsWith("audio/")) && file.size <= MEDIA_LOCAL_COPY_MAX
     }
 
     /**
@@ -593,6 +611,7 @@ class CloudreveDocumentsProvider : DocumentsProvider() {
         private const val TRANSFER_TIMEOUT_MS = 10 * 60_000L
         private const val GRAPH_WAIT_MS = 10_000L
         private const val THUMB_DIR = "documents-thumbs"
+        private const val MEDIA_LOCAL_COPY_MAX = 512L * 1024 * 1024
 
         private val DEFAULT_ROOT_PROJECTION = buildList {
             add(Root.COLUMN_ROOT_ID)
