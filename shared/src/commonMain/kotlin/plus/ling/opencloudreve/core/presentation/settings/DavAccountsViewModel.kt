@@ -107,7 +107,8 @@ class DavAccountsViewModel(
     private fun load() {
         updateState { it.copy(loading = true, error = null) }
         launchCatching(onError = { e -> updateState { it.copy(loading = false, error = e) } }) {
-            val me = userSettings.me()
+            // 每次加载都重新取用户：用户组的 WebDAV 权限可能在别处被修改，缓存会使刷新无效
+            val me = userSettings.refreshMe()
             val url = dav.davUrl()
             val username = me.email ?: accounts.account(accountId)?.email.orEmpty()
             updateState {
