@@ -1,0 +1,114 @@
+-- 传输任务（上传/下载）。状态取值：queued|preparing|running|finishing|completed|failed|canceled|paused
+-- upload：source_ref = 平台本地源，target_uri = 目标文件完整 cloudreve URI（目录 + 文件名）
+-- download：target_uri = 远端文件（已解析软链接）URI，dest_path = 本地目标路径
+CREATE TABLE TransferTask (
+    id TEXT NOT NULL PRIMARY KEY,
+    account_id TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    state TEXT NOT NULL,
+    source_ref TEXT,
+    display_name TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    last_modified INTEGER,
+    mime_type TEXT,
+    target_uri TEXT NOT NULL,
+    dest_path TEXT,
+    overwrite INTEGER NOT NULL DEFAULT 0,
+    policy_type TEXT,
+    -- 上传：服务端 UploadSession JSON；下载：DownloadSession JSON（签名 URL 与过期时间）
+    session_json TEXT,
+    chunk_size INTEGER NOT NULL DEFAULT 0,
+    chunk_count INTEGER NOT NULL DEFAULT 0,
+    bytes_done INTEGER NOT NULL DEFAULT 0,
+    -- 会话重建/下载重试计数，用于限制无限重试
+    attempts INTEGER NOT NULL DEFAULT 0,
+    error_code INTEGER,
+    error_msg TEXT,
+    -- iOS 下载 resumeData 等平台续传数据
+    resume_blob BLOB,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+CREATE INDEX TransferTask_account ON TransferTask(account_id, created_at);
+
+-- 分片状态：pending|running|done；bytes_done 为分片起点之后已被存储方确认的字节数（OneDrive 对齐用）
+CREATE TABLE TransferChunk (
+    task_id TEXT NOT NULL,
+    idx INTEGER NOT NULL,
+    state TEXT NOT NULL,
+    etag TEXT,
+    bytes_done INTEGER NOT NULL DEFAULT 0,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (task_id, idx)
+);
+
+insertTask:
+INSERT INTO TransferTask(id, account_id, kind, state, source_ref, display_name, size, last_modified, mime_type, target_uri, dest_path, overwrite, error_code, error_msg, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+selectTask:
+SELECT * FROM TransferTask WHERE id = ?;
+
+selectTasksByAccount:
+SELECT * FROM TransferTask WHERE account_id = ? ORDER BY created_at DESC, id;
+
+selectAllTasks:
+SELECT * FROM TransferTask ORDER BY created_at DESC, id;
+
+selectUnfinishedTasks:
+SELECT * FROM TransferTask WHERE state IN ('queued', 'preparing', 'running', 'finishing') ORDER BY created_at, id;
+
+updateState:
+UPDATE TransferTask SET state = ?, error_code = ?, error_msg = ?, updated_at = ? WHERE id = ?;
+
+updateSession:
+UPDATE TransferTask SET session_json = ?, policy_type = ?, chunk_size = ?, chunk_count = ?, updated_at = ? WHERE id = ?;
+
+clearSession:
+UPDATE TransferTask SET session_json = NULL, policy_type = NULL, chunk_size = 0, chunk_count = 0, bytes_done = 0, resume_blob = NULL, updated_at = ? WHERE id = ?;
+
+updateBytesDone:
+UPDATE TransferTask SET bytes_done = ?, updated_at = ? WHERE id = ?;
+
+updateAttempts:
+UPDATE TransferTask SET attempts = ?, updated_at = ? WHERE id = ?;
+
+updateTarget:
+UPDATE TransferTask SET display_name = ?, target_uri = ?, overwrite = ?, updated_at = ? WHERE id = ?;
+
+updateResumeBlob:
+UPDATE TransferTask SET resume_blob = ?, updated_at = ? WHERE id = ?;
+
+deleteTask:
+DELETE FROM TransferTask WHERE id = ?;
+
+deleteFinishedTasks:
+DELETE FROM TransferTask WHERE account_id = ? AND state IN ('completed', 'canceled');
+
+selectFinishedTaskIds:
+SELECT id FROM TransferTask WHERE account_id = ? AND state IN ('completed', 'canceled');
+
+insertChunk:
+INSERT OR REPLACE INTO TransferChunk(task_id, idx, state, etag, bytes_done, attempts) VALUES (?, ?, ?, ?, ?, ?);
+
+selectChunks:
+SELECT * FROM TransferChunk WHERE task_id = ? ORDER BY idx;
+
+selectChunk:
+SELECT * FROM TransferChunk WHERE task_id = ? AND idx = ?;
+
+updateChunk:
+UPDATE TransferChunk SET state = ?, etag = ?, bytes_done = ?, attempts = ? WHERE task_id = ? AND idx = ?;
+
+updateChunkState:
+UPDATE TransferChunk SET state = ? WHERE task_id = ? AND idx = ?;
+
+releaseRunningChunks:
+UPDATE TransferChunk SET state = 'pending' WHERE task_id = ? AND state = 'running';
+
+deleteChunks:
+DELETE FROM TransferChunk WHERE task_id = ?;
+
+resetChunkAttempts:
+UPDATE TransferChunk SET attempts = 0 WHERE task_id = ?;
