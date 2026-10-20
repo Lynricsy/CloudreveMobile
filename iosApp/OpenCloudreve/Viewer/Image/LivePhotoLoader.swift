@@ -30,11 +30,12 @@ final class LivePhotoLoader {
             contentMode: .aspectFit
         ) { [weak self] photo, info in
             let isError = info[PHLivePhotoInfoErrorKey] != nil || (info[PHLivePhotoInfoCancelledKey] as? NSNumber)?.boolValue == true
-            // Photos 在主队列回调结果
+            // PHLivePhoto 创建后不可变，这里只把它交给主线程上的视图；Photos 在主队列回调结果
+            nonisolated(unsafe) let result = photo
             MainActor.assumeIsolated {
                 guard let self else { return }
-                if let photo {
-                    self.livePhoto = photo
+                if let result {
+                    self.livePhoto = result
                 } else if isError {
                     self.failed = true
                 }

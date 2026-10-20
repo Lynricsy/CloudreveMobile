@@ -399,6 +399,22 @@
         }
       }
     },
+    "ISO 感光度": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ISO"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ISO 感光度"
+          }
+        }
+      }
+    },
     "Markdown 编辑器": {
       "localizations": {
         "en": {
@@ -1461,6 +1477,22 @@
         }
       }
     },
+    "作者": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Artist"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作者"
+          }
+        }
+      }
+    },
     "你创建的分享链接会显示在这里。": {
       "localizations": {
         "en": {
@@ -1761,6 +1793,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "停止播放"
+          }
+        }
+      }
+    },
+    "光圈": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aperture"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光圈"
+          }
+        }
+      }
+    },
+    "光圈值": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "F-Number"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光圈值"
           }
         }
       }
@@ -3999,6 +4063,22 @@
         }
       }
     },
+    "宽度": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Width"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "宽度"
+          }
+        }
+      }
+    },
     "密码": {
       "localizations": {
         "en": {
@@ -5014,6 +5094,22 @@
         }
       }
     },
+    "投影类型": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projection Type"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "投影类型"
+          }
+        }
+      }
+    },
     "折线": {
       "localizations": {
         "en": {
@@ -5026,6 +5122,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "折线"
+          }
+        }
+      }
+    },
+    "拍摄时间": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Date Taken"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拍摄时间"
           }
         }
       }
@@ -5250,6 +5362,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "排队中"
+          }
+        }
+      }
+    },
+    "描述": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Description"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "描述"
           }
         }
       }
@@ -6102,6 +6230,22 @@
         }
       }
     },
+    "方向": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orientation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "方向"
+          }
+        }
+      }
+    },
     "无法加载": {
       "localizations": {
         "en": {
@@ -6451,6 +6595,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "暂停"
+          }
+        }
+      }
+    },
+    "曝光时间": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exposure Time"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "曝光时间"
+          }
+        }
+      }
+    },
+    "曝光补偿": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exposure Bias"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "曝光补偿"
           }
         }
       }
@@ -6840,6 +7016,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "本机存储"
+          }
+        }
+      }
+    },
+    "机身序列号": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Body Serial Number"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "机身序列号"
           }
         }
       }
@@ -7630,6 +7822,22 @@
         }
       }
     },
+    "海拔": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Altitude"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "海拔"
+          }
+        }
+      }
+    },
     "添加于 %@": {
       "comment": "日期时间",
       "localizations": {
@@ -7839,6 +8047,22 @@
         }
       }
     },
+    "焦距": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focal Length"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "焦距"
+          }
+        }
+      }
+    },
     "版本": {
       "localizations": {
         "en": {
@@ -7899,6 +8123,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "版本管理"
+          }
+        }
+      }
+    },
+    "版权": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copyright"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版权"
           }
         }
       }
@@ -8289,6 +8529,54 @@
         }
       }
     },
+    "相机制造商": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera Make"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "相机制造商"
+          }
+        }
+      }
+    },
+    "相机型号": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera Model"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "相机型号"
+          }
+        }
+      }
+    },
+    "相机所有者": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera Owner"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "相机所有者"
+          }
+        }
+      }
+    },
     "确定": {
       "localizations": {
         "en": {
@@ -8623,6 +8911,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "约 %lld 个文件包含该内容"
+          }
+        }
+      }
+    },
+    "纬度": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latitude"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "纬度"
+          }
+        }
+      }
+    },
+    "经度": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longitude"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "经度"
           }
         }
       }
@@ -9477,6 +9797,22 @@
         }
       }
     },
+    "软件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Software"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "软件"
+          }
+        }
+      }
+    },
     "输入你的站点地址，登录后即可在手机上管理文件。": {
       "localizations": {
         "en": {
@@ -10215,6 +10551,54 @@
         }
       }
     },
+    "镜头制造商": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lens Make"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜头制造商"
+          }
+        }
+      }
+    },
+    "镜头型号": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lens Model"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "镜头型号"
+          }
+        }
+      }
+    },
+    "闪光灯": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flash"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "闪光灯"
+          }
+        }
+      }
+    },
     "队列": {
       "localizations": {
         "en": {
@@ -10483,6 +10867,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "验证码不正确"
+          }
+        }
+      }
+    },
+    "高度": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Height"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高度"
           }
         }
       }

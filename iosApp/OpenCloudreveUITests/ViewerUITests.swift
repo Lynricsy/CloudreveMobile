@@ -81,14 +81,16 @@ final class ViewerUITests: XCTestCase {
         app.buttons["编辑"].firstMatch.tap()
         let editor = element(app, "text.editor")
         XCTAssertTrue(editor.waitForExistence(timeout: 10), "编辑区未出现")
-        editor.tap()
+        // 点在文末下方的空白处：光标落在末尾
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85)).tap()
         app.typeText("\n来自 iOS UI 测试的修改")
         capture(app, "viewer-09-markdown-edit")
         let save = app.buttons["text.save"].firstMatch
         XCTAssertTrue(save.waitForExistence(timeout: 5) && save.isEnabled, "保存按钮不可用")
         save.tap()
         XCTAssertTrue(element(app, "text.saved").waitForExistence(timeout: 20), "未提示保存成功")
-        capture(app, "viewer-10-markdown-saved")
+        // “已保存”提示几秒后消失：出现后立即截图
+        capture(app, "viewer-10-markdown-saved", delay: 0)
         closeViewer(app)
 
         // 压缩包：目录树
@@ -150,9 +152,20 @@ final class ViewerUITests: XCTestCase {
         XCTAssertTrue(filesTab.waitForExistence(timeout: 30), "未进入主界面")
     }
 
-    /// 结束时退出登录（其它 UI 测试从服务器地址页开始）
+    /// 结束时退出登录（其它 UI 测试从服务器地址页开始）。
+    /// 之前的测试可能留下多个已登录账户：退出一个后会切到下一个，重复直到回到服务器地址页
     @MainActor
     private func signOut(_ app: XCUIApplication) {
+        let urlField = app.textFields["server.url"]
+        for _ in 0..<4 where !urlField.exists {
+            signOutCurrentAccount(app)
+            _ = urlField.waitForExistence(timeout: 15)
+        }
+        XCTAssertTrue(urlField.exists, "退出登录后未回到服务器地址页")
+    }
+
+    @MainActor
+    private func signOutCurrentAccount(_ app: XCUIApplication) {
         let meTab = [app.tabBars.buttons["我的"], app.buttons["我的"].firstMatch].first { $0.waitForExistence(timeout: 5) }
         XCTAssertNotNil(meTab, "找不到“我的” Tab")
         meTab?.tap()
@@ -170,7 +183,6 @@ final class ViewerUITests: XCTestCase {
         } else {
             app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "退出登录", "me.signOut")).firstMatch.tap()
         }
-        XCTAssertTrue(app.textFields["server.url"].waitForExistence(timeout: 30), "退出登录后未回到服务器地址页")
     }
 
     @MainActor
@@ -180,8 +192,8 @@ final class ViewerUITests: XCTestCase {
 
     /// 等动画结束后截全屏并永久保留为测试附件
     @MainActor
-    private func capture(_ app: XCUIApplication, _ name: String) {
-        Thread.sleep(forTimeInterval: 1)
+    private func capture(_ app: XCUIApplication, _ name: String, delay: TimeInterval = 1) {
+        if delay > 0 { Thread.sleep(forTimeInterval: delay) }
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = name
         attachment.lifetime = .keepAlways

@@ -8,7 +8,6 @@ struct ExternalOpenScreen: View {
     let version: String?
     let chrome: ViewerChrome
 
-    @Environment(AppSession.self) private var session
     @State private var phase: Phase = .preparing
     @State private var progress: Progress?
 
@@ -75,7 +74,8 @@ struct ExternalOpenScreen: View {
         phase = .preparing
         progress = nil
         let linked = CoreGraph.shared.files(accountId: accountId).resolveLinkedUri(file: file)
-        let siteUrl = session.activeAccount?.siteUrl ?? ""
+        // 预览总是针对当前账户（不依赖全屏呈现里的环境对象）
+        let siteUrl = CoreGraph.shared.accounts().activeAccount.value?.siteUrl ?? ""
         switch await Self.downloadAddress(accountId: accountId, uri: linked, version: version, siteUrl: siteUrl) {
         case let .failure(failure):
             phase = .failed(failure.message)

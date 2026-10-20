@@ -23,7 +23,9 @@ struct MusicTrackRow: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            Spacer(minLength: 0)
         }
+        .contentShape(.rect)
         .accessibilityAddTraits(track.isCurrent ? .isSelected : [])
     }
 }

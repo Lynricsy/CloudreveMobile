@@ -10,7 +10,7 @@ struct MetadataRowView: View {
                 .multilineTextAlignment(.trailing)
                 .textSelection(.enabled)
         } label: {
-            Text(verbatim: row.key)
+            Text(verbatim: MetadataLabels.label(for: row.key))
         }
     }
 }

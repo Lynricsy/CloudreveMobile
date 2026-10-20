@@ -20,6 +20,7 @@ struct MusicPlayerView: View {
                         } label: {
                             MusicTrackRow(track: track)
                         }
+                        .buttonStyle(.plain)
                         .accessibilityIdentifier("music.track." + track.name)
                     }
                 }
