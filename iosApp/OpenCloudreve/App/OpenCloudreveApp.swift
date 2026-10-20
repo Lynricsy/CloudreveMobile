@@ -19,6 +19,7 @@ struct OpenCloudreveApp: App {
         WindowGroup {
             RootView(session: session)
                 .environment(session)
+                .preferredColorScheme(UITestAppearance.colorScheme)
         }
         .commands { AppCommands() }
     }

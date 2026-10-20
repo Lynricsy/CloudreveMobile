@@ -121,12 +121,13 @@ final class UIPolishUITests: XCTestCase {
         XCTAssertTrue(element(app, "file.文档").waitForExistence(timeout: 30), "iPad 分栏未默认显示我的文件")
         capture(app, "iPad-01-files-split")
 
-        // ⌘N 新建文件夹
+        // ⌘N 新建文件夹（系统 alert 中的输入框不带自定义标识）
         app.typeKey("n", modifierFlags: .command)
-        let newFolderField = element(app, "files.newFolder.field")
-        XCTAssertTrue(newFolderField.waitForExistence(timeout: 10), "⌘N 未弹出新建文件夹")
+        let newFolderAlert = app.alerts.firstMatch
+        XCTAssertTrue(newFolderAlert.waitForExistence(timeout: 10), "⌘N 未弹出新建文件夹")
+        XCTAssertTrue(newFolderAlert.textFields.firstMatch.exists, "新建文件夹弹窗没有输入框")
         capture(app, "iPad-02-cmd-n")
-        app.alerts.firstMatch.buttons["取消"].tap()
+        newFolderAlert.buttons["取消"].tap()
 
         // ⌘R 刷新（不应出错，列表仍在）
         app.typeKey("r", modifierFlags: .command)
@@ -149,7 +150,7 @@ final class UIPolishUITests: XCTestCase {
         app.buttons["files.selectDone"].firstMatch.tap()
 
         // 预览器（图片）
-        goBack(app)
+        goBack(app, from: "文档")
         let previewFolder = element(app, "file.预览")
         if previewFolder.waitForExistence(timeout: 15) {
             previewFolder.tap()
@@ -159,7 +160,7 @@ final class UIPolishUITests: XCTestCase {
             XCTAssertTrue(element(app, "image.view").waitForExistence(timeout: 30), "图片预览未显示")
             capture(app, "iPad-05-viewer", settle: 2)
             app.buttons["viewer.close"].firstMatch.tap()
-            goBack(app)
+            goBack(app, from: "预览")
         }
 
         // ⌘F 切到搜索
@@ -176,16 +177,16 @@ final class UIPolishUITests: XCTestCase {
         openTab(app, ["我的"])
         XCTAssertTrue(element(app, "me.settings").waitForExistence(timeout: 20), "“我的”页未出现")
         capture(app, "iPad-09-me", settle: 2)
-        element(app, "me.settings").tap()
+        tapWhenHittable(app, element(app, "me.settings"))
         XCTAssertTrue(element(app, "settings.security").waitForExistence(timeout: 15), "设置页未出现")
         capture(app, "iPad-10-settings")
-        goBack(app)
+        goBack(app, from: "设置")
         let admin = element(app, "me.admin")
         if admin.waitForExistence(timeout: 15) {
-            admin.tap()
+            tapWhenHittable(app, admin)
             XCTAssertTrue(element(app, "admin.totals").waitForExistence(timeout: 30), "管理概览未出现")
             capture(app, "iPad-11-admin", settle: 2)
-            goBack(app)
+            goBack(app, from: "管理")
         }
 
         // 竖屏：分栏折叠
@@ -206,9 +207,8 @@ final class UIPolishUITests: XCTestCase {
     @MainActor
     func testDarkMode() throws {
         try XCTSkipIf(isPad, "iPad 目标只跑布局用例")
-        XCUIDevice.shared.appearance = .dark
-        addTeardownBlock { @MainActor in XCUIDevice.shared.appearance = .light }
-        let app = launch(language: "zh-Hans")
+        // XCUIDevice.appearance 在 CI 模拟器上不生效，改用 Debug 夹具强制深色
+        let app = launch(language: "zh-Hans", extra: ["-OCRUITestColorScheme", "dark"])
         tourAuthAndMainScreens(app, prefix: "DARK")
     }
 
@@ -243,7 +243,7 @@ final class UIPolishUITests: XCTestCase {
         openTab(app, ["我的", "Me"])
         XCTAssertTrue(element(app, "me.settings").waitForExistence(timeout: 20), "“我的”页未出现")
         capture(app, "\(prefix)-06-me", settle: 2)
-        element(app, "me.settings").tap()
+        tapWhenHittable(app, element(app, "me.settings"))
         XCTAssertTrue(element(app, "settings.security").waitForExistence(timeout: 15), "设置页未出现")
         capture(app, "\(prefix)-07-settings")
     }
@@ -308,12 +308,17 @@ final class UIPolishUITests: XCTestCase {
     private func enterServer(_ app: XCUIApplication) {
         let urlField = app.textFields["server.url"]
         XCTAssertTrue(urlField.waitForExistence(timeout: 30), "服务器地址页未出现")
-        // 地址栏可能预填了内容：点在右端让光标落在末尾，再删掉已有内容
-        urlField.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-        if let current = urlField.value as? String, !current.isEmpty, current != urlField.placeholderValue {
-            urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 2))
+        // 模拟器键盘偶尔丢字：输入后核对，不一致则清空重输
+        for _ in 0..<3 {
+            // 地址栏可能预填了内容：点在右端让光标落在末尾，再删掉已有内容
+            urlField.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+            if let current = urlField.value as? String, !current.isEmpty, current != urlField.placeholderValue {
+                urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 2))
+            }
+            urlField.typeText(serverURL)
+            if (urlField.value as? String) == serverURL { break }
         }
-        urlField.typeText(serverURL)
+        XCTAssertEqual(urlField.value as? String, serverURL, "服务器地址输入不完整")
         app.buttons["server.continue"].tap()
     }
 
@@ -351,7 +356,7 @@ final class UIPolishUITests: XCTestCase {
         let urlField = app.textFields["server.url"]
         for _ in 0..<4 {
             guard app.state == .runningForeground, !urlField.exists else { return }
-            let me = ["我的", "Me"].lazy.flatMap { [app.tabBars.buttons[$0], app.buttons[$0].firstMatch] }.first { $0.exists && $0.isHittable }
+            let me = ["我的", "Me"].lazy.flatMap { [app.tabBars.buttons[$0], app.buttons[$0].firstMatch, app.cells[$0].firstMatch] }.first { $0.exists && $0.isHittable }
             guard let me else { return }
             me.tap()
             let button = app.buttons["me.signOut"]
@@ -374,7 +379,8 @@ final class UIPolishUITests: XCTestCase {
     @MainActor
     private func openTab(_ app: XCUIApplication, _ titles: [String]) {
         for _ in 0..<4 {
-            let candidates = titles.flatMap { [app.tabBars.buttons[$0], app.buttons[$0].firstMatch] }
+            // iPhone：底部 Tab 栏按钮；iPad 横屏：侧栏中的单元格
+            let candidates = titles.flatMap { [app.tabBars.buttons[$0], app.buttons[$0].firstMatch, app.cells[$0].firstMatch] }
             if let tab = candidates.first(where: { $0.exists && $0.isHittable }) {
                 tab.tap()
                 return
@@ -382,6 +388,17 @@ final class UIPolishUITests: XCTestCase {
             Thread.sleep(forTimeInterval: 1)
         }
         XCTFail("找不到 Tab：\(titles)")
+    }
+
+    /// 元素在 Tab 栏下方等不可点处时先上滑，再点按
+    @MainActor
+    private func tapWhenHittable(_ app: XCUIApplication, _ target: XCUIElement) {
+        var attempts = 0
+        while !(target.exists && target.isHittable) && attempts < 6 {
+            app.swipeUp()
+            attempts += 1
+        }
+        target.tap()
     }
 
     @MainActor
@@ -414,8 +431,16 @@ final class UIPolishUITests: XCTestCase {
         Thread.sleep(forTimeInterval: 1)
     }
 
+    /// 导航栏返回：给出当前页标题时点该导航栏的第一个按钮（iPad 分栏有多个导航栏），否则点任意导航栏的第一个按钮
     @MainActor
-    private func goBack(_ app: XCUIApplication) {
+    private func goBack(_ app: XCUIApplication, from title: String? = nil) {
+        if let title {
+            let bar = app.navigationBars[title]
+            if bar.waitForExistence(timeout: 5), bar.buttons.firstMatch.exists {
+                bar.buttons.element(boundBy: 0).tap()
+                return
+            }
+        }
         let back = app.navigationBars.buttons.element(boundBy: 0)
         XCTAssertTrue(back.waitForExistence(timeout: 10), "找不到返回按钮")
         back.tap()

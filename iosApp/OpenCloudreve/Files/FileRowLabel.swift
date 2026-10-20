@@ -7,18 +7,21 @@ struct FileRowLabel: View {
     let thumbnails: FileThumbnailSource
     let isTrash: Bool
     @ScaledMetric(relativeTo: .body) private var thumbnailSize: CGFloat = 40
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
+        // 辅助功能字号下名称与大小/时间允许多行，避免关键信息被截断
+        let large = dynamicTypeSize.isAccessibilitySize
         HStack(spacing: 12) {
             FileThumbnail(file: file, source: thumbnails, size: thumbnailSize)
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: file.name)
-                    .lineLimit(2)
+                    .lineLimit(large ? 4 : 2)
                     .truncationMode(.middle)
                 Text(verbatim: subtitle)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                    .lineLimit(large ? 3 : 1)
             }
             Spacer(minLength: 0)
             FileBadges(file: file)
