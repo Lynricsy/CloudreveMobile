@@ -147,15 +147,16 @@ final class FileBrowserUITests: XCTestCase {
         super.tearDown()
     }
 
-    /// 长按打开上下文菜单并返回其中的菜单项。长按偶尔被识别为点按（打开详细信息），此时关闭后重试
+    /// 长按打开上下文菜单并返回其中的菜单项。长按偶尔被识别为点按（打开详细信息或预览器），此时关闭后重试
     @MainActor
     private func openContextMenu(_ app: XCUIApplication, on target: XCUIElement, item title: String) -> XCUIElement {
         let item = app.buttons[title].firstMatch
         for _ in 0..<3 {
             target.press(forDuration: 2.0)
             if item.waitForExistence(timeout: 5) { return item }
-            let done = app.buttons["完成"].firstMatch
-            if done.exists { done.tap() }
+            for dismiss in ["完成", "关闭"] where app.buttons[dismiss].firstMatch.exists {
+                app.buttons[dismiss].firstMatch.tap()
+            }
             Thread.sleep(forTimeInterval: 1)
         }
         XCTFail("上下文菜单未出现")
