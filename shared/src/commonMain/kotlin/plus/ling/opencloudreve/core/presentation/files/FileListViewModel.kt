@@ -323,9 +323,18 @@ class FileListViewModel(
         syncView(s)
     }
 
-    /** 视图设置同步：仅“我的文件”的非搜索目录，且用户未关闭视图同步 */
+    /**
+     * 视图设置同步（与 Web 端一致）：自己的“我的文件”非搜索目录，以及回收站/与我共享（服务端按文件系统存入用户设置）；
+     * 且用户未关闭视图同步。
+     */
     private fun syncView(s: FileListState) {
-        if (crUri.fs != CrUri.FS_MY || crUri.isSearch()) return
+        if (crUri.isSearch()) return
+        val syncable = when (crUri.fs) {
+            CrUri.FS_MY -> crUri.id == null
+            CrUri.FS_TRASH, CrUri.FS_SHARED_WITH_ME -> true
+            else -> false
+        }
+        if (!syncable) return
         if (s.user?.disableViewSync == true) return
         val base = serverView ?: ExplorerView()
         val view = base.copy(
