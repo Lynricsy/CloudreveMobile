@@ -54,7 +54,7 @@ import plus.ling.opencloudreve.core.model.MetadataKeys
 import plus.ling.opencloudreve.core.model.NavigatorCapability
 import plus.ling.opencloudreve.core.model.User
 import plus.ling.opencloudreve.core.presentation.files.FileOperation
-import plus.ling.opencloudreve.core.presentation.files.LockConflictPrompt
+import plus.ling.opencloudreve.core.api.LockConflict
 import plus.ling.opencloudreve.core.presentation.files.OperationFailure
 import plus.ling.opencloudreve.core.presentation.settings.PoliciesViewModel
 import plus.ling.opencloudreve.ui.common.message
@@ -342,7 +342,7 @@ private fun FailureLine(failure: OperationFailure) {
 
 /** 锁冲突（40073）：列出被锁定的路径与占用方，可强制解锁后重试 */
 @Composable
-internal fun LockConflictDialog(prompt: LockConflictPrompt, onForceUnlock: () -> Unit, onDismiss: () -> Unit) {
+internal fun LockConflictDialog(conflicts: List<LockConflict>, onForceUnlock: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.lock_conflict_title)) },
@@ -350,8 +350,8 @@ internal fun LockConflictDialog(prompt: LockConflictPrompt, onForceUnlock: () ->
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.lock_conflict_message))
                 LazyColumn(Modifier.heightIn(max = 280.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    items(prompt.conflicts.size) { index ->
-                        val c = prompt.conflicts[index]
+                    items(conflicts.size) { index ->
+                        val c = conflicts[index]
                         // 类型取值见服务端 fs.ApplicationType（WebDAV 锁是 "dav"），与 Web 端 LockConflictDetails 的映射一致
                         val owner = when (val type = c.owner?.application?.type) {
                             "dav" -> stringResource(R.string.lock_owner_webdav)
@@ -379,7 +379,7 @@ internal fun LockConflictDialog(prompt: LockConflictPrompt, onForceUnlock: () ->
             }
         },
         confirmButton = {
-            TextButton(onClick = onForceUnlock, enabled = prompt.conflicts.any { !it.token.isNullOrEmpty() }) {
+            TextButton(onClick = onForceUnlock, enabled = conflicts.any { !it.token.isNullOrEmpty() }) {
                 Text(stringResource(R.string.lock_force_unlock))
             }
         },

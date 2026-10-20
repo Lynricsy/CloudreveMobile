@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Viewers: common -->
+    <string name="viewer_open_with">Open with</string>
+    <string name="viewer_open_external">Open in another app</string>
+    <string name="viewer_always_use">Always open %1$s files this way</string>
+    <string name="viewer_more">More</string>
+    <string name="viewer_file_info">File info</string>
+    <string name="viewer_preparing_external">Downloading, then opening in another app…</string>
+    <string name="viewer_no_app">No app can open this file</string>
+    <string name="viewer_no_app_share">No app can open this file. Share to…</string>
+    <string name="viewer_downloading">Downloading…</string>
+    <string name="viewer_reload">Reload</string>
+    <string name="viewer_handoff_unsupported">This viewer requires server 4.19.11 or later (current: %1$s)</string>
+
+    <!-- Image -->
+    <string name="viewer_image_info">Image info</string>
+    <string name="viewer_image_failed">Failed to load image</string>
+    <string name="viewer_live_photo">Live Photo (long-press to play)</string>
+    <string name="viewer_info_size">Size</string>
+    <string name="viewer_info_modified">Modified</string>
+    <string name="viewer_info_location">Location</string>
+    <string name="viewer_info_exif">EXIF</string>
+    <string name="viewer_info_no_exif">No EXIF data</string>
+    <string name="viewer_geo_country">Country/region</string>
+    <string name="viewer_geo_region">State/province</string>
+    <string name="viewer_geo_city">City</string>
+    <string name="viewer_geo_street">Street</string>
+
+    <!-- Video -->
+    <string name="viewer_subtitle">Subtitles</string>
+    <string name="viewer_subtitle_off">Subtitles off</string>
+    <string name="viewer_subtitle_none">No subtitle files in this folder</string>
+    <string name="viewer_subtitle_loading">Loading subtitles…</string>
+    <string name="viewer_chapters">Chapters</string>
+    <string name="viewer_stream_info">Stream info</string>
+
+    <!-- Music -->
+    <string name="viewer_play">Play</string>
+    <string name="viewer_pause">Pause</string>
+    <string name="viewer_previous">Previous</string>
+    <string name="viewer_next">Next</string>
+    <string name="viewer_queue">Queue (%1$d)</string>
+
+    <!-- PDF -->
+    <string name="viewer_pdf_page">Page %1$d of %2$d</string>
+
+    <!-- Text -->
+    <string name="viewer_edit">Edit</string>
+    <string name="viewer_preview">Preview</string>
+    <string name="viewer_save">Save</string>
+    <string name="viewer_save_as">Save as</string>
+    <string name="viewer_saved">Saved</string>
+    <string name="viewer_saved_as">Saved as %1$s</string>
+    <string name="viewer_wrap">Word wrap</string>
+    <string name="viewer_monospace">Monospace font</string>
+    <string name="viewer_discard">Discard changes</string>
+    <string name="viewer_read_only">Read-only</string>
+    <string name="viewer_unsaved">Unsaved changes</string>
+    <string name="viewer_file_name">File name</string>
+    <string name="viewer_stale_title">File was modified</string>
+    <string name="viewer_stale_message">This file was changed elsewhere after you opened it. Overwrite to discard that change, or save as a new file.</string>
+    <string name="viewer_overwrite">Overwrite</string>
+    <string name="viewer_leave_title">Discard unsaved changes?</string>
+    <string name="viewer_leave_message">Your changes will be lost.</string>
+    <string name="viewer_discard_leave">Discard and leave</string>
+
+    <!-- Archive -->
+    <string name="viewer_archive_encoding">File name encoding</string>
+    <string name="viewer_archive_encoding_default">Default (UTF-8)</string>
+    <string name="viewer_archive_encoding_value">Encoding: %1$s</string>
+    <string name="viewer_archive_empty">This folder is empty</string>
+    <string name="viewer_archive_all">Extract all files</string>
+    <string name="viewer_archive_selected">%1$d selected</string>
+    <string name="viewer_archive_clear">Clear</string>
+    <string name="viewer_archive_extract_to">Extract to…</string>
+    <string name="viewer_archive_extract">Extract</string>
+    <string name="viewer_archive_extract_here">Extract here</string>
+    <string name="viewer_archive_destination">Destination</string>
+    <string name="viewer_archive_password">Password (optional)</string>
+    <string name="viewer_archive_node_auto">Choose node automatically</string>
+    <string name="viewer_archive_task_created">Extract task created. Track it in Tasks.</string>
+
+    <!-- Site viewer display names (web i18n keys) -->
+    <string name="site_text_image_viewer">Image viewer</string>
+    <string name="site_text_music_player">Music player</string>
+    <string name="site_text_pdf_viewer">PDF reader</string>
+    <string name="site_text_epub_viewer">EPUB reader</string>
+    <string name="site_text_archive_preview">Archive preview</string>
+    <string name="site_text_googledocs">Google Docs viewer</string>
+    <string name="site_text_m365_viewer">Microsoft 365 viewer</string>
+
+    <!-- EXIF fields -->
+    <string name="viewer_geo_district">District</string>
+    <string name="viewer_exif_camera_make">Camera make</string>
+    <string name="viewer_exif_camera_model">Camera model</string>
+    <string name="viewer_exif_lens_make">Lens make</string>
+    <string name="viewer_exif_lens_model">Lens model</string>
+    <string name="viewer_exif_taken_at">Taken at</string>
+    <string name="viewer_exif_exposure_time">Exposure time</string>
+    <string name="viewer_exif_aperture">Aperture</string>
+    <string name="viewer_exif_focal_length">Focal length</string>
+    <string name="viewer_exif_iso">ISO</string>
+    <string name="viewer_exif_exposure_bias">Exposure bias</string>
+    <string name="viewer_exif_flash">Flash</string>
+    <string name="viewer_exif_latitude">Latitude</string>
+    <string name="viewer_exif_longitude">Longitude</string>
+    <string name="viewer_exif_altitude">Altitude</string>
+    <string name="viewer_exif_orientation">Orientation</string>
+    <string name="viewer_exif_software">Software</string>
+    <string name="viewer_exif_artist">Artist</string>
+    <string name="viewer_exif_copyright">Copyright</string>
+    <string name="viewer_exif_width">Width</string>
+    <string name="viewer_exif_height">Height</string>
+</resources>

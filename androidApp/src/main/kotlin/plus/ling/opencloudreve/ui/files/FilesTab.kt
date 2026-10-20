@@ -39,6 +39,8 @@ import plus.ling.opencloudreve.core.model.User
 import plus.ling.opencloudreve.core.site.SiteConfigRepository
 import plus.ling.opencloudreve.ui.transfer.UploadDialog
 import plus.ling.opencloudreve.ui.transfer.UploadRoute
+import plus.ling.opencloudreve.ui.viewer.ViewerHostScreen
+import plus.ling.opencloudreve.ui.viewer.ViewerRoute
 
 /** 当前账户的用户资料（固定项、用户组权限），供没有自带用户状态的页面（搜索）计算动作规则 */
 val LocalAccountUser = compositionLocalOf<User?> { null }
@@ -200,6 +202,14 @@ private fun FilesNavHost(accountId: String, navController: NavHostController, na
                 navigator = navigator,
                 pickResult = entry.pickResult(),
                 onPickResultConsumed = { entry.savedStateHandle.remove<String>(FOLDER_PICK_RESULT_KEY) },
+            )
+        }
+        composable<ViewerRoute> { entry ->
+            ViewerHostScreen(
+                accountId = accountId,
+                route = entry.toRoute<ViewerRoute>(),
+                navigator = navigator,
+                onClose = { navController.popBackStack() },
             )
         }
         dialog<FolderPickerRoute>(dialogProperties = DialogProperties(usePlatformDefaultWidth = false)) { entry ->

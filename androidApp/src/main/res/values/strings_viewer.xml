@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="zh-rCN">
+    <!-- 预览器：通用 -->
+    <string name="viewer_open_with">打开方式</string>
+    <string name="viewer_open_external">用其他应用打开</string>
+    <string name="viewer_always_use">始终用此方式打开 %1$s 文件</string>
+    <string name="viewer_more">更多</string>
+    <string name="viewer_file_info">文件信息</string>
+    <string name="viewer_preparing_external">正在下载，完成后用其他应用打开…</string>
+    <string name="viewer_no_app">没有可以打开此文件的应用</string>
+    <string name="viewer_no_app_share">没有可以打开此文件的应用，分享到…</string>
+    <string name="viewer_downloading">正在下载…</string>
+    <string name="viewer_reload">重新加载</string>
+    <string name="viewer_handoff_unsupported">此预览方式需要服务端 4.19.11 或更高版本（当前 %1$s）</string>
+
+    <!-- 图片 -->
+    <string name="viewer_image_info">图片信息</string>
+    <string name="viewer_image_failed">图片加载失败</string>
+    <string name="viewer_live_photo">实况照片（长按播放）</string>
+    <string name="viewer_info_size">大小</string>
+    <string name="viewer_info_modified">修改时间</string>
+    <string name="viewer_info_location">位置</string>
+    <string name="viewer_info_exif">EXIF</string>
+    <string name="viewer_info_no_exif">没有 EXIF 信息</string>
+    <string name="viewer_geo_country">国家/地区</string>
+    <string name="viewer_geo_region">省/州</string>
+    <string name="viewer_geo_city">城市</string>
+    <string name="viewer_geo_street">街道</string>
+
+    <!-- 视频 -->
+    <string name="viewer_subtitle">字幕</string>
+    <string name="viewer_subtitle_off">关闭字幕</string>
+    <string name="viewer_subtitle_none">同目录下没有字幕文件</string>
+    <string name="viewer_subtitle_loading">正在加载字幕…</string>
+    <string name="viewer_chapters">章节</string>
+    <string name="viewer_stream_info">流信息</string>
+
+    <!-- 音乐 -->
+    <string name="viewer_play">播放</string>
+    <string name="viewer_pause">暂停</string>
+    <string name="viewer_previous">上一首</string>
+    <string name="viewer_next">下一首</string>
+    <string name="viewer_queue">播放列表（%1$d）</string>
+
+    <!-- PDF -->
+    <string name="viewer_pdf_page">第 %1$d / %2$d 页</string>
+
+    <!-- 文本 -->
+    <string name="viewer_edit">编辑</string>
+    <string name="viewer_preview">预览</string>
+    <string name="viewer_save">保存</string>
+    <string name="viewer_save_as">另存为</string>
+    <string name="viewer_saved">已保存</string>
+    <string name="viewer_saved_as">已另存为 %1$s</string>
+    <string name="viewer_wrap">自动换行</string>
+    <string name="viewer_monospace">等宽字体</string>
+    <string name="viewer_discard">放弃修改</string>
+    <string name="viewer_read_only">只读</string>
+    <string name="viewer_unsaved">有未保存的修改</string>
+    <string name="viewer_file_name">文件名</string>
+    <string name="viewer_stale_title">文件已被修改</string>
+    <string name="viewer_stale_message">打开后此文件已在别处被修改。覆盖会丢弃那次修改；也可以另存为新文件。</string>
+    <string name="viewer_overwrite">覆盖</string>
+    <string name="viewer_leave_title">放弃未保存的修改？</string>
+    <string name="viewer_leave_message">离开后修改将丢失。</string>
+    <string name="viewer_discard_leave">放弃并离开</string>
+
+    <!-- 压缩包 -->
+    <string name="viewer_archive_encoding">文件名编码</string>
+    <string name="viewer_archive_encoding_default">默认（UTF-8）</string>
+    <string name="viewer_archive_encoding_value">编码：%1$s</string>
+    <string name="viewer_archive_empty">此目录为空</string>
+    <string name="viewer_archive_all">解压全部文件</string>
+    <string name="viewer_archive_selected">已选 %1$d 项</string>
+    <string name="viewer_archive_clear">清除选择</string>
+    <string name="viewer_archive_extract_to">解压到…</string>
+    <string name="viewer_archive_extract">解压</string>
+    <string name="viewer_archive_extract_here">解压到此处</string>
+    <string name="viewer_archive_destination">目标目录</string>
+    <string name="viewer_archive_password">密码（可选）</string>
+    <string name="viewer_archive_node_auto">自动选择节点</string>
+    <string name="viewer_archive_task_created">已创建解压任务，可在“任务”中查看进度</string>
+
+    <!-- 站点预览器显示名（Web 端 i18n 键） -->
+    <string name="site_text_image_viewer">图片查看器</string>
+    <string name="site_text_music_player">音乐播放器</string>
+    <string name="site_text_pdf_viewer">PDF 阅读器</string>
+    <string name="site_text_epub_viewer">EPUB 阅读器</string>
+    <string name="site_text_archive_preview">压缩包预览</string>
+    <string name="site_text_googledocs">Google Docs 预览</string>
+    <string name="site_text_m365_viewer">Microsoft 365 预览</string>
+
+    <!-- EXIF 字段 -->
+    <string name="viewer_geo_district">区县</string>
+    <string name="viewer_exif_camera_make">相机品牌</string>
+    <string name="viewer_exif_camera_model">相机型号</string>
+    <string name="viewer_exif_lens_make">镜头品牌</string>
+    <string name="viewer_exif_lens_model">镜头型号</string>
+    <string name="viewer_exif_taken_at">拍摄时间</string>
+    <string name="viewer_exif_exposure_time">曝光时间</string>
+    <string name="viewer_exif_aperture">光圈</string>
+    <string name="viewer_exif_focal_length">焦距</string>
+    <string name="viewer_exif_iso">ISO</string>
+    <string name="viewer_exif_exposure_bias">曝光补偿</string>
+    <string name="viewer_exif_flash">闪光灯</string>
+    <string name="viewer_exif_latitude">纬度</string>
+    <string name="viewer_exif_longitude">经度</string>
+    <string name="viewer_exif_altitude">海拔</string>
+    <string name="viewer_exif_orientation">方向</string>
+    <string name="viewer_exif_software">软件</string>
+    <string name="viewer_exif_artist">作者</string>
+    <string name="viewer_exif_copyright">版权</string>
+    <string name="viewer_exif_width">宽度</string>
+    <string name="viewer_exif_height">高度</string>
+</resources>

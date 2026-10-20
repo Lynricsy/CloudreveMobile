@@ -4,6 +4,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavHostController
 import plus.ling.opencloudreve.core.model.FileItem
 import plus.ling.opencloudreve.ui.transfer.TransferHooks
+import plus.ling.opencloudreve.ui.viewer.PreviewHook
 
 /**
  * 调用后续阶段动作时的上下文。
@@ -61,6 +62,7 @@ internal val InstalledFileFeatures = FileFeatures(
     download = TransferHooks.download,
     uploadFiles = TransferHooks.uploadFiles,
     uploadMedia = TransferHooks.uploadMedia,
+    preview = PreviewHook,
 )
 
 val LocalFileFeatures = staticCompositionLocalOf { InstalledFileFeatures }

@@ -48,6 +48,13 @@ fun siteText(context: Context, raw: String): String {
         "fileManager.text" -> R.string.site_text_text
         "fileManager.markdownEditor" -> R.string.site_text_markdown_editor
         "fileManager.monacoEditor" -> R.string.site_text_monaco_editor
+        "fileManager.imageViewer" -> R.string.site_text_image_viewer
+        "fileManager.musicPlayer" -> R.string.site_text_music_player
+        "fileManager.pdfViewer" -> R.string.site_text_pdf_viewer
+        "fileManager.epubViewer" -> R.string.site_text_epub_viewer
+        "fileManager.archivePreview" -> R.string.site_text_archive_preview
+        "fileManager.googledocs" -> R.string.site_text_googledocs
+        "fileManager.m365viewer" -> R.string.site_text_m365_viewer
         else -> return raw
     }
     return context.getString(res)

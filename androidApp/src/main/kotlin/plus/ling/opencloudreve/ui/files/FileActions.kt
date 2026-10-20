@@ -269,7 +269,7 @@ fun FileActionsHost(
 
     state.lockConflict?.let { prompt ->
         LockConflictDialog(
-            prompt = prompt,
+            conflicts = prompt.conflicts,
             onForceUnlock = { vm.on(FileActionIntent.ForceUnlockAndRetry) },
             onDismiss = { vm.on(FileActionIntent.DismissConflict) },
         )
