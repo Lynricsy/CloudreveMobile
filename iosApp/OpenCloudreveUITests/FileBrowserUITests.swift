@@ -118,10 +118,10 @@ final class FileBrowserUITests: XCTestCase {
             Thread.sleep(forTimeInterval: 0.5)
         }
         if urlField.exists {
-            urlField.tap()
-            // 地址框可能已预填（如 https://），先清空
+            // 地址框可能已预填（如 https://）：点在右端让光标落到末尾，再逐字删除
+            urlField.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
             if let existing = urlField.value as? String, !existing.isEmpty, existing != urlField.placeholderValue {
-                urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: existing.count))
+                urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: existing.count + 2))
             }
             urlField.typeText(serverURL)
             app.buttons["server.continue"].tap()
