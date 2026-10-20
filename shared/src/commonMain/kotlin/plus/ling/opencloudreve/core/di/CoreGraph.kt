@@ -4,6 +4,7 @@ import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 import org.koin.mp.KoinPlatform
 import plus.ling.opencloudreve.core.auth.AccountRepository
@@ -13,6 +14,10 @@ import plus.ling.opencloudreve.core.auth.PasskeyFlow
 import plus.ling.opencloudreve.core.auth.PkceOAuth
 import plus.ling.opencloudreve.core.auth.SessionStore
 import plus.ling.opencloudreve.core.platform.PlatformContext
+import plus.ling.opencloudreve.core.presentation.auth.AccountSwitcherViewModel
+import plus.ling.opencloudreve.core.presentation.auth.LoginParams
+import plus.ling.opencloudreve.core.presentation.auth.LoginViewModel
+import plus.ling.opencloudreve.core.presentation.auth.ServerSetupViewModel
 import plus.ling.opencloudreve.core.transfer.ChunkMaterializer
 import plus.ling.opencloudreve.core.transfer.DownloadPlanner
 import plus.ling.opencloudreve.core.transfer.TransferExecutor
@@ -46,7 +51,7 @@ object CoreGraph {
     fun start(platform: PlatformContext, extraModules: List<Module> = emptyList()) {
         if (isStarted) return
         startKoin {
-            modules(listOf(platformModule(platform), authModule, transferModule) + extraModules)
+            modules(listOf(platformModule(platform), authModule, transferModule, authPresentationModule) + extraModules)
         }
     }
 
@@ -68,6 +73,15 @@ object CoreGraph {
     fun pkceOAuth(): PkceOAuth = koin.get()
     fun passkeyFlow(): PasskeyFlow = koin.get()
     fun platform(): PlatformContext = koin.get()
+
+    // ---- 登录与账户 ViewModel ----
+
+    fun serverSetupViewModel(): ServerSetupViewModel = koin.get()
+
+    fun loginViewModel(siteUrl: String, email: String? = null, language: String? = null): LoginViewModel =
+        koin.get { parametersOf(LoginParams(siteUrl, email, language)) }
+
+    fun accountSwitcherViewModel(): AccountSwitcherViewModel = koin.get()
 
     // ---- 传输 ----
 
