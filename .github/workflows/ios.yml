@@ -2,9 +2,10 @@ name: iOS
 
 on: [push, pull_request, workflow_dispatch]
 
+# 不取消进行中的运行：多个 iOS 分支任务会连续推送，每个提交都需要自己的结果
 concurrency:
-  group: ios-${{ github.ref }}
-  cancel-in-progress: true
+  group: ios-${{ github.sha }}
+  cancel-in-progress: false
 
 env:
   # UI 测试登录用的服务端版本与账号（与 iosApp/OpenCloudreveUITests 中一致）
