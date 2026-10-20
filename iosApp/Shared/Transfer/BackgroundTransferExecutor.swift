@@ -265,20 +265,21 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
     }
 
     private func handle(_ outcome: TransferOutcome, taskId: String) async {
-        if let next = outcome as? TransferOutcomeContinue {
+        switch onEnum(of: outcome) {
+        case let .continue(next):
             if next.allChunksDone {
                 if await platformTasks(taskId).isEmpty { await finalizeUpload(taskId) }
             } else {
                 await dispatchUpload(taskId)
             }
-        } else if let retry = outcome as? TransferOutcomeRetryAfter {
+        case let .retryAfter(retry):
             try? await Task.sleep(for: .milliseconds(retry.delayMillis))
             await dispatchUpload(taskId)
-        } else if outcome is TransferOutcomeRestart {
+        case .restart:
             await cancelPlatformTasks(taskId)
             await prepareUpload(taskId)
-        } else {
-            // Failed：状态已写入，停止本任务其余在途分片
+        case .failed:
+            // 状态已写入，停止本任务其余在途分片
             clearProgress(taskId)
             await cancelPlatformTasks(taskId)
         }
@@ -356,7 +357,7 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
             await failIfActive(taskId, error)
             return
         }
-        if let retry = outcome as? TransferOutcomeRetryAfter {
+        if case let .retryAfter(retry) = onEnum(of: outcome) {
             try? await Task.sleep(for: .milliseconds(retry.delayMillis))
             await start(taskId)
         }

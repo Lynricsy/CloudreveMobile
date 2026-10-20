@@ -23,7 +23,10 @@ struct TransferExecutorIntegrationTests {
             password: Self.password,
             captcha: nil
         )
-        let done = try #require(step as? LoginStepDone)
+        guard case let .done(done) = onEnum(of: step) else {
+            Issue.record("测试账号登录未直接完成（需要两步验证？）")
+            return
+        }
         let accountId = done.account.id
 
         let executor = BackgroundTransferExecutor(configurations: [URLSessionConfiguration.ephemeral])
