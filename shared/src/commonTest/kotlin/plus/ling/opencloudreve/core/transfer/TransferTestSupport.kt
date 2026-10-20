@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import plus.ling.opencloudreve.core.api.ApiClient
 import plus.ling.opencloudreve.core.api.ApiClientProvider
 import plus.ling.opencloudreve.core.api.AuthProvider
+import plus.ling.opencloudreve.core.api.SessionExpiredException
 import plus.ling.opencloudreve.core.api.CloudreveJson
 import plus.ling.opencloudreve.core.createTestDriver
 import plus.ling.opencloudreve.core.db.OpenCloudreveDatabase
@@ -25,8 +26,10 @@ class FakeFileSystem : FileSystemBridge {
     val sources = HashMap<String, ByteArray>()
     val files = HashMap<String, ByteArray>()
 
+    @Throws(Exception::class)
     override suspend fun size(sourceRef: String): Long? = sources[sourceRef]?.size?.toLong()
 
+    @Throws(Exception::class)
     override suspend fun readRange(sourceRef: String, offset: Long, length: Int): ByteArray {
         val data = sources.getValue(sourceRef)
         val start = offset.toInt().coerceAtMost(data.size)
@@ -35,14 +38,17 @@ class FakeFileSystem : FileSystemBridge {
 
     override fun tempDir(): String = "/tmp/ocr-test/"
 
+    @Throws(Exception::class)
     override suspend fun writeFile(path: String, bytes: ByteArray) {
         files[path] = bytes.copyOf()
     }
 
+    @Throws(Exception::class)
     override suspend fun appendFile(path: String, bytes: ByteArray) {
         files[path] = (files[path] ?: ByteArray(0)) + bytes
     }
 
+    @Throws(Exception::class)
     override suspend fun delete(path: String) {
         files.remove(path)
     }
@@ -89,6 +95,7 @@ class TransferEnv(
         },
     )
     val clients = object : ApiClientProvider {
+        @Throws(SessionExpiredException::class)
         override fun client(accountId: String): ApiClient = client
     }
     val planner = UploadPlanner(repository, clients, fs, clock)
