@@ -38,6 +38,19 @@ import plus.ling.opencloudreve.core.transfer.TransferManager
 import plus.ling.opencloudreve.core.transfer.TransferRepository
 import plus.ling.opencloudreve.core.transfer.UploadPlanner
 import plus.ling.opencloudreve.core.workflow.WorkflowRepository
+import plus.ling.opencloudreve.core.model.StoragePolicy
+import plus.ling.opencloudreve.core.presentation.files.DirectLinksViewModel
+import plus.ling.opencloudreve.core.presentation.files.MetadataEditViewModel
+import plus.ling.opencloudreve.core.presentation.files.VersionsViewModel
+import plus.ling.opencloudreve.core.presentation.share.ShareEditViewModel
+import plus.ling.opencloudreve.core.presentation.share.ShareListViewModel
+import plus.ling.opencloudreve.core.presentation.share.ShareVisitViewModel
+import plus.ling.opencloudreve.core.presentation.transfer.TransferListViewModel
+import plus.ling.opencloudreve.core.presentation.transfer.UploadPickerViewModel
+import plus.ling.opencloudreve.core.presentation.workflow.ArchiveTaskMode
+import plus.ling.opencloudreve.core.presentation.workflow.ArchiveTaskViewModel
+import plus.ling.opencloudreve.core.presentation.workflow.RemoteDownloadCreateViewModel
+import plus.ling.opencloudreve.core.presentation.workflow.WorkflowListViewModel
 import plus.ling.opencloudreve.core.presentation.admin.AdminFilesViewModel
 import plus.ling.opencloudreve.core.presentation.admin.AdminNodesViewModel
 import plus.ling.opencloudreve.core.presentation.admin.AdminQueueViewModel
@@ -86,6 +99,7 @@ object CoreGraph {
         startKoin {
             modules(
                 listOf(platformModule(platform), authModule, transferModule, dataModule, authPresentationModule) +
+                    fileToolsPresentationModule +
                     listOf(settingsPresentationModule, adminPresentationModule, viewerPresentationModule) +
                     extraModules,
             )
@@ -160,6 +174,47 @@ object CoreGraph {
 
     fun fileInfoViewModel(accountId: String, uri: String): FileInfoViewModel =
         koin.get { parametersOf(accountId, uri) }
+
+    // ---- 传输 / 分享 / 任务 / 版本 / 元数据 / 直链 ViewModel ----
+
+    fun transferListViewModel(accountId: String): TransferListViewModel = koin.get { parametersOf(accountId) }
+
+    /** [policy] 为当前目录列表的 `storage_policy`；未知传 null（VM 自行获取） */
+    fun uploadPickerViewModel(accountId: String, targetUri: String, policy: StoragePolicy? = null): UploadPickerViewModel =
+        koin.get { parametersOf(UploadPickerParams(accountId, targetUri, policy)) }
+
+    fun shareListViewModel(accountId: String): ShareListViewModel = koin.get { parametersOf(accountId) }
+
+    /** 新建分享传 [fileUri]，编辑传 [shareId] */
+    fun shareEditViewModel(accountId: String, fileUri: String? = null, shareId: String? = null): ShareEditViewModel =
+        koin.get { parametersOf(ShareEditParams(accountId, fileUri, shareId)) }
+
+    /** [link]：`https://<site>/s/<id>[/<pw>]`、`cloudreve://<id>[:<pw>]@share[/path]` 或分享 id */
+    fun shareVisitViewModel(accountId: String, link: String): ShareVisitViewModel =
+        koin.get { parametersOf(accountId, link) }
+
+    /** [initialCategory]：`general` / `downloading` / `downloaded` */
+    fun workflowListViewModel(accountId: String, initialCategory: String): WorkflowListViewModel =
+        koin.get { parametersOf(accountId, initialCategory) }
+
+    fun remoteDownloadCreateViewModel(accountId: String, dstUri: String, torrentUri: String? = null): RemoteDownloadCreateViewModel =
+        koin.get { parametersOf(RemoteDownloadParams(accountId, dstUri, torrentUri)) }
+
+    fun archiveTaskViewModel(
+        accountId: String,
+        mode: ArchiveTaskMode,
+        srcUris: List<String>,
+        dstUri: String,
+        fileMask: List<String> = emptyList(),
+    ): ArchiveTaskViewModel = koin.get { parametersOf(accountId, mode, srcUris, dstUri, fileMask) }
+
+    fun versionsViewModel(accountId: String, uri: String): VersionsViewModel = koin.get { parametersOf(accountId, uri) }
+
+    fun metadataEditViewModel(accountId: String, uris: List<String>): MetadataEditViewModel =
+        koin.get { parametersOf(accountId, uris) }
+
+    fun directLinksViewModel(accountId: String, uris: List<String>): DirectLinksViewModel =
+        koin.get { parametersOf(accountId, uris) }
 
     // ---- 设置、会话交接 ----
 
