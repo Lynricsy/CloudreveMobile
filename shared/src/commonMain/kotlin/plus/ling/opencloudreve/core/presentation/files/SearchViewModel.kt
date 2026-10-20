@@ -138,6 +138,10 @@ class SearchViewModel(
         }
     }
 
+    /** 结果缩略图地址（带搜索结果的 context hint）；无缩略图返回 null */
+    @Throws(Exception::class)
+    suspend fun thumbnailUrl(file: FileItem): String? = files.thumbUrl(file, currentState.contextHint)
+
     /** 按当前查询与过滤构建搜索 URI */
     fun buildSearchUri(): String {
         val s = currentState

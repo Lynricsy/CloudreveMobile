@@ -1,8 +1,9 @@
 package plus.ling.opencloudreve.ui.common
 
+import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import plus.ling.opencloudreve.R
 import plus.ling.opencloudreve.core.api.ErrorCode
 import plus.ling.opencloudreve.core.presentation.ErrorKind
@@ -13,11 +14,14 @@ import plus.ling.opencloudreve.core.presentation.UiError
  * 具体错误码优先于分类；[ErrorKind.Validation] 与 [ErrorKind.Unknown] 在有服务端消息时附带原文便于排查。
  */
 @Composable
-fun UiError.message(): String {
-    val base = stringResource(messageRes())
+fun UiError.message(): String = message(LocalContext.current)
+
+/** 非组合环境（Snackbar、事件回调）使用的同一文案 */
+fun UiError.message(context: Context): String {
+    val base = context.getString(messageRes())
     val detail = serverMsg?.takeIf { it.isNotBlank() }
     return if (detail != null && (kind == ErrorKind.Validation || kind == ErrorKind.Unknown)) {
-        stringResource(R.string.error_with_detail, base, detail)
+        context.getString(R.string.error_with_detail, base, detail)
     } else {
         base
     }

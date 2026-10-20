@@ -15,13 +15,14 @@ import plus.ling.opencloudreve.core.presentation.CoreViewModel
 import plus.ling.opencloudreve.core.presentation.ErrorKind
 import plus.ling.opencloudreve.core.presentation.UiError
 import plus.ling.opencloudreve.core.presentation.toUiError
+import plus.ling.opencloudreve.core.settings.UserSettingsRepository
 
 /** 可执行的文件操作（uri 均为 `cloudreve://` 字符串） */
 sealed interface FileOperation {
     data class Rename(val uri: String, val newName: String) : FileOperation
     data class Move(val uris: List<String>, val dst: String) : FileOperation
 
-    /** 复制；也用于“保存分享到我的文件” */
+    /** 复制（仅“我的文件”内；保存分享改用 ShareVisitViewModel 创建快捷方式） */
     data class Copy(val uris: List<String>, val dst: String) : FileOperation
 
     /** 删除：默认进回收站；[skipSoftDelete] 彻底删除（回收站内必须为 true）；[unlink] 仅解除链接 */
@@ -90,10 +91,12 @@ sealed interface FileActionEffect {
 /**
  * 文件操作执行器：串行执行一个操作；40073 进入 [FileActionState.lockConflict] 等待“强制解锁并重试”；
  * 40081 把 `aggregated_error` 汇总到 [FileActionState.partialFailures]。
+ * 固定/取消固定成功后刷新 [userSettings] 的用户资料，使 `user.pined` 立即反映变化。
  */
 class FileActionViewModel(
     val accountId: String,
     private val files: FileRepository,
+    private val userSettings: UserSettingsRepository? = null,
 ) : CoreViewModel<FileActionState, FileActionIntent, FileActionEffect>(FileActionState()) {
 
     override fun on(intent: FileActionIntent) {
@@ -156,8 +159,8 @@ class FileActionViewModel(
         is FileOperation.Delete -> files.delete(op.uris, op.unlink, op.skipSoftDelete).let { FileOperationOutcome.Done }
         is FileOperation.Restore -> files.restore(op.uris).let { FileOperationOutcome.Done }
         FileOperation.EmptyTrash -> files.emptyTrash().let { FileOperationOutcome.Done }
-        is FileOperation.Pin -> files.pin(op.uri, op.name).let { FileOperationOutcome.Done }
-        is FileOperation.Unpin -> files.unpin(op.uri).let { FileOperationOutcome.Done }
+        is FileOperation.Pin -> files.pin(op.uri, op.name).let { refreshProfileQuietly(); FileOperationOutcome.Done }
+        is FileOperation.Unpin -> files.unpin(op.uri).let { refreshProfileQuietly(); FileOperationOutcome.Done }
         is FileOperation.CreateFolder -> FileOperationOutcome.Created(files.createFolder(op.parentUri, op.name))
         is FileOperation.CreateFile -> FileOperationOutcome.Created(files.createFile(op.parentUri, op.name))
         is FileOperation.CreateSourceLinks -> {
@@ -178,6 +181,16 @@ class FileActionViewModel(
         }
         is FileOperation.PatchMetadata -> files.patchMetadata(op.uris, op.patches).let { FileOperationOutcome.Done }
         is FileOperation.MountPolicy -> files.mountPolicy(op.uri, op.policyId).let { FileOperationOutcome.Done }
+    }
+
+    private suspend fun refreshProfileQuietly() {
+        try {
+            userSettings?.refreshMe()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // 资料刷新失败不影响操作结果
+        }
     }
 
     private fun failuresOf(e: ApiException): List<OperationFailure> =

@@ -93,7 +93,6 @@
     <string name="tab_tasks">任务</string>
     <string name="tab_me">我的</string>
     <string name="tab_me_long_press">切换账户</string>
-    <string name="placeholder_files">文件浏览即将在此呈现</string>
     <string name="placeholder_shares">你创建的分享将显示在这里</string>
     <string name="placeholder_tasks">上传、下载与后台任务将显示在这里</string>
 
@@ -106,4 +105,269 @@
     <string name="account_expired">需要重新登录</string>
     <string name="account_current">当前账户</string>
     <string name="account_avatar_desc">头像</string>
+
+    <!-- 通用动作 -->
+    <string name="action_close">关闭</string>
+    <string name="action_create">创建</string>
+    <string name="action_open">打开</string>
+    <string name="action_view">查看</string>
+    <string name="action_refresh">刷新</string>
+    <string name="action_copy_link">复制链接</string>
+    <string name="action_copy_all">全部复制</string>
+    <string name="copied">已复制到剪贴板</string>
+    <string name="more_options">更多选项</string>
+
+    <!-- 文件：位置与标题 -->
+    <string name="files_locations">位置</string>
+    <string name="files_my">我的文件</string>
+    <string name="files_user_root">用户 %1$s 的文件</string>
+    <string name="files_shared_with_me">与我共享</string>
+    <string name="files_trash">回收站</string>
+    <string name="files_share_root">分享</string>
+    <string name="files_pinned">固定项</string>
+    <string name="files_loading">正在加载</string>
+    <string name="files_offline_cache">正在显示离线缓存内容</string>
+    <plurals name="files_count">
+        <item quantity="other">%1$d 项</item>
+    </plurals>
+    <plurals name="files_count_more">
+        <item quantity="other">%1$d+ 项</item>
+    </plurals>
+    <string name="folder_empty">此文件夹为空</string>
+    <string name="shared_with_me_empty">还没有人与你直接共享文件</string>
+    <string name="quota_title">存储空间</string>
+    <string name="quota_usage">已用 %1$s / 共 %2$s</string>
+    <string name="quota_over">已超出容量，无法继续上传</string>
+
+    <!-- 文件：列表与视图 -->
+    <string name="file_badge_link">快捷方式</string>
+    <string name="file_badge_shared">已分享</string>
+    <string name="file_more_actions">更多操作</string>
+    <string name="view_grid">网格视图</string>
+    <string name="view_list">列表视图</string>
+    <string name="view_thumbnails">显示缩略图</string>
+    <string name="sort">排序</string>
+    <string name="sort_name">名称</string>
+    <string name="sort_size">大小</string>
+    <string name="sort_updated">修改时间</string>
+    <string name="sort_created">创建时间</string>
+    <string name="sort_asc">升序</string>
+    <string name="sort_desc">降序</string>
+
+    <!-- 文件：多选 -->
+    <string name="selection_enter">多选</string>
+    <string name="selection_exit">退出多选</string>
+    <string name="selection_all">全选</string>
+    <string name="selection_count">已选 %1$d 项</string>
+    <string name="selection_selected">已选中</string>
+    <string name="selection_not_selected">未选中</string>
+    <plurals name="selection_over_limit">
+        <item quantity="other">一次最多操作 %1$d 项</item>
+    </plurals>
+
+    <!-- 文件：操作 -->
+    <string name="action_enter">进入</string>
+    <string name="action_download">下载</string>
+    <string name="action_share">分享</string>
+    <string name="action_rename">重命名</string>
+    <string name="action_move">移动</string>
+    <string name="action_copy">复制</string>
+    <string name="action_delete">删除</string>
+    <string name="action_restore">还原</string>
+    <string name="action_pin">固定到首页</string>
+    <string name="action_unpin">取消固定</string>
+    <string name="action_info">文件信息</string>
+    <string name="action_versions">版本</string>
+    <string name="action_metadata">标签与属性</string>
+    <string name="action_direct_link">获取直链</string>
+    <string name="action_reset_thumbnail">重新生成缩略图</string>
+    <string name="action_disable_thumbnail">不生成缩略图</string>
+    <string name="action_go_shared_link">前往分享链接</string>
+    <string name="action_go_parent">前往所在目录</string>
+    <string name="action_mount_policy">挂载存储策略</string>
+    <string name="action_relocate">转移存储策略</string>
+    <string name="action_create_archive">压缩</string>
+    <string name="action_extract_archive">解压</string>
+    <string name="action_remote_download">创建离线下载</string>
+    <string name="action_none_available">没有可执行的操作</string>
+    <string name="action_done_rename">已重命名</string>
+    <plurals name="action_done_move">
+        <item quantity="other">已移动 %1$d 项</item>
+    </plurals>
+    <plurals name="action_done_copy">
+        <item quantity="other">已复制 %1$d 项</item>
+    </plurals>
+    <plurals name="action_done_delete">
+        <item quantity="other">已删除 %1$d 项</item>
+    </plurals>
+    <plurals name="action_done_restore">
+        <item quantity="other">已还原 %1$d 项</item>
+    </plurals>
+    <string name="action_done_empty_trash">回收站已清空</string>
+    <string name="action_done_pin">已固定到首页</string>
+    <string name="action_done_unpin">已取消固定</string>
+    <string name="action_done_create">已创建</string>
+    <string name="action_done_thumbnail">缩略图设置已更新</string>
+    <string name="action_done_mount_policy">存储策略已更新</string>
+
+    <!-- 文件：新建 -->
+    <string name="new_menu">新建</string>
+    <string name="new_folder">新建文件夹</string>
+    <string name="new_folder_default_name">新建文件夹</string>
+    <string name="new_file_title">新建 %1$s</string>
+    <string name="new_file_default_name">新建文件</string>
+    <string name="upload_files">上传文件</string>
+    <string name="upload_media">上传照片或视频</string>
+    <string name="name_label">名称</string>
+    <string name="name_invalid">名称不能为空，且不能包含 / 或 \\</string>
+
+    <!-- 文件：删除与回收站 -->
+    <string name="delete_title_single">删除“%1$s”？</string>
+    <plurals name="delete_title_multiple">
+        <item quantity="other">删除 %1$d 项？</item>
+    </plurals>
+    <string name="delete_message_trash">项目将移入回收站，可在回收站中还原。</string>
+    <plurals name="delete_message_trash_retention">
+        <item quantity="other">项目将移入回收站，%1$d 天后自动清除。</item>
+    </plurals>
+    <string name="delete_message_permanent">项目将被彻底删除，无法恢复。</string>
+    <string name="delete_permanently">彻底删除，不进回收站</string>
+    <string name="delete_unlink_only">仅解除链接</string>
+    <string name="delete_unlink_hint">只删除文件记录，保留存储中的数据。</string>
+    <string name="trash_empty">清空回收站</string>
+    <string name="trash_empty_title">清空回收站？</string>
+    <string name="trash_empty_message">回收站中的所有项目都将被彻底删除，无法恢复。</string>
+    <string name="trash_empty_state">回收站是空的</string>
+    <string name="trash_original_location">原位置：%1$s</string>
+    <string name="trash_collect_soon">即将被清除</string>
+    <plurals name="trash_collect_days">
+        <item quantity="other">%1$d 天后清除</item>
+    </plurals>
+    <plurals name="trash_collect_hours">
+        <item quantity="other">%1$d 小时后清除</item>
+    </plurals>
+
+    <!-- 文件：锁与批量失败 -->
+    <string name="lock_conflict_title">文件已被锁定</string>
+    <string name="lock_conflict_message">以下项目正被其他程序占用，强制解锁可能导致对方未保存的修改丢失。</string>
+    <string name="lock_owner">占用方：%1$s</string>
+    <string name="lock_owner_webdav">WebDAV 客户端</string>
+    <string name="lock_owner_viewer">在线编辑器</string>
+    <string name="lock_owner_unknown">未知</string>
+    <string name="lock_force_unlock">强制解锁并重试</string>
+    <string name="partial_failures_title">部分项目未能完成</string>
+
+    <!-- 文件：挂载策略 -->
+    <string name="mount_policy_message">为“%1$s”选择存储策略，之后上传到此目录的文件将使用该策略。</string>
+    <string name="mount_policy_inherit">继承上级目录</string>
+    <string name="mount_policy_default">用户组默认策略</string>
+
+    <!-- 目录选择器 -->
+    <string name="picker_title">选择目标文件夹</string>
+    <string name="picker_move_here">移动到此处</string>
+    <string name="picker_copy_here">复制到此处</string>
+    <string name="picker_save_here">保存到此处</string>
+    <string name="picker_excluded">不能选择被移动的文件夹本身或其子文件夹</string>
+    <string name="picker_not_writable">此位置不可写入</string>
+    <string name="picker_no_subfolders">没有子文件夹</string>
+
+    <!-- 搜索 -->
+    <string name="search">搜索</string>
+    <string name="search_in">在“%1$s”中搜索</string>
+    <string name="search_clear">清除</string>
+    <string name="search_filters">高级筛选</string>
+    <string name="search_no_results">没有找到匹配的文件</string>
+    <string name="search_history">最近搜索</string>
+    <string name="search_history_clear">清除全部</string>
+    <string name="search_history_delete">删除“%1$s”</string>
+    <string name="search_history_empty">输入文件名开始搜索</string>
+    <string name="search_fulltext">全文搜索</string>
+    <plurals name="search_fulltext_total">
+        <item quantity="other">共 %1$d 个结果</item>
+    </plurals>
+    <string name="search_type">类型</string>
+    <string name="search_any">不限</string>
+    <string name="search_type_file">文件</string>
+    <string name="search_type_folder">文件夹</string>
+    <string name="search_category">分类</string>
+    <string name="search_category_image">图片</string>
+    <string name="search_category_video">视频</string>
+    <string name="search_category_audio">音频</string>
+    <string name="search_category_document">文档</string>
+    <string name="search_size_mb">大小（MB）</string>
+    <string name="search_min">最小</string>
+    <string name="search_max">最大</string>
+    <string name="search_updated_within">修改时间</string>
+    <string name="search_created_within">创建时间</string>
+    <string name="search_within_day">一天内</string>
+    <string name="search_within_week">一周内</string>
+    <string name="search_within_month">一个月内</string>
+    <string name="search_within_year">一年内</string>
+    <string name="search_tags">标签（逗号分隔）</string>
+    <string name="search_case_insensitive">忽略大小写</string>
+    <string name="search_reset_filters">重置</string>
+
+    <!-- 文件信息 -->
+    <string name="info_placeholder">选择一个文件查看详细信息</string>
+    <string name="info_updated">已更新</string>
+    <string name="info_type_file">文件</string>
+    <string name="info_type_folder">文件夹</string>
+    <string name="info_basic">基本信息</string>
+    <string name="info_size">大小</string>
+    <string name="info_location">位置</string>
+    <string name="info_created">创建时间</string>
+    <string name="info_updated_at">修改时间</string>
+    <string name="info_link_target">链接目标</string>
+    <string name="info_restore_uri">原位置</string>
+    <string name="info_folder_summary">目录统计</string>
+    <string name="info_summary_pending">正在统计…</string>
+    <string name="info_contents">包含</string>
+    <plurals name="info_files">
+        <item quantity="other">%1$d 个文件</item>
+    </plurals>
+    <plurals name="info_folders">
+        <item quantity="other">%1$d 个文件夹</item>
+    </plurals>
+    <string name="info_calculated_at">统计时间</string>
+    <string name="info_storage">存储</string>
+    <string name="info_storage_policy">存储策略</string>
+    <string name="info_policy_inherited">%1$s（继承）</string>
+    <string name="info_storage_used">占用空间</string>
+    <string name="info_hash">哈希</string>
+    <string name="info_hash_query">查询 SHA-256</string>
+    <string name="info_hash_compute">计算</string>
+    <string name="hash_pending">正在计算</string>
+    <string name="hash_missing">尚未计算</string>
+    <string name="hash_failed">计算失败</string>
+    <string name="hash_uploading">文件仍在上传</string>
+    <string name="hash_unsupported">该存储不支持计算哈希</string>
+    <string name="hash_unavailable">不可用</string>
+    <string name="info_direct_links">直链</string>
+    <string name="info_delete_link">删除直链</string>
+    <plurals name="info_downloads">
+        <item quantity="other">下载 %1$d 次</item>
+    </plurals>
+    <string name="info_shares">分享</string>
+    <plurals name="info_views">
+        <item quantity="other">访问 %1$d 次</item>
+    </plurals>
+    <string name="info_share_expired">已过期</string>
+    <string name="info_share_expires">%1$s 过期</string>
+    <string name="info_tags">标签</string>
+
+    <!-- 分享浏览 -->
+    <string name="share_open_link">打开分享链接</string>
+    <string name="share_link_label">分享链接或 ID</string>
+    <string name="share_owner">分享者：%1$s</string>
+    <plurals name="share_remain_downloads">
+        <item quantity="other">剩余 %1$d 次下载</item>
+    </plurals>
+    <string name="share_site_mismatch">此链接来自其他站点，将以当前账户访问</string>
+    <string name="share_password_required">此分享需要密码</string>
+    <string name="share_password">分享密码</string>
+    <string name="share_save">保存到我的文件</string>
+    <string name="share_saved">已保存快捷方式“%1$s”</string>
+    <string name="share_readme">说明文件</string>
+    <string name="share_readme_found">此目录包含 %1$s</string>
+    <string name="share_readme_failed">无法加载说明文件</string>
 </resources>

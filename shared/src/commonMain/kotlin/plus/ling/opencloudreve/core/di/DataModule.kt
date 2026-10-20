@@ -112,7 +112,10 @@ val dataModule = module {
         val d = get<DataRepositories>()
         FileListViewModel(accountId, uri, d.files(accountId), d.userSettings(accountId), d.site, d.events(accountId))
     }
-    factory { (accountId: String) -> FileActionViewModel(accountId, get<DataRepositories>().files(accountId)) }
+    factory { (accountId: String) ->
+        val d = get<DataRepositories>()
+        FileActionViewModel(accountId, d.files(accountId), d.userSettings(accountId))
+    }
     factory { (accountId: String, initialUri: String, excludedUris: List<String>) ->
         FolderPickerViewModel(accountId, initialUri, excludedUris, get<DataRepositories>().files(accountId))
     }

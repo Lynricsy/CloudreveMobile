@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,10 +45,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import plus.ling.opencloudreve.R
+import plus.ling.opencloudreve.core.auth.AccountRepository
 import plus.ling.opencloudreve.core.presentation.auth.AccountSwitcherViewModel
 import plus.ling.opencloudreve.ui.account.AccountSwitcherSheet
+import plus.ling.opencloudreve.ui.files.FilesTab
 
 /** 主界面顶层 Tab */
 enum class MainTab(
@@ -63,20 +67,30 @@ enum class MainTab(
 
 /**
  * 主界面：`NavigationSuiteScaffold`（手机底栏、平板导航栏 rail）。长按“我的”打开账户切换器。
+ * 各 Tab 的可保存状态（含 Tab 内导航栈）用 [rememberSaveableStateHolder] 保留，切换 Tab 后返回原位置。
  */
 @Composable
 fun MainScreen(
     onAddAccount: () -> Unit,
     switcher: AccountSwitcherViewModel = koinViewModel(),
+    accounts: AccountRepository = koinInject(),
 ) {
     var tab by rememberSaveable { mutableStateOf(MainTab.Files) }
     var showSwitcher by rememberSaveable { mutableStateOf(false) }
     val switcherState by switcher.state.collectAsStateWithLifecycle()
+    val active by accounts.activeAccount.collectAsStateWithLifecycle()
+    val tabStates = rememberSaveableStateHolder()
     val haptics = LocalHapticFeedback.current
     val switchLabel = stringResource(R.string.tab_me_long_press)
     val openSwitcher = {
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         showSwitcher = true
+    }
+    // 其它 Tab 请求在“文件”Tab 打开的目录（如管理页“打开此用户的文件”）
+    var filesOpenRequest by rememberSaveable { mutableStateOf<String?>(null) }
+    val openFilesAt: (String) -> Unit = { uri ->
+        filesOpenRequest = uri
+        tab = MainTab.Files
     }
 
     NavigationSuiteScaffold(
@@ -104,16 +118,24 @@ fun MainScreen(
             }
         },
     ) {
-        when (tab) {
-            MainTab.Files -> PlaceholderTab(MainTab.Files, R.string.placeholder_files)
-            MainTab.Shares -> PlaceholderTab(MainTab.Shares, R.string.placeholder_shares)
-            MainTab.Tasks -> PlaceholderTab(MainTab.Tasks, R.string.placeholder_tasks)
-            MainTab.Me -> MeTab(
-                state = switcherState,
-                onIntent = switcher::on,
-                onOpenSwitcher = { showSwitcher = true },
-                onAddAccount = onAddAccount,
-            )
+        tabStates.SaveableStateProvider(tab.name) {
+            when (tab) {
+                MainTab.Files -> active?.let { account ->
+                    FilesTab(
+                        account = account,
+                        openRequest = filesOpenRequest,
+                        onOpenRequestConsumed = { filesOpenRequest = null },
+                    )
+                }
+                MainTab.Shares -> PlaceholderTab(MainTab.Shares, R.string.placeholder_shares)
+                MainTab.Tasks -> PlaceholderTab(MainTab.Tasks, R.string.placeholder_tasks)
+                MainTab.Me -> MeTab(
+                    state = switcherState,
+                    onIntent = switcher::on,
+                    onOpenSwitcher = { showSwitcher = true },
+                    onAddAccount = onAddAccount,
+                )
+            }
         }
     }
 
