@@ -7,17 +7,29 @@ import org.koin.core.module.Module
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 import org.koin.mp.KoinPlatform
+import plus.ling.opencloudreve.core.admin.AdminRepository
 import plus.ling.opencloudreve.core.auth.AccountRepository
 import plus.ling.opencloudreve.core.auth.ApiClientRegistry
 import plus.ling.opencloudreve.core.auth.LoginFlow
 import plus.ling.opencloudreve.core.auth.PasskeyFlow
 import plus.ling.opencloudreve.core.auth.PkceOAuth
 import plus.ling.opencloudreve.core.auth.SessionStore
+import plus.ling.opencloudreve.core.device.DavRepository
+import plus.ling.opencloudreve.core.events.EventHub
+import plus.ling.opencloudreve.core.files.FileRepository
 import plus.ling.opencloudreve.core.platform.PlatformContext
 import plus.ling.opencloudreve.core.presentation.auth.AccountSwitcherViewModel
 import plus.ling.opencloudreve.core.presentation.auth.LoginParams
 import plus.ling.opencloudreve.core.presentation.auth.LoginViewModel
 import plus.ling.opencloudreve.core.presentation.auth.ServerSetupViewModel
+import plus.ling.opencloudreve.core.presentation.files.FileActionViewModel
+import plus.ling.opencloudreve.core.presentation.files.FileInfoViewModel
+import plus.ling.opencloudreve.core.presentation.files.FileListViewModel
+import plus.ling.opencloudreve.core.presentation.files.FolderPickerViewModel
+import plus.ling.opencloudreve.core.presentation.files.SearchViewModel
+import plus.ling.opencloudreve.core.settings.UserSettingsRepository
+import plus.ling.opencloudreve.core.share.ShareRepository
+import plus.ling.opencloudreve.core.site.SiteConfigRepository
 import plus.ling.opencloudreve.core.transfer.ChunkMaterializer
 import plus.ling.opencloudreve.core.transfer.DownloadPlanner
 import plus.ling.opencloudreve.core.transfer.TransferExecutor
@@ -25,6 +37,7 @@ import plus.ling.opencloudreve.core.transfer.TransferExecutorHolder
 import plus.ling.opencloudreve.core.transfer.TransferManager
 import plus.ling.opencloudreve.core.transfer.TransferRepository
 import plus.ling.opencloudreve.core.transfer.UploadPlanner
+import plus.ling.opencloudreve.core.workflow.WorkflowRepository
 
 /**
  * 共享核心的依赖图入口（Koin 全局容器）。
@@ -51,7 +64,10 @@ object CoreGraph {
     fun start(platform: PlatformContext, extraModules: List<Module> = emptyList()) {
         if (isStarted) return
         startKoin {
-            modules(listOf(platformModule(platform), authModule, transferModule, authPresentationModule) + extraModules)
+            modules(
+                listOf(platformModule(platform), authModule, transferModule, dataModule, authPresentationModule) +
+                    extraModules,
+            )
         }
     }
 
@@ -95,4 +111,32 @@ object CoreGraph {
     fun installExecutor(executor: TransferExecutor) {
         koin.get<TransferExecutorHolder>().install(executor)
     }
+
+    // ---- 数据仓库（按账户缓存） ----
+
+    fun data(): DataRepositories = koin.get()
+    fun siteConfig(): SiteConfigRepository = koin.get()
+    fun files(accountId: String): FileRepository = data().files(accountId)
+    fun shares(accountId: String): ShareRepository = data().shares(accountId)
+    fun workflows(accountId: String): WorkflowRepository = data().workflows(accountId)
+    fun userSettings(accountId: String): UserSettingsRepository = data().userSettings(accountId)
+    fun dav(accountId: String): DavRepository = data().dav(accountId)
+    fun admin(accountId: String): AdminRepository = data().admin(accountId)
+    fun events(accountId: String): EventHub = data().events(accountId)
+
+    // ---- 文件浏览 ViewModel ----
+
+    fun fileListViewModel(accountId: String, uri: String): FileListViewModel =
+        koin.get { parametersOf(accountId, uri) }
+
+    fun fileActionViewModel(accountId: String): FileActionViewModel = koin.get { parametersOf(accountId) }
+
+    fun folderPickerViewModel(accountId: String, initialUri: String, excludedUris: List<String>): FolderPickerViewModel =
+        koin.get { parametersOf(accountId, initialUri, excludedUris) }
+
+    fun searchViewModel(accountId: String, baseUri: String): SearchViewModel =
+        koin.get { parametersOf(accountId, baseUri) }
+
+    fun fileInfoViewModel(accountId: String, uri: String): FileInfoViewModel =
+        koin.get { parametersOf(accountId, uri) }
 }
