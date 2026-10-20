@@ -218,7 +218,7 @@ class AdminUserEditViewModel(
         if (currentState.openingWeb) return
         updateState { it.copy(openingWeb = true) }
         scope.launch {
-            val r = handoff.attempt(accountId, WebHandoff.adminRedirect(AdminWebSection.Users))
+            val r = handoff.attempt(accountId, WebHandoff.adminUserRedirect(currentState.user?.email))
             updateState { it.copy(openingWeb = false, handoff = r.availability ?: it.handoff) }
             r.url?.let { sendEffect(AdminUserEditEffect.OpenUrl(it)) }
             r.error?.let { sendEffect(AdminUserEditEffect.Failed(it)) }

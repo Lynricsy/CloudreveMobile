@@ -27,6 +27,8 @@ class WebHandoffTest {
         assertEquals("/admin/node/3", WebHandoff.adminRedirect(AdminWebSection.Nodes, 3))
         assertEquals("/admin/user", WebHandoff.adminRedirect(AdminWebSection.Users, 3))
         assertEquals("/admin/home", WebHandoff.adminRedirect(AdminWebSection.Home))
+        assertEquals("/admin/user?email=a%2Bb%40example.com", WebHandoff.adminUserRedirect("a+b@example.com"))
+        assertEquals("/admin/user", WebHandoff.adminUserRedirect(null))
     }
 
     @Test

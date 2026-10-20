@@ -109,6 +109,14 @@ class WebHandoff internal constructor(
         /** 管理后台页面：`/admin/<section>[/<id>]`（只有节点有独立详情页） */
         fun adminRedirect(section: AdminWebSection, id: Int? = null): String =
             "/admin/" + section.path + (if (id != null && section == AdminWebSection.Nodes) "/$id" else "")
+
+        /**
+         * 管理后台中定位某个用户：网页端用户详情是列表页内的对话框、没有独立路由，
+         * 用列表的邮箱筛选参数（前端 `EmailQuery`）只显示该用户：`/admin/user?email=<邮箱>`。
+         */
+        fun adminUserRedirect(email: String?): String =
+            adminRedirect(AdminWebSection.Users) +
+                (email?.takeIf { it.isNotBlank() }?.let { "?email=" + UriCodec.encodeComponent(it) } ?: "")
     }
 }
 
