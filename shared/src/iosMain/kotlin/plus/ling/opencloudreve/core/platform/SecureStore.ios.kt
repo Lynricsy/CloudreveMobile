@@ -27,6 +27,7 @@ import platform.Security.SecItemCopyMatching
 import platform.Security.SecItemDelete
 import platform.Security.SecItemUpdate
 import platform.Security.errSecItemNotFound
+import platform.Security.errSecMissingEntitlement
 import platform.Security.errSecSuccess
 import platform.Security.kSecAttrAccessGroup
 import platform.Security.kSecAttrAccessible
@@ -40,19 +41,62 @@ import platform.Security.kSecMatchLimitOne
 import platform.Security.kSecReturnData
 import platform.Security.kSecValueData
 import platform.posix.memcpy
+import kotlin.concurrent.Volatile
 
 /**
  * iOS：Keychain 通用密码项。
  * [accessGroup] 为完整访问组字符串（`$(AppIdentifierPrefix)plus.ling.opencloudreve.shared`，由 Swift 读取后传入），
  * 主 App 与扩展共用；为空时使用进程默认访问组（单元测试宿主）。
+ *
+ * 进程没有该访问组的 entitlement（未签名/模拟器 ad-hoc 构建）时 Keychain 返回 `errSecMissingEntitlement`（-34018），
+ * 此时本进程后续操作改用默认访问组（不带 `kSecAttrAccessGroup`），主 App 与扩展将无法共享凭证。
  */
 @OptIn(ExperimentalForeignApi::class)
 actual class SecureStore(private val accessGroup: String? = null) : SecretStore {
 
+    /** 当前使用的访问组；首次遇到 -34018 后置空（各线程收敛到同一结果，竞争无害） */
+    @Volatile
+    private var effectiveGroup: String? = accessGroup
+
     actual override fun put(key: String, value: ByteArray) {
+        val status = withGroupFallback { group -> putOnce(key, value, group) }
+        if (status != errSecSuccess) throw SecureStoreException("Keychain write failed (OSStatus $status): $key")
+    }
+
+    actual override fun get(key: String): ByteArray? {
+        var result: ByteArray? = null
+        val status = withGroupFallback { group ->
+            val (s, bytes) = getOnce(key, group)
+            result = bytes
+            s
+        }
+        return when (status) {
+            errSecSuccess -> result
+            errSecItemNotFound -> null
+            else -> throw SecureStoreException("Keychain read failed (OSStatus $status): $key")
+        }
+    }
+
+    actual override fun remove(key: String) {
+        val status = withGroupFallback { group -> removeOnce(key, group) }
+        if (status != errSecSuccess && status != errSecItemNotFound) {
+            throw SecureStoreException("Keychain delete failed (OSStatus $status): $key")
+        }
+    }
+
+    /** 以当前访问组执行 [op]；缺少访问组 entitlement 时改用默认访问组重试一次 */
+    private inline fun withGroupFallback(op: (group: String?) -> Int): Int {
+        val group = effectiveGroup
+        val status = op(group)
+        if (status != errSecMissingEntitlement || group == null) return status
+        effectiveGroup = null
+        return op(null)
+    }
+
+    private fun putOnce(key: String, value: ByteArray, group: String?): Int {
         val arena = CfArena()
         try {
-            val query = baseQuery(arena, key)
+            val query = baseQuery(arena, key, group)
             val attributes = arena.dict()
             CFDictionaryAddValue(attributes, kSecValueData, arena.obj(value.toNSData()))
             CFDictionaryAddValue(attributes, kSecAttrAccessible, kSecAttrAccessibleAfterFirstUnlock)
@@ -62,50 +106,45 @@ actual class SecureStore(private val accessGroup: String? = null) : SecretStore 
                 CFDictionaryAddValue(query, kSecAttrAccessible, kSecAttrAccessibleAfterFirstUnlock)
                 status = SecItemAdd(query, null)
             }
-            if (status != errSecSuccess) throw SecureStoreException("Keychain write failed (OSStatus $status): $key")
+            return status
         } finally {
             arena.release()
         }
     }
 
-    actual override fun get(key: String): ByteArray? {
+    private fun getOnce(key: String, group: String?): Pair<Int, ByteArray?> {
         val arena = CfArena()
         try {
-            val query = baseQuery(arena, key)
+            val query = baseQuery(arena, key, group)
             CFDictionaryAddValue(query, kSecReturnData, kCFBooleanTrue)
             CFDictionaryAddValue(query, kSecMatchLimit, kSecMatchLimitOne)
             return memScoped {
                 val out = alloc<CFTypeRefVar>()
-                when (val status = SecItemCopyMatching(query, out.ptr)) {
-                    errSecSuccess -> (CFBridgingRelease(out.value) as? NSData)?.toByteArray()
-                    errSecItemNotFound -> null
-                    else -> throw SecureStoreException("Keychain read failed (OSStatus $status): $key")
-                }
+                val status = SecItemCopyMatching(query, out.ptr)
+                val bytes = if (status == errSecSuccess) (CFBridgingRelease(out.value) as? NSData)?.toByteArray() else null
+                status to bytes
             }
         } finally {
             arena.release()
         }
     }
 
-    actual override fun remove(key: String) {
+    private fun removeOnce(key: String, group: String?): Int {
         val arena = CfArena()
         try {
-            val status = SecItemDelete(baseQuery(arena, key))
-            if (status != errSecSuccess && status != errSecItemNotFound) {
-                throw SecureStoreException("Keychain delete failed (OSStatus $status): $key")
-            }
+            return SecItemDelete(baseQuery(arena, key, group))
         } finally {
             arena.release()
         }
     }
 
     /** 定位单个条目的查询：class + service + account（+ access group） */
-    private fun baseQuery(arena: CfArena, key: String): CFMutableDictionaryRef? {
+    private fun baseQuery(arena: CfArena, key: String, group: String?): CFMutableDictionaryRef? {
         val query = arena.dict()
         CFDictionaryAddValue(query, kSecClass, kSecClassGenericPassword)
         CFDictionaryAddValue(query, kSecAttrService, arena.obj(SERVICE))
         CFDictionaryAddValue(query, kSecAttrAccount, arena.obj(key))
-        accessGroup?.let { CFDictionaryAddValue(query, kSecAttrAccessGroup, arena.obj(it)) }
+        group?.let { CFDictionaryAddValue(query, kSecAttrAccessGroup, arena.obj(it)) }
         return query
     }
 
