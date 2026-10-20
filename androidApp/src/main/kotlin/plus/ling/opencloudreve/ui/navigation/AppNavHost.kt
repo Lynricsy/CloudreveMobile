@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
@@ -27,6 +28,7 @@ import plus.ling.opencloudreve.ui.main.MainScreen
 @Composable
 fun AppNavHost(accounts: AccountRepository = koinInject()) {
     val navController = rememberNavController()
+    val keyboard = LocalSoftwareKeyboardController.current
     val active by accounts.activeAccount.collectAsStateWithLifecycle()
     val start: Any = remember {
         val a = accounts.activeAccount.value
@@ -64,7 +66,11 @@ fun AppNavHost(accounts: AccountRepository = koinInject()) {
                 email = route.email,
                 canGoBack = navController.previousBackStackEntry != null,
                 onBack = { navController.popBackStack() },
-                onSignedIn = { navController.resetTo(MainRoute) },
+                // 验证码输满自动提交时输入框仍持有焦点：先收起键盘，否则整页替换后键盘会残留在主界面上
+                onSignedIn = {
+                    keyboard?.hide()
+                    navController.resetTo(MainRoute)
+                },
                 onChangeServer = { navController.resetTo(ServerSetupRoute) },
             )
         }
