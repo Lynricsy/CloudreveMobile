@@ -61,6 +61,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.markdownTypography
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import plus.ling.opencloudreve.R
@@ -318,7 +319,18 @@ private fun ReadmeSheet(state: ShareVisitState, onDismiss: () -> Unit) {
                     modifier = Modifier.padding(vertical = 16.dp),
                 )
                 state.readme?.extension == "md" -> Column(Modifier.verticalScroll(rememberScrollState()).padding(top = 8.dp)) {
-                    Markdown(content = content)
+                    // 库默认 h1 用 displayLarge，在底部弹层里过大；按 M3 标题层级缩小
+                    Markdown(
+                        content = content,
+                        typography = markdownTypography(
+                            h1 = MaterialTheme.typography.headlineMedium,
+                            h2 = MaterialTheme.typography.headlineSmall,
+                            h3 = MaterialTheme.typography.titleLarge,
+                            h4 = MaterialTheme.typography.titleMedium,
+                            h5 = MaterialTheme.typography.titleSmall,
+                            h6 = MaterialTheme.typography.labelLarge,
+                        ),
+                    )
                 }
                 else -> Text(
                     content,

@@ -132,7 +132,7 @@ private fun fileSubtitle(file: FileItem, inTrash: Boolean): String {
         if (inTrash) {
             trashSubtitle(context, file)
         } else {
-            val time = (file.updatedAt ?: file.createdAt)?.let { formatRelative(it) }
+            val time = (file.updatedAt ?: file.createdAt)?.let { formatRelative(context, it) }
             val size = if (file.isFolder || file.isSymbolic) null else formatBytes(context, file.size)
             listOfNotNull(size, time).joinToString(" · ")
         }

@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -46,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -91,6 +94,7 @@ fun SearchScreen(
     val controller = rememberFileActionsController()
     var showFilters by rememberSaveable { mutableStateOf(false) }
     val loader = remember(vm) { ThumbnailLoader { vm.thumbnailUrl(it) } }
+    val keyboard = LocalSoftwareKeyboardController.current
 
     SearchBar(
         inputField = {
@@ -99,6 +103,7 @@ fun SearchScreen(
                 onQueryChange = { vm.on(SearchIntent.SetQuery(it)) },
                 onSearch = {
                     showFilters = false
+                    keyboard?.hide()
                     vm.on(SearchIntent.Submit)
                 },
                 expanded = true,
@@ -129,7 +134,8 @@ fun SearchScreen(
         },
         expanded = true,
         onExpandedChange = { if (!it) navigator.back() },
-        modifier = Modifier.fillMaxSize(),
+        // 不能给 SearchBar 加 fillMaxSize：它会把最小高度传给输入框，导致输入框占满全屏、结果区高度为 0。
+        // 展开态的 SearchBar 自己会铺满可用空间。
     ) {
         Column(Modifier.fillMaxSize()) {
             if (showFilters) {
@@ -139,8 +145,11 @@ fun SearchScreen(
                     onFullText = { vm.on(SearchIntent.SetFullText(it)) },
                     onApply = {
                         showFilters = false
+                        keyboard?.hide()
                         vm.on(SearchIntent.Submit)
                     },
+                    // 面板比屏幕高（尤其键盘弹出时），需可滚动，否则底部“搜索”按钮不可达
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 HorizontalDivider()
             }
@@ -312,9 +321,13 @@ private fun SearchFiltersPanel(
     onFilters: (SearchFilters) -> Unit,
     onFullText: (Boolean) -> Unit,
     onApply: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val f = state.filters
-    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(
+        modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         if (state.fullTextAvailable) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.search_fulltext), modifier = Modifier.weight(1f))

@@ -238,6 +238,12 @@
     <string name="trash_empty_title">清空回收站？</string>
     <string name="trash_empty_message">回收站中的所有项目都将被彻底删除，无法恢复。</string>
     <string name="trash_empty_state">回收站是空的</string>
+    <string name="time_just_now">刚刚</string>
+    <string name="site_text_diagram">图表</string>
+    <string name="site_text_whiteboard">白板</string>
+    <string name="site_text_text">文本</string>
+    <string name="site_text_markdown_editor">Markdown 编辑器</string>
+    <string name="site_text_monaco_editor">Monaco 代码编辑器</string>
     <string name="trash_original_location">原位置：%1$s</string>
     <string name="trash_collect_soon">即将被清除</string>
     <plurals name="trash_collect_days">
@@ -252,6 +258,10 @@
     <string name="lock_conflict_message">以下项目正被其他程序占用，强制解锁可能导致对方未保存的修改丢失。</string>
     <string name="lock_owner">占用方：%1$s</string>
     <string name="lock_owner_webdav">WebDAV 客户端</string>
+    <string name="lock_owner_move_copy">移动/复制</string>
+    <string name="lock_owner_upload">上传</string>
+    <string name="lock_owner_metadata">修改元数据</string>
+    <string name="lock_owner_versions">版本管理</string>
     <string name="lock_owner_viewer">在线编辑器</string>
     <string name="lock_owner_unknown">未知</string>
     <string name="lock_force_unlock">强制解锁并重试</string>

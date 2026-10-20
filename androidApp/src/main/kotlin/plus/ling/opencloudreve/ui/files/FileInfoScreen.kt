@@ -145,7 +145,7 @@ private fun FileInfoContent(
         SectionLabel(stringResource(R.string.info_basic))
         if (!file.isFolder) InfoLine(stringResource(R.string.info_size), formatBytes(context, file.size))
         CrUri.parseOrNull(file.path)?.parent()?.let { parent ->
-            InfoLine(stringResource(R.string.info_location), if (parent.isRoot()) folderTitle(context, parent) else folderTitle(context, parent.root()) + parent.path)
+            InfoLine(stringResource(R.string.info_location), displayPath(context, parent))
         }
         file.createdAt?.let { InfoLine(stringResource(R.string.info_created), formatDateTime(it)) }
         file.updatedAt?.let { InfoLine(stringResource(R.string.info_updated_at), formatDateTime(it)) }

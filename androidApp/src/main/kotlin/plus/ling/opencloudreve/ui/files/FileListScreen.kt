@@ -638,7 +638,7 @@ private fun NewItemSheet(
                 onNewFolder()
             }
             options.forEach { option ->
-                val name = option.template.displayName.ifBlank { option.template.ext.uppercase() }
+                val name = templateLabel(option.template.displayName, option.template.ext)
                 SheetItem(Icons.AutoMirrored.Filled.NoteAdd, stringResource(R.string.new_file_title, name)) {
                     onDismiss()
                     onNewFile(option)

@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -91,7 +92,7 @@ internal fun FileDialogs(
             onConfirm = { onRun(FileOperation.CreateFolder(dialog.parentUri, it)) },
         )
         is FileDialog.NewFile -> NameInputDialog(
-            title = stringResource(R.string.new_file_title, dialog.option.template.displayName.ifBlank { dialog.option.template.ext }),
+            title = stringResource(R.string.new_file_title, templateLabel(dialog.option.template.displayName, dialog.option.template.ext)),
             initial = stringResource(R.string.new_file_default_name) + "." + dialog.option.template.ext,
             selectBaseName = true,
             confirm = stringResource(R.string.action_create),
@@ -351,14 +352,22 @@ internal fun LockConflictDialog(prompt: LockConflictPrompt, onForceUnlock: () ->
                 LazyColumn(Modifier.heightIn(max = 280.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(prompt.conflicts.size) { index ->
                         val c = prompt.conflicts[index]
-                        val owner = when (c.owner?.application?.type) {
-                            "webdav" -> stringResource(R.string.lock_owner_webdav)
+                        // 类型取值见服务端 fs.ApplicationType（WebDAV 锁是 "dav"），与 Web 端 LockConflictDetails 的映射一致
+                        val owner = when (val type = c.owner?.application?.type) {
+                            "dav" -> stringResource(R.string.lock_owner_webdav)
                             "viewer" -> stringResource(R.string.lock_owner_viewer)
+                            "rename" -> stringResource(R.string.action_rename)
+                            "moveCopy" -> stringResource(R.string.lock_owner_move_copy)
+                            "upload" -> stringResource(R.string.lock_owner_upload)
+                            "updateMetadata" -> stringResource(R.string.lock_owner_metadata)
+                            "delete", "softDelete" -> stringResource(R.string.action_delete)
+                            "versionControl" -> stringResource(R.string.lock_owner_versions)
                             null, "" -> stringResource(R.string.lock_owner_unknown)
-                            else -> c.owner?.application?.type.orEmpty()
+                            else -> type
                         }
+                        val path = c.path?.let { raw -> CrUri.parseOrNull(raw)?.let { displayPath(LocalContext.current, it) } ?: raw }
                         Column(Modifier.fillMaxWidth()) {
-                            Text(c.path ?: "—", style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.MiddleEllipsis)
+                            Text(path ?: "—", style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.MiddleEllipsis)
                             Text(
                                 stringResource(R.string.lock_owner, owner),
                                 style = MaterialTheme.typography.bodySmall,

@@ -245,6 +245,12 @@
     <string name="trash_empty_title">Empty trash?</string>
     <string name="trash_empty_message">All items in the trash will be permanently deleted. This can\'t be undone.</string>
     <string name="trash_empty_state">Trash is empty</string>
+    <string name="time_just_now">Just now</string>
+    <string name="site_text_diagram">Diagram</string>
+    <string name="site_text_whiteboard">Whiteboard</string>
+    <string name="site_text_text">Text</string>
+    <string name="site_text_markdown_editor">Markdown Editor</string>
+    <string name="site_text_monaco_editor">Monaco Code Editor</string>
     <string name="trash_original_location">From: %1$s</string>
     <string name="trash_collect_soon">Will be purged soon</string>
     <plurals name="trash_collect_days">
@@ -261,6 +267,10 @@
     <string name="lock_conflict_message">These items are in use by another app. Forcing an unlock may discard its unsaved changes.</string>
     <string name="lock_owner">Held by: %1$s</string>
     <string name="lock_owner_webdav">WebDAV client</string>
+    <string name="lock_owner_move_copy">Move/Copy</string>
+    <string name="lock_owner_upload">Upload</string>
+    <string name="lock_owner_metadata">Update metadata</string>
+    <string name="lock_owner_versions">Version control</string>
     <string name="lock_owner_viewer">Online editor</string>
     <string name="lock_owner_unknown">Unknown</string>
     <string name="lock_force_unlock">Force unlock and retry</string>
