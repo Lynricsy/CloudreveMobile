@@ -214,9 +214,6 @@ object TransferErrorCode {
 
     /** 不支持的存储策略类型 */
     const val UNSUPPORTED_POLICY = -205
-
-    /** 重试次数用尽 */
-    const val RETRIES_EXHAUSTED = -206
 }
 
 /** 传输失败（任务已在 DB 中标记为 failed） */
