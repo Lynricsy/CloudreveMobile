@@ -35,6 +35,40 @@
         }
       }
     },
+    "%@/秒": {
+      "comment": "传输速度",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@/s"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@/秒"
+          }
+        }
+      }
+    },
+    "%lld 个文件": {
+      "comment": "待上传文件数",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个文件"
+          }
+        }
+      }
+    },
     "%lld 个版本": {
       "comment": "版本保留数量",
       "localizations": {
@@ -300,6 +334,22 @@
         }
       }
     },
+    "OneDrive 不支持上传空文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OneDrive does not accept empty files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OneDrive 不支持上传空文件"
+          }
+        }
+      }
+    },
     "Passkey": {
       "localizations": {
         "en": {
@@ -413,6 +463,23 @@
         }
       }
     },
+    "上传 %lld 项": {
+      "comment": "迷你栏：进行中的上传数",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uploading %lld items"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上传 %lld 项"
+          }
+        }
+      }
+    },
     "上传、下载与后台任务会显示在这里。": {
       "localizations": {
         "en": {
@@ -429,6 +496,22 @@
         }
       }
     },
+    "上传会在后台继续，可在 App 的“任务”页查看进度。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uploads continue in the background. Check progress on the Tasks tab in the app."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上传会在后台继续，可在 App 的“任务”页查看进度。"
+          }
+        }
+      }
+    },
     "上传会话检查": {
       "localizations": {
         "en": {
@@ -441,6 +524,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "上传会话检查"
+          }
+        }
+      }
+    },
+    "上传到": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload To"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上传到"
+          }
+        }
+      }
+    },
+    "上传到 OpenCloudreve": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload to OpenCloudreve"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上传到 OpenCloudreve"
+          }
+        }
+      }
+    },
+    "上传和下载的文件会显示在这里。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files you upload and download appear here."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上传和下载的文件会显示在这里。"
           }
         }
       }
@@ -526,6 +657,23 @@
         }
       }
     },
+    "下载 %lld 项": {
+      "comment": "迷你栏：进行中的下载数",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloading %lld items"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载 %lld 项"
+          }
+        }
+      }
+    },
     "下载次数": {
       "localizations": {
         "en": {
@@ -538,6 +686,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "下载次数"
+          }
+        }
+      }
+    },
+    "下载的文件保存在“文件”App 的“我的 iPhone › OpenCloudreve › Downloads”中。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloaded files are saved in the Files app under “On My iPhone › OpenCloudreve › Downloads”."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载的文件保存在“文件”App 的“我的 iPhone › OpenCloudreve › Downloads”中。"
           }
         }
       }
@@ -782,6 +946,23 @@
         }
       }
     },
+    "仅允许：%@": {
+      "comment": "存储策略允许的扩展名",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allowed: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅允许：%@"
+          }
+        }
+      }
+    },
     "仅公开分享": {
       "localizations": {
         "en": {
@@ -858,6 +1039,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "从"
+          }
+        }
+      }
+    },
+    "从列表移除": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from List"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从列表移除"
           }
         }
       }
@@ -990,6 +1187,22 @@
         }
       }
     },
+    "任务类型": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Task Type"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任务类型"
+          }
+        }
+      }
+    },
     "任务详情": {
       "localizations": {
         "en": {
@@ -1018,6 +1231,55 @@
           "stringUnit": {
             "state": "translated",
             "value": "任务队列"
+          }
+        }
+      }
+    },
+    "传输": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transfers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "传输"
+          }
+        }
+      }
+    },
+    "传输 %lld 项": {
+      "comment": "迷你栏：进行中的上传和下载总数",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld transfers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "传输 %lld 项"
+          }
+        }
+      }
+    },
+    "传输中": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transferring"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "传输中"
           }
         }
       }
@@ -1439,6 +1701,22 @@
         }
       }
     },
+    "共享的文本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shared Text"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共享的文本"
+          }
+        }
+      }
+    },
     "关于": {
       "localizations": {
         "en": {
@@ -1531,6 +1809,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "内部状态"
+          }
+        }
+      }
+    },
+    "准备中": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "准备中"
           }
         }
       }
@@ -2081,6 +2375,23 @@
         }
       }
     },
+    "剩余 %@": {
+      "comment": "预计剩余时间",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ left"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩余 %@"
+          }
+        }
+      }
+    },
     "剩余下载次数": {
       "localizations": {
         "en": {
@@ -2125,6 +2436,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "升序"
+          }
+        }
+      }
+    },
+    "单个文件不超过 %@": {
+      "comment": "存储策略的单文件大小上限",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Max %@ per file"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "单个文件不超过 %@"
           }
         }
       }
@@ -2356,6 +2684,22 @@
         }
       }
     },
+    "只能上传文件、照片和视频，或打开 OpenCloudreve 分享链接。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only files, photos, and videos can be uploaded, or OpenCloudreve share links opened."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只能上传文件、照片和视频，或打开 OpenCloudreve 分享链接。"
+          }
+        }
+      }
+    },
     "只读": {
       "localizations": {
         "en": {
@@ -2400,6 +2744,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "名称"
+          }
+        }
+      }
+    },
+    "后台任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Background Tasks"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "后台任务"
           }
         }
       }
@@ -2608,6 +2968,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "图表样式"
+          }
+        }
+      }
+    },
+    "在 App 中打开": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in App"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 App 中打开"
           }
         }
       }
@@ -2852,6 +3228,22 @@
         }
       }
     },
+    "多次重试后仍然失败": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still failing after several retries"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "多次重试后仍然失败"
+          }
+        }
+      }
+    },
     "大小": {
       "localizations": {
         "en": {
@@ -2880,6 +3272,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "大小（MB）"
+          }
+        }
+      }
+    },
+    "失败": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失败"
+          }
+        }
+      }
+    },
+    "失败：%@": {
+      "comment": "传输失败的原因",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失败：%@"
           }
         }
       }
@@ -2948,6 +3373,38 @@
         }
       }
     },
+    "存储服务拒绝了请求": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The storage service rejected the request"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储服务拒绝了请求"
+          }
+        }
+      }
+    },
+    "存储服务未返回 ETag，请检查存储桶的跨域设置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The storage service returned no ETag. Check the bucket's CORS settings"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储服务未返回 ETag，请检查存储桶的跨域设置"
+          }
+        }
+      }
+    },
     "存储空间": {
       "localizations": {
         "en": {
@@ -2992,6 +3449,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "存储策略"
+          }
+        }
+      }
+    },
+    "存储策略不允许上传此类型的文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The storage policy does not allow this file type"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储策略不允许上传此类型的文件"
+          }
+        }
+      }
+    },
+    "存储策略禁止上传此类型的文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The storage policy blocks this file type"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储策略禁止上传此类型的文件"
+          }
+        }
+      }
+    },
+    "存储策略禁止此文件名": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The storage policy blocks this file name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储策略禁止此文件名"
           }
         }
       }
@@ -3109,6 +3614,38 @@
         }
       }
     },
+    "导出": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出"
+          }
+        }
+      }
+    },
+    "导出或分享": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export or Share"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出或分享"
+          }
+        }
+      }
+    },
     "将删除已完成、出错和已取消的任务记录。": {
       "localizations": {
         "en": {
@@ -3153,6 +3690,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "尚未添加 Passkey"
+          }
+        }
+      }
+    },
+    "尚未登录": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Signed In"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未登录"
           }
         }
       }
@@ -3272,6 +3825,22 @@
         }
       }
     },
+    "已复制链接。打开 OpenCloudreve，在“文件”页选择“打开分享链接”即可粘贴打开。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link copied. Open OpenCloudreve and choose “Open Share Link” on the Files tab to paste it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已复制链接。打开 OpenCloudreve，在“文件”页选择“打开分享链接”即可粘贴打开。"
+          }
+        }
+      }
+    },
     "已存在同名项目": {
       "localizations": {
         "en": {
@@ -3352,6 +3921,23 @@
         }
       }
     },
+    "已开始上传 %lld 个文件": {
+      "comment": "分享扩展完成页",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Started uploading %lld files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已开始上传 %lld 个文件"
+          }
+        }
+      }
+    },
     "已挂起": {
       "localizations": {
         "en": {
@@ -3380,6 +3966,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "已授权的应用"
+          }
+        }
+      }
+    },
+    "已暂停": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暂停"
           }
         }
       }
@@ -3478,6 +4080,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "开启同步后，排序、列表/网格等视图设置会保存到服务器，在其他设备上保持一致。"
+          }
+        }
+      }
+    },
+    "开始上传": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Upload"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始上传"
           }
         }
       }
@@ -3830,6 +4448,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "折线"
+          }
+        }
+      }
+    },
+    "拍照": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take Photo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拍照"
           }
         }
       }
@@ -4298,6 +4932,38 @@
         }
       }
     },
+    "文件名不符合存储策略的命名规则": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file name does not match the storage policy's naming rule"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件名不符合存储策略的命名规则"
+          }
+        }
+      }
+    },
+    "文件名包含不允许的字符": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file name contains characters that are not allowed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件名包含不允许的字符"
+          }
+        }
+      }
+    },
     "文件地址（1 小时内有效）": {
       "localizations": {
         "en": {
@@ -4458,6 +5124,22 @@
         }
       }
     },
+    "文件超过存储策略的大小限制": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file exceeds the storage policy's size limit"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件超过存储策略的大小限制"
+          }
+        }
+      }
+    },
     "文件过大或下载失败。": {
       "localizations": {
         "en": {
@@ -4502,6 +5184,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "文档"
+          }
+        }
+      }
+    },
+    "新名称": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新名称"
           }
         }
       }
@@ -4827,6 +5525,22 @@
         }
       }
     },
+    "无法读取本地文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cannot read the local file"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法读取本地文件"
+          }
+        }
+      }
+    },
     "无法连接到服务器，请检查网络和服务器地址": {
       "localizations": {
         "en": {
@@ -4919,6 +5633,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "显示缩略图"
+          }
+        }
+      }
+    },
+    "暂不支持此存储策略": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This storage policy is not supported yet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂不支持此存储策略"
           }
         }
       }
@@ -5051,6 +5781,57 @@
         }
       }
     },
+    "有 %lld 个文件无法读取": {
+      "comment": "选择文件时读取失败的数量",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld files could not be read"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 个文件无法读取"
+          }
+        }
+      }
+    },
+    "有 %lld 个项目无法读取": {
+      "comment": "导入照片时失败的数量",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld items could not be read"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 个项目无法读取"
+          }
+        }
+      }
+    },
+    "有 %lld 项无法读取或不支持上传": {
+      "comment": "分享扩展跳过的附件数",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld items could not be read or are not supported"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 项无法读取或不支持上传"
+          }
+        }
+      }
+    },
     "有密码": {
       "localizations": {
         "en": {
@@ -5161,6 +5942,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "服务端版本 %@"
+          }
+        }
+      }
+    },
+    "未上传": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Uploaded"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未上传"
           }
         }
       }
@@ -5390,6 +6187,38 @@
         }
       }
     },
+    "正在完成": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finishing"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在完成"
+          }
+        }
+      }
+    },
+    "正在开始上传…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting upload…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在开始上传…"
+          }
+        }
+      }
+    },
     "正在统计…": {
       "localizations": {
         "en": {
@@ -5402,6 +6231,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在统计…"
+          }
+        }
+      }
+    },
+    "正在读取分享的内容…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading shared content…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在读取分享的内容…"
+          }
+        }
+      }
+    },
+    "正在读取存储策略…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading storage policy…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在读取存储策略…"
+          }
+        }
+      }
+    },
+    "正在读取所选项目…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading selected items…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在读取所选项目…"
           }
         }
       }
@@ -5486,6 +6363,22 @@
         }
       }
     },
+    "此设备没有可用的相机": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No camera is available on this device"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此设备没有可用的相机"
+          }
+        }
+      }
+    },
     "此账户未设置密码（仅通过 Passkey 或第三方登录）": {
       "localizations": {
         "en": {
@@ -5562,6 +6455,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有与你共享的内容"
+          }
+        }
+      }
+    },
+    "没有传输任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Transfers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有传输任务"
+          }
+        }
+      }
+    },
+    "没有可上传的内容": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing to Upload"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可上传的内容"
           }
         }
       }
@@ -5932,6 +6857,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "清除全部过滤条件"
+          }
+        }
+      }
+    },
+    "清除已完成": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Completed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除已完成"
           }
         }
       }
@@ -6321,6 +7262,38 @@
         }
       }
     },
+    "目标位置已有同名文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A file with the same name already exists"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标位置已有同名文件"
+          }
+        }
+      }
+    },
+    "目标位置已有同名文件，换一个名称再上传。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A file with the same name already exists. Choose another name to upload."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标位置已有同名文件，换一个名称再上传。"
+          }
+        }
+      }
+    },
     "直链": {
       "localizations": {
         "en": {
@@ -6418,6 +7391,23 @@
         }
       }
     },
+    "禁止：%@": {
+      "comment": "存储策略禁止的扩展名",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocked: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "禁止：%@"
+          }
+        }
+      }
+    },
     "离线下载": {
       "localizations": {
         "en": {
@@ -6498,6 +7488,22 @@
         }
       }
     },
+    "移除": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除"
+          }
+        }
+      }
+    },
     "站点": {
       "localizations": {
         "en": {
@@ -6542,6 +7548,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "站点未启用此功能"
+          }
+        }
+      }
+    },
+    "等待中": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待中"
           }
         }
       }
@@ -6772,6 +7794,22 @@
         }
       }
     },
+    "网络连接失败": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network connection failed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络连接失败"
+          }
+        }
+      }
+    },
     "能力": {
       "localizations": {
         "en": {
@@ -6896,6 +7934,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "覆盖上传同名文件时保留旧版本，可在文件信息中查看和恢复。"
+          }
+        }
+      }
+    },
+    "覆盖为新版本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overwrite as New Version"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "覆盖为新版本"
           }
         }
       }
@@ -7120,6 +8174,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "说明"
+          }
+        }
+      }
+    },
+    "请先打开 OpenCloudreve App 登录账户，再从分享菜单上传。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the OpenCloudreve app and sign in first, then upload from the share menu."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请先打开 OpenCloudreve App 登录账户，再从分享菜单上传。"
           }
         }
       }
@@ -7460,6 +8530,22 @@
         }
       }
     },
+    "这是一个 OpenCloudreve 分享链接": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is an OpenCloudreve share link"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这是一个 OpenCloudreve 分享链接"
+          }
+        }
+      }
+    },
     "连接信息": {
       "localizations": {
         "en": {
@@ -7572,6 +8658,38 @@
         }
       }
     },
+    "选择上传位置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Upload Location"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择上传位置"
+          }
+        }
+      }
+    },
+    "选择文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择文件"
+          }
+        }
+      }
+    },
     "选择根目录": {
       "localizations": {
         "en": {
@@ -7600,6 +8718,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择此文件夹"
+          }
+        }
+      }
+    },
+    "选择照片或视频": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Photos or Videos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择照片或视频"
           }
         }
       }
@@ -7700,6 +8834,22 @@
         }
       }
     },
+    "部分文件未加入队列": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some Files Were Not Queued"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分文件未加入队列"
+          }
+        }
+      }
+    },
     "重命名": {
       "localizations": {
         "en": {
@@ -7712,6 +8862,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "重命名"
+          }
+        }
+      }
+    },
+    "重命名后上传": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename and Upload"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重命名后上传"
           }
         }
       }

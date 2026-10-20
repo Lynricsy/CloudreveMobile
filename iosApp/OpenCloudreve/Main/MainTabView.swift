@@ -23,12 +23,9 @@ struct MainTabView: View {
                 )
             }
             Tab("任务", systemImage: "arrow.up.arrow.down.circle", value: MainTab.tasks) {
-                TabPlaceholder(
-                    title: "任务",
-                    systemImage: "arrow.up.arrow.down.circle",
-                    message: "上传、下载与后台任务会显示在这里。",
-                    identifier: "tab.tasks"
-                )
+                if let account = session.activeAccount {
+                    TasksTab(account: account)
+                }
             }
             Tab("我的", systemImage: "person.crop.circle", value: MainTab.me) {
                 MeScreen()
@@ -41,5 +38,7 @@ struct MainTabView: View {
         }
         .tabViewStyle(.sidebarAdaptable)
         .tabBarMinimizeBehavior(.onScrollDown)
+        .modifier(MainBottomAccessory(accountId: session.activeAccount?.id ?? "", selection: $selection))
+        .modifier(ShareLinkDeepLink(accountId: session.activeAccount?.id))
     }
 }

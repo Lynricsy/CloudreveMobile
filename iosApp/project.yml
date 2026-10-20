@@ -104,11 +104,30 @@ targets:
     sources:
       - path: ShareExtension
       - path: Shared
+      # 与主 App 共用的视图与桥接（目录选择器、上传表单、本地化字符串）
+      - path: OpenCloudreve/Bridge
+      - path: OpenCloudreve/Common/ErrorRow.swift
+      - path: OpenCloudreve/Common/PrimaryActionButton.swift
+      - path: OpenCloudreve/Files/FolderPickerSheet.swift
+      - path: OpenCloudreve/Files/FolderPickerContent.swift
+      - path: OpenCloudreve/Files/FileHosts.swift
+      - path: OpenCloudreve/Files/FileTypeIconView.swift
+      - path: OpenCloudreve/Files/FileIconTheme.swift
+      - path: OpenCloudreve/Files/FileIconSetting.swift
+      - path: OpenCloudreve/Files/FileFormat.swift
+      - path: OpenCloudreve/Files/LoadMoreRow.swift
+      - path: OpenCloudreve/Transfers/TransferHosts.swift
+      - path: OpenCloudreve/Transfers/UploadCandidate.swift
+      - path: OpenCloudreve/Transfers/UploadFormSections.swift
+      - path: OpenCloudreve/Transfers/UploadRejectionText.swift
+      - path: OpenCloudreve/Resources/Localizable.xcstrings
     dependencies:
       - framework: Frameworks/OpenCloudreveCore.xcframework
         embed: false
       - package: Nuke
         product: Nuke
+      - package: Nuke
+        product: NukeUI
     entitlements:
       path: ShareExtension/ShareExtension.entitlements
       properties:

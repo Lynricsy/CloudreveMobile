@@ -31,7 +31,12 @@ struct FileFeatures {
     var relocate: FileHook?
 
     /// 当前接入的实现：后续阶段在此填入各自的 Hook
-    @MainActor static let installed = FileFeatures()
+    @MainActor static let installed = FileFeatures(
+        download: TransferHooks.download,
+        uploadFiles: TransferHooks.uploadFiles,
+        uploadMedia: TransferHooks.uploadMedia,
+        uploadCamera: TransferHooks.uploadCamera
+    )
 
     /// 动作对应的入口；不是后续阶段动作时为 nil
     func hook(for action: FileAction) -> FileHook? {
