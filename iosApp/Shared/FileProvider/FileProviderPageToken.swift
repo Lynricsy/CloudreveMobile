@@ -29,7 +29,7 @@ enum FileProviderPageToken: Equatable, Sendable {
     /// 编码给系统保存
     var providerPage: NSFileProviderPage {
         switch self {
-        case .first: NSFileProviderPage.initialPageSortedByName
+        case .first: NSFileProviderPage(NSFileProviderPage.initialPageSortedByName as Data)
         case let .cursor(token): NSFileProviderPage(Data((Self.cursorPrefix + token).utf8))
         case let .page(page): NSFileProviderPage(Data((Self.pagePrefix + String(page)).utf8))
         }

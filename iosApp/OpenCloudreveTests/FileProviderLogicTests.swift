@@ -8,8 +8,8 @@ struct FileProviderLogicTests {
     // MARK: - 分页
 
     @Test func initialPagesDecodeAsFirst() {
-        #expect(FileProviderPageToken(NSFileProviderPage.initialPageSortedByName) == .first)
-        #expect(FileProviderPageToken(NSFileProviderPage.initialPageSortedByDate) == .first)
+        #expect(FileProviderPageToken(NSFileProviderPage(NSFileProviderPage.initialPageSortedByName as Data)) == .first)
+        #expect(FileProviderPageToken(NSFileProviderPage(NSFileProviderPage.initialPageSortedByDate as Data)) == .first)
         #expect(FileProviderPageToken(NSFileProviderPage(Data("garbage".utf8))) == .first)
     }
 
