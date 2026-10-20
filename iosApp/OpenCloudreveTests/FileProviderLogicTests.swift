@@ -99,9 +99,11 @@ struct FileProviderLogicTests {
         let all = FileProviderCapabilityMap.capabilities(isFolder: true, inTrash: false) { _ in true }
         #expect(all == [.allowsContentEnumerating, .allowsAddingSubItems, .allowsRenaming, .allowsReparenting, .allowsTrashing, .allowsDeleting])
 
+        // iOS 上 allowsContentEnumerating 与 allowsReading、allowsAddingSubItems 与 allowsWriting 是同一位
         let browseOnly = FileProviderCapabilityMap.capabilities(isFolder: true, inTrash: false, has: bits(c.ENTER_FOLDER))
         #expect(browseOnly == [.allowsContentEnumerating])
-        #expect(!browseOnly.contains(.allowsReading))
+        #expect(!browseOnly.contains(.allowsAddingSubItems))
+        #expect(!browseOnly.contains(.allowsRenaming))
     }
 
     @Test func trashCapabilitiesOnlyDeleteAndRestore() {
