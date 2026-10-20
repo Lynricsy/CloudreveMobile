@@ -56,6 +56,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,7 +67,6 @@ import plus.ling.opencloudreve.R
 import plus.ling.opencloudreve.core.model.CrUri
 import plus.ling.opencloudreve.core.model.FileItem
 import plus.ling.opencloudreve.core.model.SearchFileType
-import plus.ling.opencloudreve.core.presentation.files.FileOperation
 import plus.ling.opencloudreve.core.presentation.files.SearchFilters
 import plus.ling.opencloudreve.core.presentation.files.SearchIntent
 import plus.ling.opencloudreve.core.presentation.files.SearchState
@@ -190,9 +190,9 @@ fun SearchScreen(
         navigator = navigator,
         navController = navController,
         snackbar = snackbar,
-        onChanged = { op, _ ->
+        onChanged = { _, _ ->
             // 名称/位置变化后重新搜索，保持结果准确
-            if (op !is FileOperation.CreateSourceLinks) vm.on(SearchIntent.Submit)
+            vm.on(SearchIntent.Submit)
         },
     )
 }
@@ -235,6 +235,7 @@ private fun SearchResults(
     onLoadMore: () -> Unit,
 ) {
     val listState = rememberLazyListState()
+    val context = LocalContext.current
     val fullText = state.fullTextHits.isNotEmpty()
     val count = if (fullText) state.fullTextHits.size else state.results.size
     LoadMoreEffect(listState, count, state.hasMore, onLoadMore)
@@ -280,7 +281,8 @@ private fun SearchResults(
                     onClick = { onOpen(file) },
                     onLongClick = { onMore(file) },
                     onMore = { onMore(file) },
-                    supporting = CrUri.parseOrNull(file.path)?.parent()?.path,
+                    // 位置用可读路径：根目录显示“我的文件”而非“/”
+                    supporting = CrUri.parseOrNull(file.path)?.parent()?.let { displayPath(context, it) },
                 )
             }
         }

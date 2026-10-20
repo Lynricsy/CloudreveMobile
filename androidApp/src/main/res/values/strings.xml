@@ -180,6 +180,10 @@
     <string name="action_versions">版本</string>
     <string name="action_metadata">标签与属性</string>
     <string name="action_direct_link">获取直链</string>
+    <string name="direct_link_force_download">强制下载</string>
+    <string name="direct_link_show_name">复制时带文件名</string>
+    <string name="direct_link_limit">一次最多获取 %1$d 个直链</string>
+    <string name="direct_link_folder_denied">当前用户组不允许为文件夹创建直链</string>
     <string name="action_reset_thumbnail">重新生成缩略图</string>
     <string name="action_disable_thumbnail">不生成缩略图</string>
     <string name="action_go_shared_link">前往分享链接</string>
@@ -278,6 +282,7 @@
     <string name="picker_copy_here">复制到此处</string>
     <string name="picker_save_here">保存到此处</string>
     <string name="picker_excluded">不能选择被移动的文件夹本身或其子文件夹</string>
+    <string name="picker_same_folder">项目已在此文件夹中</string>
     <string name="picker_not_writable">此位置不可写入</string>
     <string name="picker_no_subfolders">没有子文件夹</string>
 

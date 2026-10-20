@@ -5,6 +5,8 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.layout.PaneAdaptedValue
+import androidx.compose.material3.adaptive.layout.ThreePaneScaffoldValue
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -16,6 +18,10 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +42,8 @@ import plus.ling.opencloudreve.core.di.DataRepositories
 import plus.ling.opencloudreve.core.model.FileItem
 import plus.ling.opencloudreve.core.model.SiteExplorer
 import plus.ling.opencloudreve.core.model.User
+import plus.ling.opencloudreve.ui.common.LocalImmersiveState
+import plus.ling.opencloudreve.core.model.CrUri
 import plus.ling.opencloudreve.core.site.SiteConfigRepository
 import plus.ling.opencloudreve.ui.transfer.UploadDialog
 import plus.ling.opencloudreve.ui.transfer.UploadRoute
@@ -51,6 +59,14 @@ import plus.ling.opencloudreve.ui.workflow.RemoteDownloadRoute
 
 /** 当前账户的用户资料（固定项、用户组权限），供没有自带用户状态的页面（搜索）计算动作规则 */
 val LocalAccountUser = compositionLocalOf<User?> { null }
+
+/** 只展开列表窗格（ListDetail 的 primary = 详情、secondary = 列表、tertiary = 附加） */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+private val ListPaneOnly = ThreePaneScaffoldValue(
+    primary = PaneAdaptedValue.Hidden,
+    secondary = PaneAdaptedValue.Expanded,
+    tertiary = PaneAdaptedValue.Hidden,
+)
 
 private val routeJson = Json { ignoreUnknownKeys = true }
 
@@ -106,7 +122,7 @@ private fun FilesTabContent(
 
     val navigator = remember(navController, pane, scope, features) {
         object : FileNavigator {
-            override fun openFolder(uri: String) = navController.navigate(FolderRoute(uri))
+            override fun openFolder(uri: String, title: String?) = navController.navigate(FolderRoute(uri, title))
 
             override fun openFile(file: FileItem, listingUri: String) {
                 val preview = features.preview
@@ -148,21 +164,34 @@ private fun FilesTabContent(
             consumeShare()
         }
     }
-    // 从详情窗格打开版本/元数据页：单窗格时先关闭详情，使列表侧导航可见
-    val openTool: (Any) -> Unit = { route ->
+    // 版本/元数据页关闭后信息页刷新（[infoRevision]）；手机单窗格时打开工具页会先关闭详情，关闭工具页后重新打开该文件的信息页
+    var infoRevision by remember { mutableIntStateOf(0) }
+    var toolReturnKey by rememberSaveable { mutableStateOf<String?>(null) }
+    val openTool: (String, Any) -> Unit = { infoKey, route ->
         scope.launch {
-            if (singlePane) pane.navigateBack()
+            if (singlePane) {
+                toolReturnKey = infoKey
+                pane.navigateBack()
+            }
             navController.navigate(route)
         }
     }
+    val onToolClosed: () -> Unit = {
+        infoRevision++
+        val back = toolReturnKey
+        toolReturnKey = null
+        if (back != null) scope.launch { pane.navigateTo(ListDetailPaneScaffoldRole.Detail, back) }
+    }
 
+    // 预览器沉浸时（平板）只显示列表侧窗格（预览器在其中），不改变详情窗格的导航状态，退出后恢复双栏
+    val immersive = LocalImmersiveState.current.active
     CompositionLocalProvider(LocalFileIconTheme provides icons, LocalAccountUser provides user) {
         ListDetailPaneScaffold(
-            directive = pane.scaffoldDirective,
-            value = pane.scaffoldValue,
+            directive = if (immersive) pane.scaffoldDirective.copy(maxHorizontalPartitions = 1) else pane.scaffoldDirective,
+            value = if (immersive) ListPaneOnly else pane.scaffoldValue,
             listPane = {
                 AnimatedPane {
-                    FilesNavHost(accountId, navController, navigator)
+                    FilesNavHost(accountId, navController, navigator, onToolClosed)
                 }
             },
             detailPane = {
@@ -178,8 +207,9 @@ private fun FilesTabContent(
                             accountId = accountId,
                             uri = key,
                             onClose = close,
-                            onOpenVersions = { uri -> openTool(VersionsRoute(uri)) },
-                            onEditMetadata = { uri -> openTool(MetadataEditRoute(listOf(uri))) },
+                            revision = infoRevision,
+                            onOpenVersions = { uri -> openTool(key, VersionsRoute(uri)) },
+                            onEditMetadata = { uri -> openTool(key, MetadataEditRoute(listOf(uri))) },
                         )
                     }
                 }
@@ -188,8 +218,14 @@ private fun FilesTabContent(
     }
 }
 
+/** @param onToolClosed 版本/元数据页关闭（信息页需刷新） */
 @Composable
-private fun FilesNavHost(accountId: String, navController: NavHostController, navigator: FileNavigator) {
+private fun FilesNavHost(
+    accountId: String,
+    navController: NavHostController,
+    navigator: FileNavigator,
+    onToolClosed: () -> Unit,
+) {
     NavHost(navController = navController, startDestination = FilesHomeRoute) {
         composable<FilesHomeRoute> {
             FilesHomeScreen(accountId = accountId, navigator = navigator, navController = navController)
@@ -205,6 +241,7 @@ private fun FilesNavHost(accountId: String, navController: NavHostController, na
                 canGoBack = navController.previousBackStackEntry != null,
                 pickResult = result,
                 onPickResultConsumed = { entry.savedStateHandle.remove<String>(FOLDER_PICK_RESULT_KEY) },
+                titleOverride = route.title,
             )
         }
         composable<FileSearchRoute> { entry ->
@@ -240,6 +277,12 @@ private fun FilesNavHost(accountId: String, navController: NavHostController, na
                 accountId = accountId,
                 initialUri = request.initialUri,
                 excluded = request.excluded,
+                // 移动时不能选项目所在的原目录
+                sameFolders = if (request.purpose == FolderPickPurpose.Move) {
+                    request.sources.mapNotNull { CrUri.parseOrNull(it)?.parent()?.toString() }
+                } else {
+                    emptyList()
+                },
                 confirmLabel = stringResource(
                     when (request.purpose) {
                         FolderPickPurpose.Move -> R.string.picker_move_here
@@ -297,18 +340,28 @@ private fun FilesNavHost(accountId: String, navController: NavHostController, na
             )
         }
         composable<VersionsRoute> { entry ->
+            val close = {
+                navController.popBackStack()
+                onToolClosed()
+            }
+            BackHandler(onBack = close)
             VersionsScreen(
                 accountId = accountId,
                 uri = entry.toRoute<VersionsRoute>().uri,
-                onClose = { navController.popBackStack() },
+                onClose = close,
                 onPreview = { file, version -> navController.navigate(ViewerRoute(file, version = version)) },
             )
         }
         composable<MetadataEditRoute> { entry ->
+            val close = {
+                navController.popBackStack()
+                onToolClosed()
+            }
+            BackHandler(onBack = close)
             MetadataEditScreen(
                 accountId = accountId,
                 uris = entry.toRoute<MetadataEditRoute>().uris,
-                onClose = { navController.popBackStack() },
+                onClose = close,
             )
         }
     }

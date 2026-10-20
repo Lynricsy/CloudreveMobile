@@ -99,7 +99,7 @@ internal sealed interface FileDialog {
     data class NewFolder(val parentUri: String) : FileDialog
     data class NewFile(val parentUri: String, val option: NewFileOption) : FileDialog
     data object EmptyTrash : FileDialog
-    data class SourceLinks(val outcome: FileOperationOutcome.SourceLinks) : FileDialog
+    data class DirectLinks(val uris: List<String>) : FileDialog
     data class MountPolicy(val folder: FileItem) : FileDialog
 }
 
@@ -188,7 +188,7 @@ fun FileActionsHost(
                 if (pin == null) run(FileOperation.Pin(first.path, first.name)) else run(FileOperation.Unpin(first.path))
             }
             FileAction.Info -> navigator.showInfo(first)
-            FileAction.DirectLink -> run(FileOperation.CreateSourceLinks(uris))
+            FileAction.DirectLink -> controller.dialog = FileDialog.DirectLinks(uris)
             FileAction.ResetThumbnail -> run(FileOperation.SetThumbnailDisabled(targets.filter { it.thumbDisabled }.map { it.path }, false))
             FileAction.DisableThumbnail -> run(FileOperation.SetThumbnailDisabled(uris, true))
             FileAction.GoToSharedLink -> first.metadata[MetadataKeys.SHARED_REDIRECT]
@@ -222,12 +222,7 @@ fun FileActionsHost(
         when (effect) {
             is FileActionEffect.Succeeded -> {
                 changed(effect.operation, effect.outcome)
-                val outcome = effect.outcome
-                if (outcome is FileOperationOutcome.SourceLinks) {
-                    controller.dialog = FileDialog.SourceLinks(outcome)
-                } else {
-                    successMessage(context, effect.operation)?.let { snackbar.showSnackbar(it) }
-                }
+                successMessage(context, effect.operation)?.let { snackbar.showSnackbar(it) }
             }
             is FileActionEffect.Failed -> {
                 // 部分失败由对话框列出明细；其余直接提示
@@ -385,7 +380,8 @@ private fun FileActionsSheet(
     onAction: (FileAction) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState()) {
+    // 默认全展开，项目多时在面板内滚动到底（半展开时底部项被遮住）
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         LazyColumn(Modifier.fillMaxWidth().navigationBarsPadding()) {
             item(key = "header", contentType = "header") {
                 val single = targets.singleOrNull()

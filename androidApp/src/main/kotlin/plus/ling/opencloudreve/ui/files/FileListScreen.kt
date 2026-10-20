@@ -113,6 +113,7 @@ private const val PREFETCH_DISTANCE = 12
 /**
  * 文件列表页：目录、回收站、与我共享、分享内目录、搜索 URI。
  * 列表/网格、排序、缩略图开关、多选、下拉刷新、滚动到底加载更多；操作交给 [FileActionsHost]。
+ * @param titleOverride 根目录标题覆盖（从分享快捷方式进入时为分享名）
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,6 +125,7 @@ fun FileListScreen(
     canGoBack: Boolean,
     pickResult: FolderPickResult?,
     onPickResultConsumed: () -> Unit,
+    titleOverride: String? = null,
 ) {
     val vm: FileListViewModel = koinViewModel { parametersOf(accountId, uri) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -155,12 +157,16 @@ fun FileListScreen(
     val onOpen: (FileItem) -> Unit = { file ->
         when {
             state.selecting -> vm.on(FileListIntent.ToggleSelection(file.path))
-            file.isFolder -> navigator.openFolder(if (file.isSymbolic) file.linkedUri else vm.childUri(file))
+            // 分享快捷方式（软链接目录）：进入分享根时以快捷方式名（即分享名）作标题
+            file.isFolder -> if (file.isSymbolic) navigator.openFolder(file.linkedUri, file.name) else navigator.openFolder(vm.childUri(file))
             else -> navigator.openFile(file, uri)
         }
     }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val title = if (state.isRoot && !state.isSearch) folderTitle(uri) else state.title.ifEmpty { folderTitle(uri) }
+    val title = when {
+        state.isRoot && !state.isSearch -> titleOverride ?: folderTitle(uri)
+        else -> state.title.ifEmpty { titleOverride ?: folderTitle(uri) }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),

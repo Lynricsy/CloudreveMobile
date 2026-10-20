@@ -1,6 +1,9 @@
 package plus.ling.opencloudreve.ui.files
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -58,6 +61,10 @@ import plus.ling.opencloudreve.core.api.LockConflict
 import plus.ling.opencloudreve.core.presentation.files.OperationFailure
 import plus.ling.opencloudreve.core.presentation.settings.PoliciesViewModel
 import plus.ling.opencloudreve.ui.common.message
+import plus.ling.opencloudreve.core.presentation.files.DirectLinksEffect
+import plus.ling.opencloudreve.core.presentation.files.DirectLinksIntent
+import plus.ling.opencloudreve.core.presentation.files.DirectLinksViewModel
+import plus.ling.opencloudreve.ui.common.CollectEffects
 
 /** 名称中不允许的字符（与服务端校验一致：不能含 `/` 与 `\`） */
 private fun isValidName(name: String): Boolean {
@@ -111,7 +118,7 @@ internal fun FileDialogs(
             },
             dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
         )
-        is FileDialog.SourceLinks -> SourceLinksDialog(dialog, onDismiss)
+        is FileDialog.DirectLinks -> DirectLinksDialog(accountId, dialog.uris, onDismiss)
         is FileDialog.MountPolicy -> MountPolicyDialog(accountId, dialog.folder, onDismiss) { policyId ->
             onRun(FileOperation.MountPolicy(dialog.folder.path, policyId))
         }
@@ -284,42 +291,90 @@ private fun DeleteDialog(
     )
 }
 
+/** 勾选行：整行可点（含文字），无障碍按复选框朗读 */
 @Composable
 private fun CheckRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Checkbox(checked = checked, onCheckedChange = onChange)
+    Row(
+        Modifier.fillMaxWidth().toggleable(value = checked, role = Role.Checkbox, onValueChange = onChange),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Checkbox(checked = checked, onCheckedChange = null, modifier = Modifier.padding(12.dp))
         Text(label, style = MaterialTheme.typography.bodyMedium)
     }
 }
 
-/** 直链结果：可逐条复制；失败项列出原因 */
+/**
+ * 直链（[DirectLinksViewModel]）：打开即生成（或取回已有）永久直链，可逐条/全部复制；
+ * 选项“强制下载”（`/f/d/` 形式）与“复制时带文件名”；失败项列出原因。
+ */
 @Composable
-private fun SourceLinksDialog(dialog: FileDialog.SourceLinks, onDismiss: () -> Unit) {
+private fun DirectLinksDialog(accountId: String, uris: List<String>, onDismiss: () -> Unit) {
+    val vm: DirectLinksViewModel = koinViewModel(key = "direct_links:" + uris.joinToString("|")) { parametersOf(accountId, uris) }
+    val state by vm.state.collectAsStateWithLifecycle()
     val copy = rememberCopyToClipboard(null)
     val scope = rememberCoroutineScope()
-    val links = dialog.outcome.links
+    val context = LocalContext.current
+    var error by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(vm) {
+        if (state.generated.isEmpty()) vm.on(DirectLinksIntent.Generate)
+    }
+    CollectEffects(vm.effects) { effect ->
+        if (effect is DirectLinksEffect.Failed) error = effect.error.message(context)
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.action_direct_link)) },
         text = {
-            LazyColumn(Modifier.heightIn(max = 360.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(links, key = { it.link }) { link ->
+            LazyColumn(Modifier.heightIn(max = 420.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                when {
+                    state.folderNotAllowed -> item(key = "folder") {
+                        Text(stringResource(R.string.direct_link_folder_denied), color = MaterialTheme.colorScheme.error)
+                    }
+                    state.exceedsLimit -> item(key = "limit") {
+                        Text(stringResource(R.string.direct_link_limit, state.batchLimit), color = MaterialTheme.colorScheme.error)
+                    }
+                    state.generating -> item(key = "progress") { LoadingMore() }
+                }
+                items(state.generated, key = { it.link }) { link ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(link.link, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f), maxLines = 3, overflow = TextOverflow.Ellipsis)
-                        IconButton(onClick = { scope.launch { copy(link.link) } }) {
+                        Column(Modifier.weight(1f)) {
+                            if (state.showFileName) {
+                                Text(link.name, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.MiddleEllipsis)
+                            }
+                            Text(link.displayLink, style = MaterialTheme.typography.bodySmall, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                        }
+                        IconButton(onClick = {
+                            val text = if (state.showFileName) "[${link.name}] ${link.displayLink}" else link.displayLink
+                            scope.launch { copy(text) }
+                        }) {
                             Icon(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.action_copy_link))
                         }
                     }
                 }
-                items(dialog.outcome.failures, key = { "f:" + it.uri }) { failure ->
+                items(state.failures, key = { "f:" + it.uri }) { failure ->
                     FailureLine(failure)
+                }
+                error?.let { message ->
+                    item(key = "error") { Text(message, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+                }
+                if (state.generated.isNotEmpty()) {
+                    item(key = "options") {
+                        Column {
+                            CheckRow(stringResource(R.string.direct_link_force_download), state.forceDownload) {
+                                vm.on(DirectLinksIntent.SetForceDownload(it))
+                            }
+                            CheckRow(stringResource(R.string.direct_link_show_name), state.showFileName) {
+                                vm.on(DirectLinksIntent.SetShowFileName(it))
+                            }
+                        }
+                    }
                 }
             }
         },
         confirmButton = {
-            if (links.size > 1) {
-                TextButton(onClick = { scope.launch { copy(links.joinToString("\n") { it.link }) } }) {
-                    Text(stringResource(R.string.action_copy_all))
+            if (state.generated.isNotEmpty()) {
+                TextButton(onClick = { scope.launch { copy(state.copyText) } }) {
+                    Text(stringResource(if (state.generated.size > 1) R.string.action_copy_all else R.string.action_copy_link))
                 }
             }
         },

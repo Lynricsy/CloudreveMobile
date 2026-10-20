@@ -8,8 +8,11 @@ import plus.ling.opencloudreve.core.model.FileItem
  * 由 `FilesTab` 实现：列表类页面在左侧窗格的嵌套导航中，文件信息在右侧详情窗格（手机上全屏）。
  */
 interface FileNavigator {
-    /** 进入目录（也可以是回收站、与我共享、分享内目录、搜索 URI） */
-    fun openFolder(uri: String)
+    /**
+     * 进入目录（也可以是回收站、与我共享、分享内目录、搜索 URI）。
+     * @param title 显示标题（分享快捷方式进入分享根时用快捷方式名即分享名）；null 按 URI 推断
+     */
+    fun openFolder(uri: String, title: String? = null)
 
     /** 打开文件：已接入预览（[FileFeatures.preview]）时预览，否则显示文件信息 */
     fun openFile(file: FileItem, listingUri: String)
@@ -56,9 +59,9 @@ data class FolderPickResult(
 @Serializable
 data object FilesHomeRoute
 
-/** 文件列表页 */
+/** 文件列表页；[title] 覆盖根目录的推断标题（见 [FileNavigator.openFolder]） */
 @Serializable
-data class FolderRoute(val uri: String)
+data class FolderRoute(val uri: String, val title: String? = null)
 
 /** 搜索页 */
 @Serializable

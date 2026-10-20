@@ -1,6 +1,7 @@
 package plus.ling.opencloudreve.ui.viewer
 
 import android.content.res.Configuration
+import android.view.View
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,6 +58,7 @@ import plus.ling.opencloudreve.core.presentation.viewer.ViewerVideoIntent
 import plus.ling.opencloudreve.core.presentation.viewer.ViewerVideoState
 import plus.ling.opencloudreve.core.presentation.viewer.ViewerVideoViewModel
 import plus.ling.opencloudreve.ui.common.message
+import plus.ling.opencloudreve.ui.common.SystemBarsHidden
 
 /** Media3 支持的外挂字幕格式 → MIME（vrr 不受支持，不加载） */
 private fun subtitleMime(format: String): String? = when (format) {
@@ -120,10 +122,15 @@ internal fun VideoViewerScreen(
     }
 
     val landscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    // 横屏全屏：播放控件隐藏时同时隐藏顶栏与系统栏，点按画面恢复
+    var controlsVisible by remember { mutableStateOf(true) }
+    val fullscreen = landscape && !controlsVisible
+    SystemBarsHidden(fullscreen)
     ViewerScaffold(
         title = state.file.name,
         menu = menu,
         onClose = onClose,
+        showTopBar = !fullscreen,
         extraMenu = { dismiss -> SubtitleMenuItems(state, dismiss) { vm.on(ViewerVideoIntent.SelectSubtitle(it)) } },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
@@ -139,6 +146,9 @@ internal fun VideoViewerScreen(
                             PlayerView(ctx).apply {
                                 this.player = player
                                 setShowSubtitleButton(true)
+                                setControllerVisibilityListener(
+                                    PlayerView.ControllerVisibilityListener { visibility -> controlsVisible = visibility == View.VISIBLE },
+                                )
                             }
                         },
                         modifier = Modifier.fillMaxSize(),

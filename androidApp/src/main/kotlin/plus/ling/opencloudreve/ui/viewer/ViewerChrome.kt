@@ -134,7 +134,7 @@ internal fun ViewerErrorPage(title: String, message: String, onClose: () -> Unit
     }
 }
 
-/** 标准预览页骨架 */
+/** 标准预览页骨架；[showTopBar] 为 false 时隐藏顶栏（横屏视频控件隐藏时全屏） */
 @Composable
 internal fun ViewerScaffold(
     title: String,
@@ -142,13 +142,14 @@ internal fun ViewerScaffold(
     onClose: () -> Unit,
     subtitle: String? = null,
     snackbar: SnackbarHostState? = null,
+    showTopBar: Boolean = true,
     extraMenu: @Composable (dismiss: () -> Unit) -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
-        topBar = { ViewerTopBar(title, menu, onClose, subtitle, extraMenu = extraMenu, actions = actions) },
+        topBar = { if (showTopBar) ViewerTopBar(title, menu, onClose, subtitle, extraMenu = extraMenu, actions = actions) },
         bottomBar = bottomBar,
         snackbarHost = { if (snackbar != null) SnackbarHost(snackbar) },
         content = content,

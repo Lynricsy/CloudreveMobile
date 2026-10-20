@@ -181,6 +181,10 @@
     <string name="action_versions">Versions</string>
     <string name="action_metadata">Tags and properties</string>
     <string name="action_direct_link">Get direct link</string>
+    <string name="direct_link_force_download">Force download</string>
+    <string name="direct_link_show_name">Include file name when copying</string>
+    <string name="direct_link_limit">At most %1$d direct links at a time</string>
+    <string name="direct_link_folder_denied">Your group can\'t create direct links for folders</string>
     <string name="action_reset_thumbnail">Regenerate thumbnail</string>
     <string name="action_disable_thumbnail">Don\'t generate thumbnail</string>
     <string name="action_go_shared_link">Go to shared link</string>
@@ -287,6 +291,7 @@
     <string name="picker_copy_here">Copy here</string>
     <string name="picker_save_here">Save here</string>
     <string name="picker_excluded">A folder can\'t be moved into itself or its subfolders</string>
+    <string name="picker_same_folder">The items are already in this folder</string>
     <string name="picker_not_writable">This location is not writable</string>
     <string name="picker_no_subfolders">No subfolders</string>
 

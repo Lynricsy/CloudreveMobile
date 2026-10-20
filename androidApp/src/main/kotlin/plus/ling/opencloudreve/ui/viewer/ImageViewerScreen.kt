@@ -70,6 +70,7 @@ import plus.ling.opencloudreve.core.presentation.viewer.ViewerImageIntent
 import plus.ling.opencloudreve.core.presentation.viewer.ViewerImageViewModel
 import plus.ling.opencloudreve.core.presentation.viewer.ViewerParams
 import plus.ling.opencloudreve.ui.common.message
+import plus.ling.opencloudreve.ui.common.SystemBarsHidden
 import plus.ling.opencloudreve.ui.files.formatBytes
 import plus.ling.opencloudreve.ui.files.formatDateTime
 
@@ -84,6 +85,8 @@ internal fun ImageViewerScreen(
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
     var chromeVisible by remember { mutableStateOf(true) }
+    // 点按图片隐藏顶栏时同时隐藏系统栏
+    SystemBarsHidden(!chromeVisible, onDarkBackground = true)
     var showInfo by remember { mutableStateOf(false) }
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {

@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -79,12 +80,18 @@ fun FileInfoScreen(
     onOpenVersions: ((String) -> Unit)? = null,
     /** 打开标签与元数据编辑页（参数为文件 URI）；null 不显示入口 */
     onEditMetadata: ((String) -> Unit)? = null,
+    /** 外部修改计数（版本/元数据页关闭时递增），变化时重新拉取 */
+    revision: Int = 0,
 ) {
     val vm: FileInfoViewModel = koinViewModel(key = "info:$uri") { parametersOf(accountId, uri) }
     val state by vm.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
     val resources = LocalResources.current
+    // VM 按 URI 缓存在页面作用域：重新打开同一文件或外部修改后刷新（首次加载由 VM 自己完成）
+    LaunchedEffect(vm, revision) {
+        if (vm.state.value.file != null) vm.on(FileInfoIntent.Refresh)
+    }
     CollectEffects(vm.effects) { effect ->
         when (effect) {
             is FileInfoEffect.Failed -> snackbar.showSnackbar(effect.error.message(context))

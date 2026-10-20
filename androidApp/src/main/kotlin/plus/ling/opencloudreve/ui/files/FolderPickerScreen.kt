@@ -34,6 +34,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -57,6 +58,7 @@ import plus.ling.opencloudreve.ui.common.message
 /**
  * 目录选择器（移动/复制/保存分享的目标；P5 上传目标、WebDAV 根目录也复用）。
  * @param confirmLabel 确认按钮文字（“移动到此处”等）
+ * @param sameFolders 不能作为目标的目录 URI（如移动时项目所在的原目录），停在这些目录时确认按钮禁用并提示
  */
 @Composable
 fun FolderPickerScreen(
@@ -66,17 +68,24 @@ fun FolderPickerScreen(
     confirmLabel: String,
     onPicked: (String) -> Unit,
     onCancel: () -> Unit,
+    sameFolders: List<String> = emptyList(),
 ) {
     val vm: FolderPickerViewModel = koinViewModel { parametersOf(accountId, initialUri, excluded) }
     val state by vm.state.collectAsStateWithLifecycle()
-    FolderPickerContent(state, confirmLabel, vm::on, onPicked, onCancel)
+    val normalizedSame = remember(sameFolders) { sameFolders.map(::normalizeFolderUri).toSet() }
+    val inSameFolder = normalizeFolderUri(state.uri) in normalizedSame
+    FolderPickerContent(state, confirmLabel, inSameFolder, vm::on, onPicked, onCancel)
 }
+
+/** 目录 URI 规范化（统一编码与结尾），用于比较是否同一目录 */
+private fun normalizeFolderUri(uri: String): String = CrUri.parseOrNull(uri)?.toString() ?: uri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FolderPickerContent(
     state: FolderPickerState,
     confirmLabel: String,
+    inSameFolder: Boolean,
     onIntent: (FolderPickerIntent) -> Unit,
     onPicked: (String) -> Unit,
     onCancel: () -> Unit,
@@ -105,6 +114,7 @@ private fun FolderPickerContent(
                 Text(
                     when {
                         state.excluded -> stringResource(R.string.picker_excluded)
+                        inSameFolder -> stringResource(R.string.picker_same_folder)
                         !state.canCreateFolder && !state.loading -> stringResource(R.string.picker_not_writable)
                         else -> ""
                     },
@@ -112,7 +122,11 @@ private fun FolderPickerContent(
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                 )
-                Button(onClick = { onPicked(state.uri) }, enabled = state.canSelect, modifier = Modifier.padding(end = 16.dp)) {
+                Button(
+                    onClick = { onPicked(state.uri) },
+                    enabled = state.canSelect && !inSameFolder,
+                    modifier = Modifier.padding(end = 16.dp),
+                ) {
                     Text(confirmLabel)
                 }
             }

@@ -63,6 +63,12 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.runtime.CompositionLocalProvider
+import plus.ling.opencloudreve.ui.common.ImmersiveState
+import plus.ling.opencloudreve.ui.common.LocalImmersiveState
 
 /** 主界面顶层 Tab */
 enum class MainTab(
@@ -126,7 +132,15 @@ fun MainScreen(
     }.collectAsStateWithLifecycle(TransferSummary.EMPTY)
     RequestNotificationPermission(summary.activeCount > 0)
 
+    // 预览器等沉浸式页面请求时隐藏底栏/导航栏 rail
+    val immersive = remember { ImmersiveState() }
+    val adaptiveInfo = currentWindowAdaptiveInfo()
     NavigationSuiteScaffold(
+        layoutType = if (immersive.active) {
+            NavigationSuiteType.None
+        } else {
+            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+        },
         navigationSuiteItems = {
             MainTab.entries.forEach { item ->
                 val selected = item == tab
@@ -160,35 +174,37 @@ fun MainScreen(
             }
         },
     ) {
-        tabStates.SaveableStateProvider(tab.name) {
-            when (tab) {
-                MainTab.Files -> active?.let { account ->
-                    FilesTab(
-                        account = account,
-                        openRequest = filesOpenRequest,
-                        onOpenRequestConsumed = { filesOpenRequest = null },
-                        shareRequest = filesShareRequest,
-                        onShareRequestConsumed = { filesShareRequest = null },
-                    )
-                }
-                MainTab.Shares -> active?.let { account ->
-                    key(account.id) { SharesTab(accountId = account.id, openFilesAt = openFilesAt) }
-                }
-                MainTab.Tasks -> active?.let { account ->
-                    key(account.id) { TasksTab(accountId = account.id) }
-                }
-                MainTab.Me -> active?.let { account ->
-                    // 切换账户时重建“我的”Tab 内的导航栈与 ViewModel
-                    key(account.id) {
-                        MeTab(
-                            accountId = account.id,
-                            switcherState = switcherState,
-                            onSwitcherIntent = switcher::on,
-                            onOpenSwitcher = { showSwitcher = true },
-                            onAddAccount = onAddAccount,
-                            onReLogin = onReLogin,
-                            openFilesAt = openFilesAt,
+        CompositionLocalProvider(LocalImmersiveState provides immersive) {
+            tabStates.SaveableStateProvider(tab.name) {
+                when (tab) {
+                    MainTab.Files -> active?.let { account ->
+                        FilesTab(
+                            account = account,
+                            openRequest = filesOpenRequest,
+                            onOpenRequestConsumed = { filesOpenRequest = null },
+                            shareRequest = filesShareRequest,
+                            onShareRequestConsumed = { filesShareRequest = null },
                         )
+                    }
+                    MainTab.Shares -> active?.let { account ->
+                        key(account.id) { SharesTab(accountId = account.id, openFilesAt = openFilesAt) }
+                    }
+                    MainTab.Tasks -> active?.let { account ->
+                        key(account.id) { TasksTab(accountId = account.id) }
+                    }
+                    MainTab.Me -> active?.let { account ->
+                        // 切换账户时重建“我的”Tab 内的导航栈与 ViewModel
+                        key(account.id) {
+                            MeTab(
+                                accountId = account.id,
+                                switcherState = switcherState,
+                                onSwitcherIntent = switcher::on,
+                                onOpenSwitcher = { showSwitcher = true },
+                                onAddAccount = onAddAccount,
+                                onReLogin = onReLogin,
+                                openFilesAt = openFilesAt,
+                            )
+                        }
                     }
                 }
             }

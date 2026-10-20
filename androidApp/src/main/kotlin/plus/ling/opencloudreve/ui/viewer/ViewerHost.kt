@@ -48,6 +48,7 @@ import plus.ling.opencloudreve.ui.common.message
 import plus.ling.opencloudreve.ui.files.FileHook
 import plus.ling.opencloudreve.ui.files.FileNavigator
 import plus.ling.opencloudreve.ui.files.siteText
+import plus.ling.opencloudreve.ui.common.HideAppNavigation
 
 private val viewerJson = Json { ignoreUnknownKeys = true }
 
@@ -101,6 +102,8 @@ fun ViewerHostScreen(
     onClose: () -> Unit,
     repositories: DataRepositories = koinInject(),
 ) {
+    // 预览页全屏：隐藏应用底栏/导航栏 rail 与平板详情窗格，返回后恢复
+    HideAppNavigation()
     val context = LocalContext.current
     val file = remember(route.file) { route.fileItem() }
     val host by produceState<HostState>(HostState.Loading, accountId) {
