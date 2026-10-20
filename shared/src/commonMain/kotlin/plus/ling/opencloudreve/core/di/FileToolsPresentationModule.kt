@@ -1,6 +1,7 @@
 package plus.ling.opencloudreve.core.di
 
 import org.koin.dsl.module
+import plus.ling.opencloudreve.core.api.ApiClientProvider
 import plus.ling.opencloudreve.core.auth.AccountRepository
 import plus.ling.opencloudreve.core.model.StoragePolicy
 import plus.ling.opencloudreve.core.presentation.files.DirectLinksViewModel
@@ -9,6 +10,7 @@ import plus.ling.opencloudreve.core.presentation.files.VersionsViewModel
 import plus.ling.opencloudreve.core.presentation.share.ShareEditViewModel
 import plus.ling.opencloudreve.core.presentation.share.ShareListViewModel
 import plus.ling.opencloudreve.core.presentation.share.ShareVisitViewModel
+import plus.ling.opencloudreve.core.presentation.viewer.ViewerEnvironment
 import plus.ling.opencloudreve.core.presentation.transfer.TransferListViewModel
 import plus.ling.opencloudreve.core.presentation.transfer.UploadPickerViewModel
 import plus.ling.opencloudreve.core.presentation.workflow.ArchiveTaskMode
@@ -59,6 +61,7 @@ val fileToolsPresentationModule = module {
             d.shares(accountId),
             d.files(accountId),
             d.userSettings(accountId),
+            ViewerEnvironment(d.files(accountId), d.site, d.userSettings(accountId), get<ApiClientProvider>()),
         )
     }
     factory { (accountId: String, initialCategory: String) ->

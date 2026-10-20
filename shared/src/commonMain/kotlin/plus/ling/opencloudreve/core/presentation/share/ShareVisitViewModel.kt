@@ -18,6 +18,8 @@ import plus.ling.opencloudreve.core.presentation.currentUserOrNull
 import plus.ling.opencloudreve.core.presentation.toUiError
 import plus.ling.opencloudreve.core.settings.UserSettingsRepository
 import plus.ling.opencloudreve.core.share.ShareRepository
+import plus.ling.opencloudreve.core.presentation.viewer.TextCodec
+import plus.ling.opencloudreve.core.presentation.viewer.ViewerEnvironment
 
 /** 分享内面包屑 */
 data class ShareCrumb(val name: String, val uri: String)
@@ -48,6 +50,9 @@ data class ShareVisitState(
     val singleFile: FileItem? = null,
     /** 当前目录的 README（`show_readme` 且为目录分享；README.md 优先于 README.txt） */
     val readme: FileItem? = null,
+    /** README 正文（找到 README 后自动下载；超过 [ShareVisitViewModel.README_MAX_BYTES] 或失败为 null） */
+    val readmeContent: String? = null,
+    val readmeLoading: Boolean = false,
     /** 当前用户就是分享者 */
     val isOwner: Boolean = false,
     val saving: Boolean = false,
@@ -94,7 +99,7 @@ sealed interface ShareVisitEffect {
 /**
  * 打开分享链接：解析链接 → `GET /share/info/:id?count_views=true` 显示头部 → 需要密码时输入（40069 重试）
  * → `GET /file?uri=cloudreve://<id>[:<pw>]@share` 浏览；单文件分享直接给出 [ShareVisitState.singleFile]；
- * 目录分享按 README.md → README.txt 查找说明文件；“保存到我的文件”在自己的目录创建分享快捷方式。
+ * 目录分享按 README.md → README.txt 查找说明文件并下载正文；“保存到我的文件”在自己的目录创建分享快捷方式。
  */
 class ShareVisitViewModel(
     val accountId: String,
@@ -103,6 +108,7 @@ class ShareVisitViewModel(
     private val shares: ShareRepository,
     private val files: FileRepository,
     private val userSettings: UserSettingsRepository,
+    private val viewer: ViewerEnvironment,
 ) : CoreViewModel<ShareVisitState, ShareVisitIntent, ShareVisitEffect>(ShareVisitState(link = link)) {
 
     private val parsed: ShareLink? = ShareLinkParser.parse(link)
@@ -136,7 +142,7 @@ class ShareVisitViewModel(
             }
             ShareVisitIntent.LoadMore -> loadMore()
             is ShareVisitIntent.SaveToMyFiles -> save(intent.dstUri)
-            ShareVisitIntent.DismissReadme -> updateState { it.copy(readme = null) }
+            ShareVisitIntent.DismissReadme -> updateState { it.copy(readme = null, readmeContent = null, readmeLoading = false) }
         }
     }
 
@@ -236,6 +242,8 @@ class ShareVisitViewModel(
                     loadingList = true,
                     hasMore = false,
                     readme = null,
+                    readmeContent = null,
+                    readmeLoading = false,
                     singleFile = null,
                 )
             }
@@ -326,7 +334,18 @@ class ShareVisitViewModel(
             } else {
                 null
             }
-        if (found != null && currentState.currentUri == dir.toString()) updateState { it.copy(readme = found) }
+        if (found == null || currentState.currentUri != dir.toString()) return
+        updateState { it.copy(readme = found, readmeContent = null, readmeLoading = found.size <= README_MAX_BYTES) }
+        if (found.size > README_MAX_BYTES) return
+        val text = try {
+            val url = viewer.url(found, null, currentState.contextHint)
+            viewer.download(accountId, url.url).takeIf { it.size <= README_MAX_BYTES }?.let { TextCodec.decode(it).text }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            null
+        }
+        updateState { if (it.readme?.path == found.path) it.copy(readmeContent = text, readmeLoading = false) else it }
     }
 
     private fun save(dstUri: String) {
@@ -354,5 +373,8 @@ class ShareVisitViewModel(
     companion object {
         /** README 优先级（高 → 低） */
         val README_NAMES: List<String> = listOf("README.md", "README.txt")
+
+        /** README 正文下载上限（1 MiB） */
+        const val README_MAX_BYTES: Long = 1L shl 20
     }
 }

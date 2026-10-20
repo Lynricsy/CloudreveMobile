@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import plus.ling.opencloudreve.core.api.apiPath
 import plus.ling.opencloudreve.core.api.bodyText
+import plus.ling.opencloudreve.core.api.json
 import plus.ling.opencloudreve.core.files.err
 import plus.ling.opencloudreve.core.files.fileJson
 import plus.ling.opencloudreve.core.files.okData
@@ -75,6 +76,8 @@ class ShareViewModelsTest {
                     else -> okData("""{"id":"S1","unlocked":false,"password_protected":true,"source_type":1,"owner":$ownerJson}""")
                 }
                 "/file" -> okData(listing(fileJson("a.md", "cloudreve://S1:good@share") + "," + fileJson("b", "cloudreve://S1:good@share", folder = true), nextToken = "n1"))
+                "/file/url" -> okData("""{"urls":[{"url":"https://cloud.example.com/readme-content"}]}""")
+                "/readme-content" -> json("# Hello", contentType = "text/markdown")
                 "/file/info" -> if (req.url.parameters["uri"]!!.endsWith("README.md")) {
                     okData(fileJson("README.md", "cloudreve://S1:good@share"))
                 } else {
@@ -84,7 +87,7 @@ class ShareViewModelsTest {
                 else -> err(404)
             }
         }
-        val vm = ShareVisitViewModel(ACCOUNT, "https://cloud.example.com/s/S1", "https://cloud.example.com", env.shares, env.files, env.userSettings)
+        val vm = ShareVisitViewModel(ACCOUNT, "https://cloud.example.com/s/S1", "https://cloud.example.com", env.shares, env.files, env.userSettings, env.viewer)
         eventually { vm.state.value.needsPassword }
         assertFalse(vm.state.value.passwordIncorrect)
         assertFalse(vm.state.value.siteMismatch)
@@ -102,6 +105,9 @@ class ShareViewModelsTest {
         assertEquals(listOf("Docs"), s.crumbs.map { it.name })
         // 已加载部分没有 README 且列表未取全：按优先级取信息，README.md 存在即采用
         assertEquals("README.md", s.readme?.name)
+        eventually { vm.state.value.readmeContent != null }
+        assertEquals("# Hello", vm.state.value.readmeContent)
+        assertFalse(vm.state.value.readmeLoading)
         assertTrue(env.server.requests.none { it.apiPath == "/file/info" && it.url.parameters["uri"]!!.endsWith("README.txt") })
         assertTrue(s.canSave)
         assertEquals("cloudreve://S1:good@share", s.shortcutTarget)
@@ -123,7 +129,7 @@ class ShareViewModelsTest {
                 else -> err(404)
             }
         }
-        val vm = ShareVisitViewModel(ACCOUNT, "cloudreve://F1@share", null, env.shares, env.files, env.userSettings)
+        val vm = ShareVisitViewModel(ACCOUNT, "cloudreve://F1@share", null, env.shares, env.files, env.userSettings, env.viewer)
         eventually { vm.state.value.singleFile != null }
         assertEquals("a.bin", vm.state.value.singleFile?.name)
         assertNull(vm.state.value.readme)
@@ -156,7 +162,7 @@ class ShareViewModelsTest {
                 else -> err(404)
             }
         }
-        val vm = ShareVisitViewModel(ACCOUNT, "P1", "https://x", env.shares, env.files, env.userSettings)
+        val vm = ShareVisitViewModel(ACCOUNT, "P1", "https://x", env.shares, env.files, env.userSettings, env.viewer)
         eventually { vm.state.value.needsPassword && vm.state.value.isOwner }
         assertTrue(vm.state.value.passwordIncorrect)
         assertFalse(vm.state.value.canSave)

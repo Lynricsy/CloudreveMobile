@@ -12,6 +12,7 @@ import plus.ling.opencloudreve.core.files.DataEnv
 import plus.ling.opencloudreve.core.settings.UserSettingsRepository
 import plus.ling.opencloudreve.core.share.ShareRepository
 import plus.ling.opencloudreve.core.workflow.WorkflowRepository
+import plus.ling.opencloudreve.core.presentation.viewer.ViewerEnvironment
 
 /** 真实时间等待条件成立（VM 运行在 Unconfined 主调度器上，HTTP 在 MockEngine 线程完成） */
 suspend fun eventually(timeoutMs: Long = 5_000, block: () -> Boolean) = withContext(Dispatchers.Default) {
@@ -29,6 +30,7 @@ class VmEnv(handler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpRes
     val shares = ShareRepository(ACCOUNT, data.clients)
     val workflows = WorkflowRepository(ACCOUNT, data.clients)
     val userSettings = UserSettingsRepository(ACCOUNT, data.clients) { _, _ -> }
+    val viewer = ViewerEnvironment(files, site, userSettings, data.clients, data.clock)
 }
 
 /** 用户 JSON；[permissionB64] 为用户组权限位集合（base64） */
