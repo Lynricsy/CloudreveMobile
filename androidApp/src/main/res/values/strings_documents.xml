@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 系统文件集成（DocumentsProvider） -->
+    <string name="documents_load_failed">加载失败：%1$s</string>
+    <string name="documents_search_failed">搜索失败：%1$s</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- System file integration (DocumentsProvider) -->
+    <string name="documents_load_failed">Failed to load: %1$s</string>
+    <string name="documents_search_failed">Search failed: %1$s</string>
+</resources>

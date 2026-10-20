@@ -44,7 +44,7 @@ internal object UploadSources {
     fun fromFile(file: File, mimeType: String?): UploadSource =
         UploadSource(file.absolutePath, file.name, file.length(), file.lastModified(), mimeType)
 
-    /** 为拍照新建一个收件箱文件（尚不存在） */
+    /** 为拍照结果或系统文件集成写入的内容新建一个收件箱文件（尚不存在） */
     fun newCameraFile(context: Context, name: String): File {
         val dir = File(inboxDir(context), UUID.randomUUID().toString()).apply { mkdirs() }
         return File(dir, name)
