@@ -9,6 +9,7 @@ struct FolderPickerContent: View {
     @Environment(\.dismiss) private var dismiss
     @State private var creatingFolder = false
     @State private var newFolderName = ""
+    @ScaledMetric(relativeTo: .body) private var iconSize: CGFloat = 28
 
     var body: some View {
         let state = host.state
@@ -38,7 +39,7 @@ struct FolderPickerContent: View {
                         host.send(FolderPickerIntentOpen(uri: folder.path))
                     } label: {
                         HStack {
-                            FileTypeIconView(file: folder, size: 28)
+                            FileTypeIconView(file: folder, size: iconSize)
                             Text(verbatim: folder.name)
                                 .foregroundStyle(.primary)
                             Spacer()

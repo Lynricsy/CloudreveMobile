@@ -2,10 +2,13 @@ import SwiftUI
 
 /// 服务器地址页顶部说明
 struct ServerSetupHeader: View {
+    /// 装饰图标随动态字体缩放
+    @ScaledMetric(relativeTo: .largeTitle) private var iconSize: CGFloat = 48
+
     var body: some View {
         VStack(spacing: 12) {
             Image(systemName: "externaldrive.connected.to.line.below")
-                .font(.system(size: 48))
+                .font(.system(size: iconSize))
                 .foregroundStyle(.tint)
                 .accessibilityHidden(true)
             Text("连接到你的 OpenCloudreve")

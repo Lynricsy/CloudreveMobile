@@ -85,7 +85,7 @@ struct SecurityForm: View {
                 .keyboardType(.numberPad)
                 .textContentType(.oneTimeCode)
             Button("取消", role: .cancel) {}
-            Button("关闭", role: .destructive) {
+            Button("停用", role: .destructive) {
                 security.send(SecurityIntentDisableTwoFactor(code: disableCode))
             }
         } message: {

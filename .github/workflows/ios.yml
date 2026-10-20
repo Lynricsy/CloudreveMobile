@@ -109,12 +109,38 @@ jobs:
             -skipPackagePluginValidation -skipMacroValidation \
             CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= \
             build test
+      - name: iPad 布局与键盘快捷键截图
+        # 只跑一个 UI 用例控制时长（与上一步共用 DerivedData，只增量构建）；iPhone 上该用例自动跳过
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          d = json.load(sys.stdin)['devices']
+          cands = [(k, x) for k, v in d.items() if 'iOS' in k for x in v if x['name'].startswith('iPad')]
+          cands.sort(key=lambda kv: kv[0], reverse=True)
+          pick = next((x for k, x in cands if x['name'].startswith('iPad Pro 11')), cands[0][1])
+          print(pick['udid'], pick['name'], file=sys.stderr)
+          print(pick['udid'])
+          ")
+          cd iosApp
+          xcodebuild -project OpenCloudreve.xcodeproj -scheme OpenCloudreve \
+            -destination "platform=iOS Simulator,id=$UDID" \
+            -resultBundlePath build/OpenCloudreve-iPad.xcresult \
+            -skipPackagePluginValidation -skipMacroValidation \
+            -only-testing:OpenCloudreveUITests/UIPolishUITests/testIPadLayoutAndKeyboardShortcuts \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= \
+            test
       - name: 导出截图
         if: always()
         run: |
           mkdir -p iosApp/build/screenshots
           if [ -d iosApp/build/OpenCloudreve.xcresult ]; then
             xcrun xcresulttool export attachments --path iosApp/build/OpenCloudreve.xcresult --output-path iosApp/build/screenshots || true
+          fi
+          mkdir -p iosApp/build/screenshots-ipad
+          if [ -d iosApp/build/OpenCloudreve-iPad.xcresult ]; then
+            xcrun xcresulttool export attachments --path iosApp/build/OpenCloudreve-iPad.xcresult --output-path iosApp/build/screenshots-ipad || true
           fi
           cp "$RUNNER_TEMP/ocr-server/server.log" iosApp/build/ || true
       - uses: actions/upload-artifact@v5
@@ -124,4 +150,6 @@ jobs:
           path: |
             iosApp/build/OpenCloudreve.xcresult
             iosApp/build/screenshots
+            iosApp/build/OpenCloudreve-iPad.xcresult
+            iosApp/build/screenshots-ipad
             iosApp/build/server.log

@@ -6,10 +6,11 @@ struct FileRowLabel: View {
     let file: FileItem
     let thumbnails: FileThumbnailSource
     let isTrash: Bool
+    @ScaledMetric(relativeTo: .body) private var thumbnailSize: CGFloat = 40
 
     var body: some View {
         HStack(spacing: 12) {
-            FileThumbnail(file: file, source: thumbnails, size: 40)
+            FileThumbnail(file: file, source: thumbnails, size: thumbnailSize)
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: file.name)
                     .lineLimit(2)

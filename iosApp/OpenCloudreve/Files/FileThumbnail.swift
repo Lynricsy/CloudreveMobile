@@ -34,7 +34,10 @@ struct FileThumbnail: View {
         .task(id: TaskKey(path: file.path, source: source)) {
             url = await source.url(for: file)
         }
-        .accessibilityHidden(true)
+        // 文件的名称/大小由所在行朗读；目录额外读出“文件夹”以区分类型
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(file.isFolder ? Text("文件夹") : Text(verbatim: ""))
+        .accessibilityHidden(!file.isFolder)
     }
 
     /// 文件或缩略图设置变化时重新获取地址

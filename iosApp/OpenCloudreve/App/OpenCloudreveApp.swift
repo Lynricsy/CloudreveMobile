@@ -20,5 +20,6 @@ struct OpenCloudreveApp: App {
             RootView(session: session)
                 .environment(session)
         }
+        .commands { AppCommands() }
     }
 }

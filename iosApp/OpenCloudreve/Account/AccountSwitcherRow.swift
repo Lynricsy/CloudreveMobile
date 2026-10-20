@@ -11,11 +11,12 @@ struct AccountSwitcherRow: View {
     let signingOut: Bool
     let select: () -> Void
     let signOut: () -> Void
+    @ScaledMetric(relativeTo: .body) private var avatarSize: CGFloat = 40
 
     var body: some View {
         Button(action: select) {
             HStack(spacing: 12) {
-                AccountAvatar(url: avatarUrl, name: nickname, size: 40)
+                AccountAvatar(url: avatarUrl, name: nickname, size: avatarSize)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: nickname)
                         .foregroundStyle(.primary)

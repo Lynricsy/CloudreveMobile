@@ -5,12 +5,14 @@ struct LoginHeader: View {
     let title: String
     let siteUrl: String
     let version: String?
+    /// 装饰图标随动态字体缩放
+    @ScaledMetric(relativeTo: .largeTitle) private var iconSize: CGFloat = 40
 
     var body: some View {
         Section {
             VStack(spacing: 6) {
                 Image(systemName: "cloud.fill")
-                    .font(.system(size: 40))
+                    .font(.system(size: iconSize))
                     .foregroundStyle(.tint)
                     .accessibilityHidden(true)
                 if !title.isEmpty {

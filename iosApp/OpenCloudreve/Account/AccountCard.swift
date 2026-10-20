@@ -6,10 +6,11 @@ struct AccountCard: View {
     let email: String
     let host: String
     let avatarUrl: String
+    @ScaledMetric(relativeTo: .title3) private var avatarSize: CGFloat = 64
 
     var body: some View {
         HStack(spacing: 16) {
-            AccountAvatar(url: avatarUrl, name: nickname, size: 64)
+            AccountAvatar(url: avatarUrl, name: nickname, size: avatarSize)
             VStack(alignment: .leading, spacing: 4) {
                 Text(verbatim: nickname)
                     .font(.title3.bold())

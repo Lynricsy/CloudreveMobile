@@ -8,6 +8,8 @@ struct FileListContent: View {
     let actions: FileActionHost
 
     @State private var driver = FileActionDriver()
+    /// 本页是否在屏幕上（推入子目录或切到其它 Tab 时为 false）
+    @State private var isVisible = false
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -73,11 +75,22 @@ struct FileListContent: View {
                 }
             }
         }
-        .onAppear { list.send(FileListIntentSetForeground(foreground: true)) }
-        .onDisappear { list.send(FileListIntentSetForeground(foreground: false)) }
-        .onChange(of: scenePhase) { _, phase in
-            list.send(FileListIntentSetForeground(foreground: phase == .active))
+        .focusedSceneValue(\.fileListCommands, isVisible ? FileListCommandTarget(list: list, driver: driver, context: context) : nil)
+        .onAppear {
+            isVisible = true
+            updateForeground()
         }
+        .onDisappear {
+            isVisible = false
+            updateForeground()
+        }
+        .onChange(of: scenePhase) { updateForeground() }
+    }
+
+    /// 目录事件（SSE）订阅：页面可见且 App 不在后台时为前台；进入后台 10 秒后由 VM 断开，回到前台重连。
+    /// `.inactive`（控制中心、App 切换器）仍算前台，避免短暂打断时反复断开。
+    private func updateForeground() {
+        list.send(FileListIntentSetForeground(foreground: isVisible && scenePhase != .background))
     }
 
     private func subtitle(_ state: FileListState) -> String {

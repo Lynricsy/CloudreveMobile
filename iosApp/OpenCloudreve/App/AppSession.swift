@@ -8,6 +8,8 @@ final class AppSession {
     private(set) var activeAccount: Account?
     /// 无当前账户时登录页的预填信息（修改密码后设置；再次出现当前账户时清除）
     var reloginHint: ReloginHint?
+    /// 待打开的分享链接：深链到达时可能尚未登录（或会话失效），进入主界面后由 `ShareLinkDeepLink` 取走并打开
+    var pendingShareLink: String?
     @ObservationIgnored private var task: Task<Void, Never>?
 
     init(accounts: AccountRepository) {

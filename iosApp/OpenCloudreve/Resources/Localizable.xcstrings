@@ -2007,11 +2007,12 @@
       }
     },
     "关闭": {
+      "comment": "关闭弹出的页面（sheet、预览器）",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Turn Off"
+            "value": "Close"
           }
         },
         "zh-Hans": {
@@ -10899,6 +10900,158 @@
           "stringUnit": {
             "state": "translated",
             "value": "默认"
+          }
+        }
+      }
+    },
+    "刷新": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新"
+          }
+        }
+      }
+    },
+    "删除所选项目": {
+      "comment": "键盘命令：删除多选中的条目",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Selected Items"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除所选项目"
+          }
+        }
+      }
+    },
+    "阿里云 OSS": {
+      "comment": "存储策略类型",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alibaba Cloud OSS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "阿里云 OSS"
+          }
+        }
+      }
+    },
+    "腾讯云 COS": {
+      "comment": "存储策略类型",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tencent Cloud COS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "腾讯云 COS"
+          }
+        }
+      }
+    },
+    "七牛云": {
+      "comment": "存储策略类型",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qiniu Cloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "七牛云"
+          }
+        }
+      }
+    },
+    "又拍云": {
+      "comment": "存储策略类型",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UPYUN"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "又拍云"
+          }
+        }
+      }
+    },
+    "金山云 KS3": {
+      "comment": "存储策略类型",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kingsoft Cloud KS3"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "金山云 KS3"
+          }
+        }
+      }
+    },
+    "华为云 OBS": {
+      "comment": "存储策略类型",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Huawei Cloud OBS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "华为云 OBS"
+          }
+        }
+      }
+    },
+    "停用": {
+      "comment": "关闭两步验证确认框的确认按钮",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn Off"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停用"
           }
         }
       }
