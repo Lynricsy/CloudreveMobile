@@ -13,6 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
+import io.ktor.http.content.ByteArrayContent
 import io.ktor.utils.io.CancellationException
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
@@ -87,6 +88,44 @@ class ApiClient(
         return decodeData(env.data, resultSerializer)
     }
 
+    /**
+     * 以原始字节为请求体发送（`PUT /file/content`、`PUT /user/setting/avatar` 等），响应仍是信封；
+     * 同样处理 401 刷新重放。空数组即 `Content-Length: 0`。
+     */
+    suspend fun envelopeBytes(
+        method: HttpMethod,
+        path: String,
+        bytes: ByteArray,
+        contentType: String = "application/octet-stream",
+        query: Map<String, Any?> = emptyMap(),
+        headers: Map<String, String> = emptyMap(),
+    ): ApiEnvelope {
+        val content = ByteArrayContent(bytes, ContentType.parse(contentType))
+        val auth = auth
+        val token = auth?.validAccessToken()
+        val first = sendWith(method, path, query, token, headers) { setBody(content) }
+        if (first.code == ErrorCode.LOGIN_REQUIRED && auth != null && token != null) {
+            val renewed = auth.refreshAfterRejection(token) ?: return first
+            return sendWith(method, path, query, renewed, headers) { setBody(content) }
+        }
+        return first
+    }
+
+    /** 同 [envelopeBytes]，`code == 0` 时解码 data */
+    suspend fun <T> callBytes(
+        method: HttpMethod,
+        path: String,
+        resultSerializer: KSerializer<T>,
+        bytes: ByteArray,
+        contentType: String = "application/octet-stream",
+        query: Map<String, Any?> = emptyMap(),
+        headers: Map<String, String> = emptyMap(),
+    ): T {
+        val env = envelopeBytes(method, path, bytes, contentType, query, headers)
+        throwIfError(env)
+        return decodeData(env.data, resultSerializer)
+    }
+
     suspend inline fun <reified T> get(
         path: String,
         query: Map<String, Any?> = emptyMap(),
@@ -148,6 +187,7 @@ class ApiClient(
         else -> CloudreveJson.encodeToJsonElement(serializer<B>(), body)
     }
 
+    /** 以 JSON 体（可为空）发送 */
     private suspend fun send(
         method: HttpMethod,
         path: String,
@@ -155,6 +195,20 @@ class ApiClient(
         body: JsonElement?,
         token: String?,
         headers: Map<String, String>,
+    ): ApiEnvelope = sendWith(method, path, query, token, headers) {
+        if (body != null) {
+            contentType(ContentType.Application.Json)
+            setBody(CloudreveJson.encodeToString(JsonElement.serializer(), body))
+        }
+    }
+
+    private suspend fun sendWith(
+        method: HttpMethod,
+        path: String,
+        query: Map<String, Any?>,
+        token: String?,
+        headers: Map<String, String>,
+        writeBody: HttpRequestBuilder.() -> Unit,
     ): ApiEnvelope {
         val url = if (path.startsWith("http://") || path.startsWith("https://")) path else apiBase + path
         val response = try {
@@ -163,10 +217,7 @@ class ApiClient(
                 applyClientHeaders(token)
                 headers.forEach { (k, v) -> header(k, v) }
                 appendQuery(query)
-                if (body != null) {
-                    contentType(ContentType.Application.Json)
-                    setBody(CloudreveJson.encodeToString(JsonElement.serializer(), body))
-                }
+                writeBody()
             }
         } catch (e: CancellationException) {
             throw e
