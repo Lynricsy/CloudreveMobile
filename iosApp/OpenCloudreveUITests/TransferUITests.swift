@@ -77,24 +77,26 @@ final class TransferUITests: XCTestCase {
 
     // MARK: - 辅助
 
-    /// 测试结束（含中途失败）时若仍在登录状态则退出登录；不做断言
+    /// 测试结束（含中途失败）时若仍在登录状态则退出全部账户；不做断言
     @MainActor
     private static func bestEffortSignOut(_ app: XCUIApplication) {
-        guard app.state == .runningForeground, !app.textFields["server.url"].exists else { return }
-        let me = app.tabBars.buttons["我的"]
-        guard me.waitForExistence(timeout: 3) else { return }
-        me.tap()
-        let button = app.buttons["me.signOut"]
-        var attempts = 0
-        while !(button.exists && button.isHittable) && attempts < 6 {
-            app.swipeUp()
-            attempts += 1
+        for _ in 0..<4 {
+            guard app.state == .runningForeground, !app.textFields["server.url"].exists else { return }
+            let me = app.tabBars.buttons["我的"]
+            guard me.waitForExistence(timeout: 3) else { return }
+            me.tap()
+            let button = app.buttons["me.signOut"]
+            var attempts = 0
+            while !(button.exists && button.isHittable) && attempts < 6 {
+                app.swipeUp()
+                attempts += 1
+            }
+            guard button.exists else { return }
+            button.tap()
+            let confirm = app.sheets.buttons["退出登录"]
+            if confirm.waitForExistence(timeout: 5) { confirm.tap() }
+            _ = app.textFields["server.url"].waitForExistence(timeout: 10)
         }
-        guard button.exists else { return }
-        button.tap()
-        let confirm = app.sheets.buttons["退出登录"]
-        if confirm.waitForExistence(timeout: 5) { confirm.tap() }
-        _ = app.textFields["server.url"].waitForExistence(timeout: 10)
     }
 
     @MainActor
@@ -126,24 +128,29 @@ final class TransferUITests: XCTestCase {
         XCTAssertTrue(filesTab.waitForExistence(timeout: 30), "未进入主界面")
     }
 
+    /// 退出登录；模拟器里可能残留其它账户（退出后切到下一个账户），重复直到回到服务器地址页
     @MainActor
     private func signOut(_ app: XCUIApplication) {
-        openTab(app, "我的")
-        let signOutButton = app.buttons["me.signOut"]
-        var attempts = 0
-        while !(signOutButton.exists && signOutButton.isHittable) && attempts < 6 {
-            app.swipeUp()
-            attempts += 1
+        let urlField = app.textFields["server.url"]
+        for _ in 0..<4 where !urlField.exists {
+            openTab(app, "我的")
+            let signOutButton = app.buttons["me.signOut"]
+            var attempts = 0
+            while !(signOutButton.exists && signOutButton.isHittable) && attempts < 6 {
+                app.swipeUp()
+                attempts += 1
+            }
+            XCTAssertTrue(signOutButton.waitForExistence(timeout: 10), "找不到退出登录按钮")
+            signOutButton.tap()
+            let confirm = app.sheets.buttons["退出登录"]
+            if confirm.waitForExistence(timeout: 5) {
+                confirm.tap()
+            } else {
+                app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "退出登录", "me.signOut")).firstMatch.tap()
+            }
+            _ = urlField.waitForExistence(timeout: 10)
         }
-        XCTAssertTrue(signOutButton.waitForExistence(timeout: 10), "找不到退出登录按钮")
-        signOutButton.tap()
-        let confirm = app.sheets.buttons["退出登录"]
-        if confirm.waitForExistence(timeout: 5) {
-            confirm.tap()
-        } else {
-            app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "退出登录", "me.signOut")).firstMatch.tap()
-        }
-        XCTAssertTrue(app.textFields["server.url"].waitForExistence(timeout: 20), "退出登录后未回到服务器地址页")
+        XCTAssertTrue(urlField.exists, "退出登录后未回到服务器地址页")
     }
 
     /// 切换 Tab（Tab 栏滚动收起时也能点到）
