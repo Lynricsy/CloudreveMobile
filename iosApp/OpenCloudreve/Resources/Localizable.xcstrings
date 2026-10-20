@@ -193,18 +193,18 @@
         }
       }
     },
-    "例如 https://cloud.example.com；未填写协议时默认使用 HTTPS。": {
+    "例如 `https://cloud.example.com`。未填写协议时默认使用 HTTPS。": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "For example https://cloud.example.com. HTTPS is used when no scheme is given."
+            "value": "For example `https://cloud.example.com`. HTTPS is used when no scheme is given."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "例如 https://cloud.example.com；未填写协议时默认使用 HTTPS。"
+            "value": "例如 `https://cloud.example.com`。未填写协议时默认使用 HTTPS。"
           }
         }
       }

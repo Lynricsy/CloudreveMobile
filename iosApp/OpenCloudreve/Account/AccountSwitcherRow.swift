@@ -38,7 +38,10 @@ struct AccountSwitcherRow: View {
                         .accessibilityLabel(Text("当前账户"))
                 }
             }
+            .contentShape(.rect)
         }
+        // 默认样式会把整行文字染成强调色；plain 保持主/次文字颜色，contentShape 让整行可点
+        .buttonStyle(.plain)
         .disabled(signingOut)
         .swipeActions {
             Button("退出登录", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive, action: signOut)

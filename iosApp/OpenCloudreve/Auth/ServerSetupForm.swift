@@ -24,7 +24,8 @@ struct ServerSetupForm: View {
                     .onSubmit(submit)
                     .accessibilityIdentifier("server.url")
             } footer: {
-                Text("例如 https://cloud.example.com；未填写协议时默认使用 HTTPS。")
+                // 反引号让 Markdown 把地址当代码，避免自动链接吞掉后面的全角标点与中文
+                Text("例如 `https://cloud.example.com`。未填写协议时默认使用 HTTPS。")
             }
 
             if let error = host.state.error {
