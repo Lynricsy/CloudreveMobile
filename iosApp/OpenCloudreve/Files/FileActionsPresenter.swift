@@ -98,6 +98,7 @@ struct FileActionsPresenter: ViewModifier {
                     switch onEnum(of: effect) {
                     case let .succeeded(success):
                         onChanged(success.operation, success.outcome)
+                        FileProviderSignal.workingSetChanged(accountId: context.accountId)
                         if case let .sourceLinks(result) = onEnum(of: success.outcome) {
                             driver.sheet = .sourceLinks(id: UUID(), links: result.links, failures: result.failures)
                         }

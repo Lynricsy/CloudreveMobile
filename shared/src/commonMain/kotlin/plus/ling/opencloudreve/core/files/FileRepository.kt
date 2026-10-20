@@ -88,6 +88,14 @@ class FileRepository internal constructor(
         runCatching { CloudreveJson.decodeFromString(ListPage.serializer(), row.json) }.getOrNull()
     }
 
+    /** 最近缓存的目录列表（新到旧，最多 [limit] 个；File Provider 工作集用），解析失败的跳过 */
+    @Throws(Exception::class)
+    suspend fun recentListings(limit: Int): List<ListPage> = withContext(ioDispatcher) {
+        database.cacheQueries.selectRecentListings(accountId, limit.toLong()).executeAsList().mapNotNull { row ->
+            runCatching { CloudreveJson.decodeFromString(ListPage.serializer(), row.json) }.getOrNull()
+        }
+    }
+
     /** 写入目录缓存（搜索结果不缓存） */
     internal suspend fun writeListingCache(uri: String, page: ListPage) {
         if (CrUri.parseOrNull(uri)?.isSearch() == true) return

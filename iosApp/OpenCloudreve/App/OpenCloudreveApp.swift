@@ -8,6 +8,7 @@ struct OpenCloudreveApp: App {
     init() {
         CoreBootstrap.start()
         _session = State(initialValue: AppSession(accounts: CoreGraph.shared.accounts()))
+        FileProviderDomains.start(accounts: CoreGraph.shared.accounts())
     }
 
     var body: some Scene {

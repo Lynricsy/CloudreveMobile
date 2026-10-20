@@ -31,6 +31,7 @@ import plus.ling.opencloudreve.core.settings.UserSettingsRepository
 import plus.ling.opencloudreve.core.share.ShareRepository
 import plus.ling.opencloudreve.core.site.SiteConfigRepository
 import plus.ling.opencloudreve.core.transfer.ChunkMaterializer
+import plus.ling.opencloudreve.core.transfer.DirectTransferRunner
 import plus.ling.opencloudreve.core.transfer.DownloadPlanner
 import plus.ling.opencloudreve.core.transfer.TransferExecutor
 import plus.ling.opencloudreve.core.transfer.TransferExecutorHolder
@@ -141,6 +142,9 @@ object CoreGraph {
     fun uploadPlanner(): UploadPlanner = koin.get()
     fun downloadPlanner(): DownloadPlanner = koin.get()
     fun chunkMaterializer(): ChunkMaterializer = koin.get()
+
+    /** 进程内直接执行传输（iOS File Provider 扩展等需要同步等待结果的场景） */
+    fun directTransferRunner(): DirectTransferRunner = koin.get()
 
     /** 安装平台传输执行器（Android WorkManager / iOS 后台 URLSession），应在启动后立即调用 */
     fun installExecutor(executor: TransferExecutor) {

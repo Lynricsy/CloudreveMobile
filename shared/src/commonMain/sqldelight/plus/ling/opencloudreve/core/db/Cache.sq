@@ -31,6 +31,9 @@ INSERT OR REPLACE INTO ListingCache (account_id, uri, json, cached_at) VALUES (?
 selectListing:
 SELECT * FROM ListingCache WHERE account_id = ? AND uri = ?;
 
+selectRecentListings:
+SELECT * FROM ListingCache WHERE account_id = ? ORDER BY cached_at DESC LIMIT :limit;
+
 deleteListing:
 DELETE FROM ListingCache WHERE account_id = ? AND uri = ?;
 

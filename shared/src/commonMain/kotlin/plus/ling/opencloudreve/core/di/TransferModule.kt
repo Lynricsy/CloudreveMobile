@@ -3,6 +3,7 @@ package plus.ling.opencloudreve.core.di
 import org.koin.dsl.module
 import plus.ling.opencloudreve.core.platform.PlatformContext
 import plus.ling.opencloudreve.core.transfer.ChunkMaterializer
+import plus.ling.opencloudreve.core.transfer.DirectTransferRunner
 import plus.ling.opencloudreve.core.transfer.DownloadPlanner
 import plus.ling.opencloudreve.core.transfer.FileSystemBridge
 import plus.ling.opencloudreve.core.transfer.TransferExecutorHolder
@@ -22,4 +23,5 @@ val transferModule = module {
     single { ChunkMaterializer(get(), get(), get()) }
     single { TransferExecutorHolder() }
     single { TransferManager(get(), get(), get(), get()) }
+    single { DirectTransferRunner(get(), get(), get(), get(), get(), get()) }
 }

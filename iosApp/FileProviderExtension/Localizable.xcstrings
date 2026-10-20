@@ -1,0 +1,23 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "回收站" : {
+      "comment" : "系统“文件”中回收站容器的名称",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trash"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回收站"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
