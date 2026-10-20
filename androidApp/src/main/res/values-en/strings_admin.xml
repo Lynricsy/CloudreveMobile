@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Admin: common -->
+    <string name="admin_open_in_web">Open in web dashboard</string>
+    <string name="admin_total_count">%1$d total</string>
+    <string name="admin_selected_count">%1$d selected</string>
+    <string name="admin_select_all">Select all</string>
+    <string name="admin_clear_selection">Exit selection</string>
+    <string name="admin_enter_selection">Select</string>
+    <string name="admin_delete">Delete</string>
+    <string name="admin_delete_confirm_title">Delete selected items?</string>
+    <plurals name="admin_delete_confirm_message">
+        <item quantity="one">%1$d item will be deleted. This cannot be undone.</item>
+        <item quantity="other">%1$d items will be deleted. This cannot be undone.</item>
+    </plurals>
+    <plurals name="admin_deleted">
+        <item quantity="one">Deleted %1$d item</item>
+        <item quantity="other">Deleted %1$d items</item>
+    </plurals>
+    <string name="admin_empty">Nothing here</string>
+    <string name="admin_empty_filtered">No results match the filters</string>
+    <string name="admin_load_failed">Failed to load</string>
+    <string name="admin_sort">Sort</string>
+    <string name="admin_sort_asc">Ascending</string>
+    <string name="admin_sort_desc">Descending</string>
+    <string name="admin_more">More</string>
+    <string name="admin_filter_clear">Clear filters</string>
+    <string name="admin_filter_all">All</string>
+    <string name="admin_filter_apply">Apply</string>
+    <string name="admin_filter_clear_value">Clear</string>
+    <string name="admin_filter_user_id">User ID</string>
+    <string name="admin_filter_file_id">File ID</string>
+    <string name="admin_filter_policy_id">Storage policy ID</string>
+    <string name="admin_filter_shared">Shared only</string>
+    <string name="admin_filter_direct_link">With direct links</string>
+    <string name="admin_copy">Copy</string>
+    <string name="admin_copied">Copied</string>
+    <string name="admin_open">Open</string>
+    <string name="admin_expand">Expand</string>
+    <string name="admin_collapse">Collapse</string>
+    <string name="admin_yes">Yes</string>
+    <string name="admin_no">No</string>
+    <string name="admin_save">Save</string>
+    <string name="admin_saved">Saved</string>
+    <string name="admin_discard">Discard changes</string>
+    <string name="admin_info">Info</string>
+    <string name="admin_field_id">ID</string>
+    <string name="admin_field_hash_id">Hash ID</string>
+    <string name="admin_field_created">Created</string>
+    <string name="admin_field_updated">Updated</string>
+
+    <!-- Sort fields -->
+    <string name="admin_order_id">ID</string>
+    <string name="admin_order_nick">Nickname</string>
+    <string name="admin_order_email">Email</string>
+    <string name="admin_order_storage">Storage used</string>
+    <string name="admin_order_updated_at">Updated</string>
+    <string name="admin_order_created_at">Created</string>
+    <string name="admin_order_views">Views</string>
+    <string name="admin_order_downloads">Downloads</string>
+    <string name="admin_order_remain_downloads">Remaining downloads</string>
+    <string name="admin_order_name">Name</string>
+    <string name="admin_order_size">Size</string>
+    <string name="admin_order_weight">Weight</string>
+
+    <!-- Summary -->
+    <string name="admin_home_title">Admin</string>
+    <string name="admin_users">Users</string>
+    <string name="admin_shares">Shares</string>
+    <string name="admin_files">Files</string>
+    <string name="admin_entities">Entities</string>
+    <string name="admin_queue">Task queue</string>
+    <string name="admin_nodes">Nodes</string>
+    <string name="admin_section_manage">Manage</string>
+    <string name="admin_server_info">Server</string>
+    <string name="admin_version">Version</string>
+    <string name="admin_version_value">%1$s (%2$s)</string>
+    <string name="admin_generated_at">Generated at</string>
+    <string name="admin_site_urls">Site URLs</string>
+    <string name="admin_daily_title">New in the last 12 days</string>
+    <string name="admin_chart_line">Line</string>
+    <string name="admin_chart_bar">Bar</string>
+    <string name="admin_chart_empty">No statistics yet</string>
+
+    <!-- Users -->
+    <string name="admin_user_email">Email</string>
+    <string name="admin_user_nick">Nickname</string>
+    <string name="admin_user_status">Status</string>
+    <string name="admin_user_group">Group</string>
+    <string name="admin_user_storage">Storage used</string>
+    <string name="admin_user_status_active">Active</string>
+    <string name="admin_user_status_inactive">Inactive</string>
+    <string name="admin_user_status_manual_banned">Banned</string>
+    <string name="admin_user_status_sys_banned">Banned by system</string>
+    <string name="admin_user_edit_title">Edit user</string>
+    <string name="admin_user_new_password">New password (leave empty to keep)</string>
+    <string name="admin_user_password_hint">6–128 characters</string>
+    <string name="admin_user_clear_2fa">Clear two-factor authentication</string>
+    <string name="admin_user_clear_2fa_desc">This user has 2FA enabled; it will be turned off on save</string>
+    <string name="admin_user_locked">Status and group of the initial administrator cannot be changed</string>
+    <string name="admin_user_capacity">Capacity</string>
+    <string name="admin_user_capacity_value">%1$s / %2$s</string>
+    <string name="admin_user_calibrate">Calibrate storage</string>
+    <string name="admin_user_calibrated">Storage calibrated</string>
+    <string name="admin_user_open_files">Browse this user\'s files</string>
+    <string name="admin_user_delete">Delete user</string>
+    <string name="admin_user_delete_confirm">User %1$s and all of their files will be deleted. This cannot be undone.</string>
+    <string name="admin_user_two_fa">Two-factor authentication</string>
+
+    <!-- Shares -->
+    <string name="admin_share_file_missing">(file not found)</string>
+    <string name="admin_share_owner">Owner</string>
+    <string name="admin_share_stats">%1$d views · %2$d downloads</string>
+    <string name="admin_share_expires">Expires</string>
+    <string name="admin_share_expires_at">Expires %1$s</string>
+    <string name="admin_share_expired_at">Expired %1$s</string>
+    <string name="admin_share_never">Never expires</string>
+    <string name="admin_share_password">Password</string>
+    <string name="admin_share_has_password">Password protected</string>
+    <string name="admin_share_no_password">None</string>
+    <string name="admin_share_unlimited">Unlimited</string>
+    <string name="admin_share_view">Share view settings</string>
+    <string name="admin_share_readme">Show README</string>
+    <string name="admin_share_link">Share link</string>
+    <string name="admin_share_copy_link">Copy share link</string>
+    <string name="admin_share_delete_confirm">Delete this share?</string>
+
+    <!-- Files -->
+    <string name="admin_file_name">File name</string>
+    <string name="admin_file_size">Size</string>
+    <string name="admin_file_owner">Owner</string>
+    <string name="admin_file_policy">Storage policy</string>
+    <string name="admin_file_primary_entity">Primary entity ID</string>
+    <string name="admin_file_shares">Shares</string>
+    <string name="admin_file_entities">Entities</string>
+    <string name="admin_file_direct_links">Direct links</string>
+    <string name="admin_file_metadata">Metadata</string>
+    <string name="admin_file_get_url">Get URL</string>
+    <string name="admin_file_url_title">File URL</string>
+    <string name="admin_file_url_note">Valid for 1 hour</string>
+    <string name="admin_file_delete_confirm">Delete this file?</string>
+    <string name="admin_entity_version">Version</string>
+    <string name="admin_entity_thumbnail">Thumbnail</string>
+    <string name="admin_entity_live_photo">Live photo</string>
+    <string name="admin_entity_refs">%1$d references</string>
+    <string name="admin_direct_link_label">%1$s (%2$d downloads)</string>
+
+    <!-- Task queue -->
+    <string name="admin_queue_metrics">Queue metrics</string>
+    <string name="admin_refresh_metrics">Refresh metrics</string>
+    <string name="admin_metric_busy">Busy</string>
+    <string name="admin_metric_submitted">Submitted</string>
+    <string name="admin_metric_success">Succeeded</string>
+    <string name="admin_metric_failure">Failed</string>
+    <string name="admin_metric_suspending">Suspended</string>
+    <string name="admin_queue_name_media_meta">Media metadata</string>
+    <string name="admin_queue_name_recycle">Recycle</string>
+    <string name="admin_queue_name_io_intense">IO intensive</string>
+    <string name="admin_queue_name_remote_download">Remote download</string>
+    <string name="admin_queue_name_thumb">Thumbnails</string>
+    <string name="admin_task_type">Type</string>
+    <string name="admin_task_status">Status</string>
+    <string name="admin_task_user">User</string>
+    <string name="admin_task_status_queued">Queued</string>
+    <string name="admin_task_status_processing">Processing</string>
+    <string name="admin_task_status_suspending">Suspended</string>
+    <string name="admin_task_status_error">Error</string>
+    <string name="admin_task_status_canceled">Canceled</string>
+    <string name="admin_task_status_completed">Completed</string>
+    <string name="admin_task_type_create_archive">Create archive</string>
+    <string name="admin_task_type_extract_archive">Extract archive</string>
+    <string name="admin_task_type_relocate">Relocate storage</string>
+    <string name="admin_task_type_remote_download">Remote download</string>
+    <string name="admin_task_type_import">Import external files</string>
+    <string name="admin_task_type_media_meta">Extract media metadata</string>
+    <string name="admin_task_type_entity_recycle_routine">Routine entity recycle</string>
+    <string name="admin_task_type_explicit_entity_recycle">Entity recycle</string>
+    <string name="admin_task_type_upload_sentinel_check">Upload session check</string>
+    <string name="admin_task_correlation">Correlation ID</string>
+    <string name="admin_task_node">Node</string>
+    <string name="admin_task_summary">Summary</string>
+    <string name="admin_task_phase">Phase</string>
+    <string name="admin_task_summary_props">Summary properties</string>
+    <string name="admin_task_public_state">Execution state</string>
+    <string name="admin_task_retry_count">Retries</string>
+    <string name="admin_task_duration">Execution time</string>
+    <string name="admin_task_resume_time">Resume at</string>
+    <string name="admin_task_error">Error</string>
+    <string name="admin_task_error_history">Error history</string>
+    <string name="admin_task_slave_props">Slave task properties</string>
+    <string name="admin_task_private_state">Internal state</string>
+    <string name="admin_cleanup">Clean up tasks</string>
+    <string name="admin_cleanup_message">Delete finished tasks created before:</string>
+    <plurals name="admin_cleanup_older_than">
+        <item quantity="one">Older than %1$d day</item>
+        <item quantity="other">Older than %1$d days</item>
+    </plurals>
+    <string name="admin_cleanup_confirm">Clean up</string>
+    <string name="admin_tasks_cleaned">Tasks cleaned up</string>
+
+    <!-- Nodes -->
+    <string name="admin_node_type">Type</string>
+    <string name="admin_node_type_master">Master</string>
+    <string name="admin_node_type_slave">Slave</string>
+    <string name="admin_node_status">Status</string>
+    <string name="admin_node_status_active">Active</string>
+    <string name="admin_node_status_suspended">Suspended</string>
+    <string name="admin_node_server">Server</string>
+    <string name="admin_node_weight_value">Weight %1$d</string>
+    <string name="admin_node_policies">Storage policies</string>
+    <string name="admin_node_settings">Node settings</string>
+    <string name="admin_node_test">Test connection</string>
+    <string name="admin_node_test_ok">Node is reachable</string>
+    <string name="admin_node_test_failed">Connection failed: %1$s</string>
+    <string name="admin_node_test_failed_plain">Connection failed</string>
+</resources>

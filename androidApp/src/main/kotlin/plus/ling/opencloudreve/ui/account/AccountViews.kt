@@ -49,8 +49,15 @@ import plus.ling.opencloudreve.core.presentation.auth.AccountItem
 import plus.ling.opencloudreve.core.presentation.auth.AccountSwitcherIntent
 import plus.ling.opencloudreve.core.presentation.auth.AccountSwitcherUiState
 import plus.ling.opencloudreve.ui.common.message
+import androidx.compose.ui.platform.LocalContext
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 
-/** 头像：加载失败（无头像 404）时显示昵称首字母 */
+/**
+ * 头像：加载失败（无头像时服务端返回 JSON 错误）时显示昵称首字母。
+ * 不写磁盘缓存：Coil 3 默认不看缓存头，会把“无头像”的 JSON 响应按地址长期缓存；
+ * 账户重新登录后头像版本号归零，地址与上传前相同，会一直命中那份旧响应。
+ */
 @Composable
 fun AccountAvatar(item: AccountItem, size: Dp, modifier: Modifier = Modifier) {
     val name = item.account.nickname.ifBlank { item.account.email }
@@ -67,8 +74,15 @@ fun AccountAvatar(item: AccountItem, size: Dp, modifier: Modifier = Modifier) {
             )
         }
     }
+    val context = LocalContext.current
+    val request = remember(item.avatarUrl) {
+        ImageRequest.Builder(context)
+            .data(item.avatarUrl)
+            .diskCachePolicy(CachePolicy.DISABLED)
+            .build()
+    }
     SubcomposeAsyncImage(
-        model = item.avatarUrl,
+        model = request,
         contentDescription = stringResource(R.string.account_avatar_desc),
         contentScale = ContentScale.Crop,
         modifier = modifier.size(size).clip(CircleShape),

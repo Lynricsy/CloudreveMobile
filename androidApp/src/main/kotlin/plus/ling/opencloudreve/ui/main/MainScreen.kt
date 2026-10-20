@@ -28,6 +28,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
@@ -72,6 +73,8 @@ enum class MainTab(
 @Composable
 fun MainScreen(
     onAddAccount: () -> Unit,
+    /** 会话被主动结束（如修改密码）后到该站点的登录页重新登录 */
+    onReLogin: (siteUrl: String, email: String) -> Unit,
     switcher: AccountSwitcherViewModel = koinViewModel(),
     accounts: AccountRepository = koinInject(),
 ) {
@@ -129,12 +132,20 @@ fun MainScreen(
                 }
                 MainTab.Shares -> PlaceholderTab(MainTab.Shares, R.string.placeholder_shares)
                 MainTab.Tasks -> PlaceholderTab(MainTab.Tasks, R.string.placeholder_tasks)
-                MainTab.Me -> MeTab(
-                    state = switcherState,
-                    onIntent = switcher::on,
-                    onOpenSwitcher = { showSwitcher = true },
-                    onAddAccount = onAddAccount,
-                )
+                MainTab.Me -> active?.let { account ->
+                    // 切换账户时重建“我的”Tab 内的导航栈与 ViewModel
+                    key(account.id) {
+                        MeTab(
+                            accountId = account.id,
+                            switcherState = switcherState,
+                            onSwitcherIntent = switcher::on,
+                            onOpenSwitcher = { showSwitcher = true },
+                            onAddAccount = onAddAccount,
+                            onReLogin = onReLogin,
+                            openFilesAt = openFilesAt,
+                        )
+                    }
+                }
             }
         }
     }

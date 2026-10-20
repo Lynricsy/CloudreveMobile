@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="zh-rCN">
+    <!-- 网页交接（设置与管理共用） -->
+    <string name="error_no_browser">没有可以打开网页的浏览器</string>
+    <string name="handoff_unsupported">此功能需要服务端 4.19.11 或更高版本（当前 %1$s）</string>
+
+    <!-- 我的 -->
+    <string name="me_admin">管理</string>
+    <string name="me_admin_desc">站点概览、用户、分享、文件、任务与节点</string>
+    <string name="me_avatar_title">更换头像</string>
+    <string name="me_avatar_pick">从相册选择</string>
+    <string name="me_avatar_gravatar">使用 Gravatar</string>
+    <string name="me_avatar_gravatar_desc">根据邮箱显示 Gravatar 头像</string>
+    <string name="me_avatar_crop_title">调整头像</string>
+    <string name="me_avatar_crop_confirm">使用</string>
+    <string name="me_avatar_decode_failed">无法读取这张图片</string>
+    <string name="me_avatar_updated">头像已更新</string>
+    <string name="me_nickname">昵称</string>
+    <string name="me_nickname_edit">修改昵称</string>
+    <string name="me_nickname_updated">昵称已更新</string>
+    <string name="me_capacity">已用 %1$s，共 %2$s</string>
+
+    <!-- 设置 -->
+    <string name="settings_title">设置</string>
+    <string name="settings_save">保存</string>
+    <string name="settings_saved">已保存</string>
+    <string name="settings_delete">删除</string>
+    <string name="settings_copy">复制</string>
+    <string name="settings_copied">已复制%1$s</string>
+    <string name="settings_off">已关闭</string>
+    <string name="settings_section_appearance">外观</string>
+    <string name="settings_section_files">文件管理</string>
+    <string name="settings_section_security">安全与隐私</string>
+    <string name="settings_section_storage">连接与存储</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_language_system">跟随系统</string>
+    <string name="settings_language_zh">简体中文</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_theme">主题色</string>
+    <string name="settings_theme_dynamic">跟随系统动态色</string>
+    <string name="settings_theme_site_named">站点主题 %1$s</string>
+    <string name="settings_view_sync">同步视图设置</string>
+    <string name="settings_view_sync_desc">在各设备间同步目录的排序、视图模式等设置</string>
+    <string name="settings_version_retention">版本保留</string>
+    <string name="settings_retention_desc">覆盖文件时保留旧版本，可在文件信息中查看与恢复。</string>
+    <string name="settings_retention_enable">启用版本保留</string>
+    <string name="settings_retention_exts">文件扩展名</string>
+    <string name="settings_retention_exts_hint">用逗号分隔，如 docx, md；留空表示全部类型</string>
+    <string name="settings_retention_max">最多保留版本数</string>
+    <string name="settings_retention_max_hint">0 表示不限</string>
+    <string name="settings_retention_all_types">全部类型</string>
+    <string name="settings_retention_unlimited">不限版本数</string>
+    <string name="settings_retention_max_n">最多 %1$d 个版本</string>
+    <string name="settings_profile_shares">个人主页分享可见性</string>
+    <string name="settings_profile_shares_public">仅展示公开分享</string>
+    <string name="settings_profile_shares_all">展示全部分享</string>
+    <string name="settings_profile_shares_hide">不展示</string>
+
+    <!-- 安全 -->
+    <string name="security_title">账户安全</string>
+    <string name="security_desc">密码、两步验证、Passkey、已授权应用</string>
+    <string name="security_section_login">登录</string>
+    <string name="security_section_passkeys">Passkey</string>
+    <string name="security_section_apps">已授权应用</string>
+    <string name="security_change_password">修改密码</string>
+    <string name="security_passwordless">此账户未设置密码</string>
+    <string name="security_password_current">当前密码</string>
+    <string name="security_password_new">新密码</string>
+    <string name="security_password_relogin">修改后所有设备都需要重新登录。</string>
+    <string name="security_2fa">两步验证</string>
+    <string name="security_2fa_on_desc">已开启，登录时需要输入身份验证器中的验证码</string>
+    <string name="security_2fa_off_desc">未开启</string>
+    <string name="security_2fa_enable_title">开启两步验证</string>
+    <string name="security_2fa_enable_message">用身份验证器应用扫描二维码（或手动输入密钥），然后输入生成的 6 位验证码。</string>
+    <string name="security_2fa_qr_desc">两步验证二维码</string>
+    <string name="security_2fa_secret">密钥</string>
+    <string name="security_2fa_enable">开启</string>
+    <string name="security_2fa_enabled">两步验证已开启</string>
+    <string name="security_2fa_disable_title">关闭两步验证</string>
+    <string name="security_2fa_disable_message">请输入身份验证器中的 6 位验证码以确认关闭。</string>
+    <string name="security_2fa_disable">关闭</string>
+    <string name="security_2fa_disabled">两步验证已关闭</string>
+    <string name="security_passkeys_empty">尚未添加 Passkey</string>
+    <string name="security_passkey_add">在此设备添加 Passkey</string>
+    <string name="security_passkey_added">Passkey 已添加</string>
+    <string name="security_passkey_failed">无法创建 Passkey：%1$s</string>
+    <string name="security_passkey_delete">删除 Passkey</string>
+    <string name="security_passkey_delete_message">删除后将不能再用“%1$s”登录。</string>
+    <string name="security_passkey_deleted">Passkey 已删除</string>
+    <string name="security_passkey_created">添加于 %1$s</string>
+    <string name="security_passkey_used">最近使用 %1$s</string>
+    <string name="security_apps_empty">没有已授权的应用</string>
+    <string name="security_grant_scopes">%1$d 项权限</string>
+    <string name="security_grant_revoke">撤销授权</string>
+    <string name="security_grant_revoke_message">“%1$s”将无法再访问你的账户。</string>
+    <string name="security_grant_revoked">已撤销授权</string>
+
+    <!-- WebDAV -->
+    <string name="dav_title">WebDAV</string>
+    <string name="dav_desc">用其他应用挂载你的文件</string>
+    <string name="dav_connection">连接信息</string>
+    <string name="dav_address">地址</string>
+    <string name="dav_username">用户名</string>
+    <string name="dav_password">密码</string>
+    <string name="dav_accounts">账号</string>
+    <string name="dav_empty">还没有 WebDAV 账号</string>
+    <string name="dav_disabled">当前用户组未开启 WebDAV</string>
+    <string name="dav_new">新建账号</string>
+    <string name="dav_edit">编辑账号</string>
+    <string name="dav_delete">删除账号</string>
+    <string name="dav_delete_message">删除后使用“%1$s”的客户端将无法连接。</string>
+    <string name="dav_created">账号已创建</string>
+    <string name="dav_deleted">账号已删除</string>
+    <string name="dav_more">更多操作</string>
+    <string name="dav_copy_address">复制地址</string>
+    <string name="dav_copy_username">复制用户名</string>
+    <string name="dav_copy_password">复制密码</string>
+    <string name="dav_name">备注名</string>
+    <string name="dav_root">根目录</string>
+    <string name="dav_root_my">我的文件</string>
+    <string name="dav_root_share">分享 %1$s</string>
+    <string name="dav_pick_root">设为根目录</string>
+    <string name="dav_readonly">只读</string>
+    <string name="dav_readonly_desc">只允许浏览和下载</string>
+    <string name="dav_proxy">反向代理</string>
+    <string name="dav_proxy_desc">下载由站点中转，而不是重定向到存储端</string>
+    <string name="dav_disable_sys_files">禁止系统文件</string>
+    <string name="dav_disable_sys_files_desc">不上传 .DS_Store、desktop.ini 等系统生成的文件</string>
+
+    <!-- 存储策略 -->
+    <string name="policies_title">存储策略</string>
+    <string name="policies_desc">当前用户组可用的存储策略</string>
+    <string name="policies_empty">没有可用的存储策略</string>
+    <string name="policies_default">默认</string>
+    <string name="policies_max_size">单文件上限：%1$s</string>
+    <string name="policies_unlimited">不限</string>
+    <string name="policies_encrypted">客户端加密</string>
+    <string name="policies_children">子策略与权重</string>
+    <string name="policies_weight">权重 %1$d（%2$d%%）</string>
+    <string name="policies_type_local">本机存储</string>
+    <string name="policies_type_remote">从机存储</string>
+    <string name="policies_type_lb">负载均衡</string>
+    <string name="policies_type_oss">阿里云 OSS</string>
+    <string name="policies_type_cos">腾讯云 COS</string>
+    <string name="policies_type_qiniu">七牛云</string>
+    <string name="policies_type_upyun">又拍云</string>
+    <string name="policies_type_ks3">金山云 KS3</string>
+    <string name="policies_type_obs">华为云 OBS</string>
+
+    <!-- 关于 -->
+    <string name="about_title">关于</string>
+    <string name="about_tagline">OpenCloudreve 移动客户端</string>
+    <string name="about_app_version">应用版本</string>
+    <string name="about_server_version">服务端版本</string>
+    <string name="about_server_unknown">无法获取</string>
+    <string name="about_loading">正在获取…</string>
+    <string name="about_source">源代码</string>
+    <string name="about_licenses">开源许可</string>
+</resources>

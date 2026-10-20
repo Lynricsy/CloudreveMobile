@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="zh-rCN">
+    <!-- 管理：通用 -->
+    <string name="admin_open_in_web">在网页后台打开</string>
+    <string name="admin_total_count">共 %1$d 项</string>
+    <string name="admin_selected_count">已选 %1$d 项</string>
+    <string name="admin_select_all">全选</string>
+    <string name="admin_clear_selection">退出多选</string>
+    <string name="admin_enter_selection">多选</string>
+    <string name="admin_delete">删除</string>
+    <string name="admin_delete_confirm_title">删除所选项目？</string>
+    <plurals name="admin_delete_confirm_message">
+        <item quantity="other">将删除 %1$d 项，此操作不可撤销。</item>
+    </plurals>
+    <plurals name="admin_deleted">
+        <item quantity="other">已删除 %1$d 项</item>
+    </plurals>
+    <string name="admin_empty">暂无数据</string>
+    <string name="admin_empty_filtered">没有符合条件的结果</string>
+    <string name="admin_load_failed">加载失败</string>
+    <string name="admin_sort">排序</string>
+    <string name="admin_sort_asc">升序</string>
+    <string name="admin_sort_desc">降序</string>
+    <string name="admin_more">更多</string>
+    <string name="admin_filter_clear">清除筛选</string>
+    <string name="admin_filter_all">全部</string>
+    <string name="admin_filter_apply">应用</string>
+    <string name="admin_filter_clear_value">清除</string>
+    <string name="admin_filter_user_id">用户 ID</string>
+    <string name="admin_filter_file_id">文件 ID</string>
+    <string name="admin_filter_policy_id">存储策略 ID</string>
+    <string name="admin_filter_shared">仅已分享</string>
+    <string name="admin_filter_direct_link">仅有直链</string>
+    <string name="admin_copy">复制</string>
+    <string name="admin_copied">已复制</string>
+    <string name="admin_open">打开</string>
+    <string name="admin_expand">展开</string>
+    <string name="admin_collapse">收起</string>
+    <string name="admin_yes">是</string>
+    <string name="admin_no">否</string>
+    <string name="admin_save">保存</string>
+    <string name="admin_saved">已保存</string>
+    <string name="admin_discard">放弃修改</string>
+    <string name="admin_info">信息</string>
+    <string name="admin_field_id">ID</string>
+    <string name="admin_field_hash_id">Hash ID</string>
+    <string name="admin_field_created">创建时间</string>
+    <string name="admin_field_updated">更新时间</string>
+
+    <!-- 排序字段 -->
+    <string name="admin_order_id">ID</string>
+    <string name="admin_order_nick">昵称</string>
+    <string name="admin_order_email">邮箱</string>
+    <string name="admin_order_storage">已用空间</string>
+    <string name="admin_order_updated_at">更新时间</string>
+    <string name="admin_order_created_at">创建时间</string>
+    <string name="admin_order_views">浏览数</string>
+    <string name="admin_order_downloads">下载数</string>
+    <string name="admin_order_remain_downloads">剩余下载次数</string>
+    <string name="admin_order_name">名称</string>
+    <string name="admin_order_size">大小</string>
+    <string name="admin_order_weight">权重</string>
+
+    <!-- 概览 -->
+    <string name="admin_home_title">管理</string>
+    <string name="admin_users">用户</string>
+    <string name="admin_shares">分享</string>
+    <string name="admin_files">文件</string>
+    <string name="admin_entities">实体</string>
+    <string name="admin_queue">任务队列</string>
+    <string name="admin_nodes">节点</string>
+    <string name="admin_section_manage">管理</string>
+    <string name="admin_server_info">服务端</string>
+    <string name="admin_version">版本</string>
+    <string name="admin_version_value">%1$s（%2$s）</string>
+    <string name="admin_generated_at">统计时间</string>
+    <string name="admin_site_urls">站点地址</string>
+    <string name="admin_daily_title">近 12 天新增</string>
+    <string name="admin_chart_line">折线</string>
+    <string name="admin_chart_bar">柱状</string>
+    <string name="admin_chart_empty">暂无统计数据</string>
+
+    <!-- 用户 -->
+    <string name="admin_user_email">邮箱</string>
+    <string name="admin_user_nick">昵称</string>
+    <string name="admin_user_status">状态</string>
+    <string name="admin_user_group">用户组</string>
+    <string name="admin_user_storage">已用空间</string>
+    <string name="admin_user_status_active">正常</string>
+    <string name="admin_user_status_inactive">未激活</string>
+    <string name="admin_user_status_manual_banned">已封禁</string>
+    <string name="admin_user_status_sys_banned">系统封禁</string>
+    <string name="admin_user_edit_title">编辑用户</string>
+    <string name="admin_user_new_password">新密码（留空不修改）</string>
+    <string name="admin_user_password_hint">6–128 位</string>
+    <string name="admin_user_clear_2fa">清除两步验证</string>
+    <string name="admin_user_clear_2fa_desc">该用户已启用两步验证，保存后将关闭</string>
+    <string name="admin_user_locked">初始管理员的状态与用户组不可修改</string>
+    <string name="admin_user_capacity">容量</string>
+    <string name="admin_user_capacity_value">%1$s / %2$s</string>
+    <string name="admin_user_calibrate">校准容量</string>
+    <string name="admin_user_calibrated">已校准容量</string>
+    <string name="admin_user_open_files">打开此用户的文件</string>
+    <string name="admin_user_delete">删除用户</string>
+    <string name="admin_user_delete_confirm">将删除用户 %1$s 及其全部文件，此操作不可撤销。</string>
+    <string name="admin_user_two_fa">两步验证</string>
+
+    <!-- 分享 -->
+    <string name="admin_share_file_missing">（文件不存在）</string>
+    <string name="admin_share_owner">所有者</string>
+    <string name="admin_share_stats">浏览 %1$d · 下载 %2$d</string>
+    <string name="admin_share_expires">过期时间</string>
+    <string name="admin_share_expires_at">%1$s 过期</string>
+    <string name="admin_share_expired_at">已于 %1$s 过期</string>
+    <string name="admin_share_never">永不过期</string>
+    <string name="admin_share_password">密码</string>
+    <string name="admin_share_has_password">有密码</string>
+    <string name="admin_share_no_password">无</string>
+    <string name="admin_share_unlimited">不限</string>
+    <string name="admin_share_view">共享视图设置</string>
+    <string name="admin_share_readme">显示 README</string>
+    <string name="admin_share_link">分享链接</string>
+    <string name="admin_share_copy_link">复制分享链接</string>
+    <string name="admin_share_delete_confirm">删除此分享？</string>
+
+    <!-- 文件 -->
+    <string name="admin_file_name">文件名</string>
+    <string name="admin_file_size">大小</string>
+    <string name="admin_file_owner">所有者</string>
+    <string name="admin_file_policy">存储策略</string>
+    <string name="admin_file_primary_entity">主实体 ID</string>
+    <string name="admin_file_shares">分享数</string>
+    <string name="admin_file_entities">实体</string>
+    <string name="admin_file_direct_links">直链</string>
+    <string name="admin_file_metadata">元数据</string>
+    <string name="admin_file_get_url">获取 URL</string>
+    <string name="admin_file_url_title">文件地址</string>
+    <string name="admin_file_url_note">地址 1 小时内有效</string>
+    <string name="admin_file_delete_confirm">删除此文件？</string>
+    <string name="admin_entity_version">版本</string>
+    <string name="admin_entity_thumbnail">缩略图</string>
+    <string name="admin_entity_live_photo">实况照片</string>
+    <string name="admin_entity_refs">引用 %1$d 次</string>
+    <string name="admin_direct_link_label">%1$s（下载 %2$d 次）</string>
+
+    <!-- 任务队列 -->
+    <string name="admin_queue_metrics">队列指标</string>
+    <string name="admin_refresh_metrics">刷新指标</string>
+    <string name="admin_metric_busy">忙碌</string>
+    <string name="admin_metric_submitted">已提交</string>
+    <string name="admin_metric_success">成功</string>
+    <string name="admin_metric_failure">失败</string>
+    <string name="admin_metric_suspending">挂起</string>
+    <string name="admin_queue_name_media_meta">媒体元数据</string>
+    <string name="admin_queue_name_recycle">回收</string>
+    <string name="admin_queue_name_io_intense">IO 密集</string>
+    <string name="admin_queue_name_remote_download">离线下载</string>
+    <string name="admin_queue_name_thumb">缩略图</string>
+    <string name="admin_task_type">类型</string>
+    <string name="admin_task_status">状态</string>
+    <string name="admin_task_user">用户</string>
+    <string name="admin_task_status_queued">排队中</string>
+    <string name="admin_task_status_processing">处理中</string>
+    <string name="admin_task_status_suspending">挂起中</string>
+    <string name="admin_task_status_error">出错</string>
+    <string name="admin_task_status_canceled">已取消</string>
+    <string name="admin_task_status_completed">已完成</string>
+    <string name="admin_task_type_create_archive">创建压缩包</string>
+    <string name="admin_task_type_extract_archive">解压缩</string>
+    <string name="admin_task_type_relocate">迁移存储策略</string>
+    <string name="admin_task_type_remote_download">离线下载</string>
+    <string name="admin_task_type_import">导入外部文件</string>
+    <string name="admin_task_type_media_meta">提取媒体元数据</string>
+    <string name="admin_task_type_entity_recycle_routine">例行回收实体</string>
+    <string name="admin_task_type_explicit_entity_recycle">回收实体</string>
+    <string name="admin_task_type_upload_sentinel_check">上传会话检查</string>
+    <string name="admin_task_correlation">关联 ID</string>
+    <string name="admin_task_node">节点</string>
+    <string name="admin_task_summary">摘要</string>
+    <string name="admin_task_phase">阶段</string>
+    <string name="admin_task_summary_props">摘要属性</string>
+    <string name="admin_task_public_state">执行状态</string>
+    <string name="admin_task_retry_count">重试次数</string>
+    <string name="admin_task_duration">执行时长</string>
+    <string name="admin_task_resume_time">恢复时间</string>
+    <string name="admin_task_error">错误</string>
+    <string name="admin_task_error_history">错误历史</string>
+    <string name="admin_task_slave_props">从机任务属性</string>
+    <string name="admin_task_private_state">内部状态</string>
+    <string name="admin_cleanup">清理任务</string>
+    <string name="admin_cleanup_message">删除以下时间之前创建的已结束任务：</string>
+    <plurals name="admin_cleanup_older_than">
+        <item quantity="other">早于 %1$d 天</item>
+    </plurals>
+    <string name="admin_cleanup_confirm">清理</string>
+    <string name="admin_tasks_cleaned">已清理任务</string>
+
+    <!-- 节点 -->
+    <string name="admin_node_type">类型</string>
+    <string name="admin_node_type_master">主机</string>
+    <string name="admin_node_type_slave">从机</string>
+    <string name="admin_node_status">状态</string>
+    <string name="admin_node_status_active">启用</string>
+    <string name="admin_node_status_suspended">已暂停</string>
+    <string name="admin_node_server">服务器地址</string>
+    <string name="admin_node_weight_value">权重 %1$d</string>
+    <string name="admin_node_policies">关联存储策略</string>
+    <string name="admin_node_settings">节点设置</string>
+    <string name="admin_node_test">连通测试</string>
+    <string name="admin_node_test_ok">节点连接正常</string>
+    <string name="admin_node_test_failed">连接失败：%1$s</string>
+    <string name="admin_node_test_failed_plain">连接失败</string>
+</resources>

@@ -69,7 +69,10 @@ fun AppNavHost(accounts: AccountRepository = koinInject()) {
             )
         }
         composable<MainRoute> {
-            MainScreen(onAddAccount = { navController.navigate(ServerSetupRoute) })
+            MainScreen(
+                onAddAccount = { navController.navigate(ServerSetupRoute) },
+                onReLogin = { siteUrl, email -> navController.resetTo(LoginRoute(siteUrl, email)) },
+            )
         }
     }
 }

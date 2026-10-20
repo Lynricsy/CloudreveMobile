@@ -29,6 +29,7 @@ security-crypto = "1.1.0"
 coil = "3.6.3"
 zxing = "3.5.4"
 markdown-renderer = "0.46.0"
+material-color-utilities = "5.0.1"
 junit = "4.13.2"
 
 [libraries]
@@ -94,6 +95,7 @@ coil-video = { module = "io.coil-kt.coil3:coil-video", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown-renderer" }
+material-color-utilities = { module = "com.materialkolor:material-color-utilities", version.ref = "material-color-utilities" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

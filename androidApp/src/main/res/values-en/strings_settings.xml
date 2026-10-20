@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Web handoff (shared by settings and admin) -->
+    <string name="error_no_browser">No browser available to open the page</string>
+    <string name="handoff_unsupported">This feature requires server 4.19.11 or later (current: %1$s)</string>
+
+    <!-- Me -->
+    <string name="me_admin">Administration</string>
+    <string name="me_admin_desc">Site overview, users, shares, files, tasks and nodes</string>
+    <string name="me_avatar_title">Change avatar</string>
+    <string name="me_avatar_pick">Choose from photos</string>
+    <string name="me_avatar_gravatar">Use Gravatar</string>
+    <string name="me_avatar_gravatar_desc">Show the Gravatar linked to your email</string>
+    <string name="me_avatar_crop_title">Adjust avatar</string>
+    <string name="me_avatar_crop_confirm">Use</string>
+    <string name="me_avatar_decode_failed">Couldn\'t read this image</string>
+    <string name="me_avatar_updated">Avatar updated</string>
+    <string name="me_nickname">Nickname</string>
+    <string name="me_nickname_edit">Edit nickname</string>
+    <string name="me_nickname_updated">Nickname updated</string>
+    <string name="me_capacity">%1$s of %2$s used</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_saved">Saved</string>
+    <string name="settings_delete">Delete</string>
+    <string name="settings_copy">Copy</string>
+    <string name="settings_copied">%1$s copied</string>
+    <string name="settings_off">Off</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_files">File management</string>
+    <string name="settings_section_security">Security &amp; privacy</string>
+    <string name="settings_section_storage">Connections &amp; storage</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_system">System default</string>
+    <string name="settings_language_zh">简体中文</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_theme">Theme color</string>
+    <string name="settings_theme_dynamic">System dynamic color</string>
+    <string name="settings_theme_site_named">Site theme %1$s</string>
+    <string name="settings_view_sync">Sync view settings</string>
+    <string name="settings_view_sync_desc">Sync folder sorting and view mode across devices</string>
+    <string name="settings_version_retention">Version retention</string>
+    <string name="settings_retention_desc">Keep previous versions when a file is overwritten. You can view and restore them in file info.</string>
+    <string name="settings_retention_enable">Enable version retention</string>
+    <string name="settings_retention_exts">File extensions</string>
+    <string name="settings_retention_exts_hint">Comma separated, e.g. docx, md. Leave empty for all types</string>
+    <string name="settings_retention_max">Maximum versions</string>
+    <string name="settings_retention_max_hint">0 means unlimited</string>
+    <string name="settings_retention_all_types">All types</string>
+    <string name="settings_retention_unlimited">Unlimited versions</string>
+    <string name="settings_retention_max_n">Up to %1$d versions</string>
+    <string name="settings_profile_shares">Shares on public profile</string>
+    <string name="settings_profile_shares_public">Public shares only</string>
+    <string name="settings_profile_shares_all">All shares</string>
+    <string name="settings_profile_shares_hide">Hidden</string>
+
+    <!-- Security -->
+    <string name="security_title">Account security</string>
+    <string name="security_desc">Password, two-factor authentication, passkeys, authorized apps</string>
+    <string name="security_section_login">Sign-in</string>
+    <string name="security_section_passkeys">Passkeys</string>
+    <string name="security_section_apps">Authorized apps</string>
+    <string name="security_change_password">Change password</string>
+    <string name="security_passwordless">This account has no password</string>
+    <string name="security_password_current">Current password</string>
+    <string name="security_password_new">New password</string>
+    <string name="security_password_relogin">You will need to sign in again on all devices.</string>
+    <string name="security_2fa">Two-factor authentication</string>
+    <string name="security_2fa_on_desc">On. Sign-in requires a code from your authenticator app</string>
+    <string name="security_2fa_off_desc">Off</string>
+    <string name="security_2fa_enable_title">Turn on two-factor authentication</string>
+    <string name="security_2fa_enable_message">Scan the QR code with an authenticator app (or enter the key manually), then enter the 6-digit code it shows.</string>
+    <string name="security_2fa_qr_desc">Two-factor QR code</string>
+    <string name="security_2fa_secret">Secret key</string>
+    <string name="security_2fa_enable">Turn on</string>
+    <string name="security_2fa_enabled">Two-factor authentication is on</string>
+    <string name="security_2fa_disable_title">Turn off two-factor authentication</string>
+    <string name="security_2fa_disable_message">Enter the 6-digit code from your authenticator app to confirm.</string>
+    <string name="security_2fa_disable">Turn off</string>
+    <string name="security_2fa_disabled">Two-factor authentication is off</string>
+    <string name="security_passkeys_empty">No passkeys yet</string>
+    <string name="security_passkey_add">Add a passkey on this device</string>
+    <string name="security_passkey_added">Passkey added</string>
+    <string name="security_passkey_failed">Couldn\'t create passkey: %1$s</string>
+    <string name="security_passkey_delete">Delete passkey</string>
+    <string name="security_passkey_delete_message">You will no longer be able to sign in with \"%1$s\".</string>
+    <string name="security_passkey_deleted">Passkey deleted</string>
+    <string name="security_passkey_created">Added %1$s</string>
+    <string name="security_passkey_used">Last used %1$s</string>
+    <string name="security_apps_empty">No authorized apps</string>
+    <string name="security_grant_scopes">%1$d permissions</string>
+    <string name="security_grant_revoke">Revoke access</string>
+    <string name="security_grant_revoke_message">\"%1$s\" will no longer be able to access your account.</string>
+    <string name="security_grant_revoked">Access revoked</string>
+
+    <!-- WebDAV -->
+    <string name="dav_title">WebDAV</string>
+    <string name="dav_desc">Mount your files in other apps</string>
+    <string name="dav_connection">Connection</string>
+    <string name="dav_address">Address</string>
+    <string name="dav_username">Username</string>
+    <string name="dav_password">Password</string>
+    <string name="dav_accounts">Accounts</string>
+    <string name="dav_empty">No WebDAV accounts yet</string>
+    <string name="dav_disabled">WebDAV is not enabled for your user group</string>
+    <string name="dav_new">New account</string>
+    <string name="dav_edit">Edit account</string>
+    <string name="dav_delete">Delete account</string>
+    <string name="dav_delete_message">Clients using \"%1$s\" will no longer be able to connect.</string>
+    <string name="dav_created">Account created</string>
+    <string name="dav_deleted">Account deleted</string>
+    <string name="dav_more">More actions</string>
+    <string name="dav_copy_address">Copy address</string>
+    <string name="dav_copy_username">Copy username</string>
+    <string name="dav_copy_password">Copy password</string>
+    <string name="dav_name">Name</string>
+    <string name="dav_root">Root folder</string>
+    <string name="dav_root_my">My files</string>
+    <string name="dav_root_share">Share %1$s</string>
+    <string name="dav_pick_root">Use as root</string>
+    <string name="dav_readonly">Read-only</string>
+    <string name="dav_readonly_desc">Only browsing and downloading are allowed</string>
+    <string name="dav_proxy">Reverse proxy</string>
+    <string name="dav_proxy_desc">Downloads are relayed by the site instead of redirecting to storage</string>
+    <string name="dav_disable_sys_files">Block system files</string>
+    <string name="dav_disable_sys_files_desc">Don\'t upload system files such as .DS_Store and desktop.ini</string>
+
+    <!-- Storage policies -->
+    <string name="policies_title">Storage policies</string>
+    <string name="policies_desc">Storage policies available to your user group</string>
+    <string name="policies_empty">No storage policies available</string>
+    <string name="policies_default">Default</string>
+    <string name="policies_max_size">Max file size: %1$s</string>
+    <string name="policies_unlimited">Unlimited</string>
+    <string name="policies_encrypted">Client-side encryption</string>
+    <string name="policies_children">Child policies and weights</string>
+    <string name="policies_weight">Weight %1$d (%2$d%%)</string>
+    <string name="policies_type_local">Local storage</string>
+    <string name="policies_type_remote">Slave node</string>
+    <string name="policies_type_lb">Load balancing</string>
+    <string name="policies_type_oss">Alibaba Cloud OSS</string>
+    <string name="policies_type_cos">Tencent Cloud COS</string>
+    <string name="policies_type_qiniu">Qiniu</string>
+    <string name="policies_type_upyun">Upyun</string>
+    <string name="policies_type_ks3">Kingsoft KS3</string>
+    <string name="policies_type_obs">Huawei Cloud OBS</string>
+
+    <!-- About -->
+    <string name="about_title">About</string>
+    <string name="about_tagline">Mobile client for OpenCloudreve</string>
+    <string name="about_app_version">App version</string>
+    <string name="about_server_version">Server version</string>
+    <string name="about_server_unknown">Unavailable</string>
+    <string name="about_loading">Loading…</string>
+    <string name="about_source">Source code</string>
+    <string name="about_licenses">Open-source licenses</string>
+</resources>

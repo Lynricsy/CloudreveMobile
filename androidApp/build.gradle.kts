@@ -79,6 +79,8 @@ dependencies {
     implementation(libs.androidx.browser)
     implementation(libs.zxing.core)
     implementation(libs.markdown.renderer.m3)
+    // 站点主题色 → M3 配色（HCT 色彩算法）
+    implementation(libs.material.color.utilities)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)

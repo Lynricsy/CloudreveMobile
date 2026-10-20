@@ -9,6 +9,9 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import com.materialkolor.hct.Hct
+import com.materialkolor.scheme.SchemeContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
@@ -93,16 +96,23 @@ private val BrandDark: ColorScheme = darkColorScheme(
 )
 
 /**
- * 应用主题：Android 12+ 默认使用系统动态取色，否则用品牌色配色；跟随系统深色模式。
+ * 应用主题：默认 Android 12+ 使用系统动态取色，否则用品牌色配色；[settings] 选择站点主题色时，
+ * 以其主色（深浅色各一）为种子按 M3 HCT 算法生成配色。跟随系统深色模式。
  */
 @Composable
 fun OpenCloudreveTheme(
+    settings: ThemeSettings = ThemeSettings(),
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    val seed = if (settings.source == ThemeSource.Site) {
+        if (darkTheme) settings.darkSeed ?: settings.lightSeed else settings.lightSeed
+    } else {
+        null
+    }
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        seed != null -> remember(seed, darkTheme) { seedColorScheme(seed, darkTheme) }
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
@@ -110,4 +120,49 @@ fun OpenCloudreveTheme(
         else -> BrandLight
     }
     MaterialTheme(colorScheme = colorScheme, content = content)
+}
+
+/** 以 [seed]（ARGB）生成 M3 配色；用 Content 方案，主色尽量贴近站点主题色本身 */
+fun seedColorScheme(seed: Int, dark: Boolean): ColorScheme {
+    val s = SchemeContent(Hct.fromInt(seed), dark, 0.0)
+    val c = { argb: Int -> Color(argb) }
+    val base = if (dark) darkColorScheme() else lightColorScheme()
+    return base.copy(
+        primary = c(s.primary),
+        onPrimary = c(s.onPrimary),
+        primaryContainer = c(s.primaryContainer),
+        onPrimaryContainer = c(s.onPrimaryContainer),
+        inversePrimary = c(s.inversePrimary),
+        secondary = c(s.secondary),
+        onSecondary = c(s.onSecondary),
+        secondaryContainer = c(s.secondaryContainer),
+        onSecondaryContainer = c(s.onSecondaryContainer),
+        tertiary = c(s.tertiary),
+        onTertiary = c(s.onTertiary),
+        tertiaryContainer = c(s.tertiaryContainer),
+        onTertiaryContainer = c(s.onTertiaryContainer),
+        error = c(s.error),
+        onError = c(s.onError),
+        errorContainer = c(s.errorContainer),
+        onErrorContainer = c(s.onErrorContainer),
+        background = c(s.background),
+        onBackground = c(s.onBackground),
+        surface = c(s.surface),
+        onSurface = c(s.onSurface),
+        surfaceVariant = c(s.surfaceVariant),
+        onSurfaceVariant = c(s.onSurfaceVariant),
+        surfaceTint = c(s.surfaceTint),
+        inverseSurface = c(s.inverseSurface),
+        inverseOnSurface = c(s.inverseOnSurface),
+        outline = c(s.outline),
+        outlineVariant = c(s.outlineVariant),
+        scrim = c(s.scrim),
+        surfaceBright = c(s.surfaceBright),
+        surfaceDim = c(s.surfaceDim),
+        surfaceContainerLowest = c(s.surfaceContainerLowest),
+        surfaceContainerLow = c(s.surfaceContainerLow),
+        surfaceContainer = c(s.surfaceContainer),
+        surfaceContainerHigh = c(s.surfaceContainerHigh),
+        surfaceContainerHighest = c(s.surfaceContainerHighest),
+    )
 }

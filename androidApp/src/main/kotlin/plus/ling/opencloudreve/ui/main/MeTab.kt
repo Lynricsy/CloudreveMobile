@@ -1,140 +1,163 @@
 package plus.ling.opencloudreve.ui.main
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.PersonAdd
-import androidx.compose.material.icons.outlined.SwitchAccount
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import kotlinx.serialization.Serializable
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import plus.ling.opencloudreve.R
-import plus.ling.opencloudreve.core.presentation.auth.AccountItem
 import plus.ling.opencloudreve.core.presentation.auth.AccountSwitcherIntent
 import plus.ling.opencloudreve.core.presentation.auth.AccountSwitcherUiState
-import plus.ling.opencloudreve.ui.account.AccountAvatar
-import plus.ling.opencloudreve.ui.account.SignOutDialog
+import plus.ling.opencloudreve.core.presentation.settings.DavAccountsViewModel
+import plus.ling.opencloudreve.core.presentation.settings.PoliciesViewModel
+import plus.ling.opencloudreve.core.presentation.settings.SecurityViewModel
+import plus.ling.opencloudreve.core.presentation.settings.SettingsViewModel
+import plus.ling.opencloudreve.ui.admin.AdminHomeRoute
+import plus.ling.opencloudreve.ui.admin.adminGraph
+import plus.ling.opencloudreve.ui.files.FolderPickerScreen
+import plus.ling.opencloudreve.ui.settings.AboutScreen
+import plus.ling.opencloudreve.ui.settings.DavAccountsScreen
+import plus.ling.opencloudreve.ui.settings.LicensesScreen
+import plus.ling.opencloudreve.ui.settings.MeHomeScreen
+import plus.ling.opencloudreve.ui.settings.PoliciesScreen
+import plus.ling.opencloudreve.ui.settings.SecurityScreen
+import plus.ling.opencloudreve.ui.settings.SettingsDestinations
+import plus.ling.opencloudreve.ui.settings.SettingsScreen
+import plus.ling.opencloudreve.ui.theme.ThemePreferences
 
-/** “我的”Tab：顶部当前账户卡（点按打开切换器）+ 账户操作（设置项由后续阶段补充） */
-@OptIn(ExperimentalMaterial3Api::class)
+/** “我的”首页 */
+@Serializable
+data object MeHomeRoute
+
+@Serializable
+data object SettingsRoute
+
+@Serializable
+data object SecurityRoute
+
+@Serializable
+data object DavAccountsRoute
+
+/** WebDAV 根目录选择 */
+@Serializable
+data class DavRootPickerRoute(val initialUri: String)
+
+@Serializable
+data object PoliciesRoute
+
+@Serializable
+data object AboutRoute
+
+@Serializable
+data object LicensesRoute
+
+/** 目录选择结果在 WebDAV 页 `SavedStateHandle` 中的键 */
+private const val DAV_ROOT_KEY = "dav_root"
+
+/**
+ * “我的”Tab：内嵌导航（底栏保持可见）——首页、设置及其子页、管理。
+ * @param onReLogin 修改密码后账户已登出，到该站点登录页重新登录
+ * @param openFilesAt 在“文件”Tab 打开某个目录（管理端“打开此用户的文件”）
+ */
 @Composable
 fun MeTab(
-    state: AccountSwitcherUiState,
-    onIntent: (AccountSwitcherIntent) -> Unit,
+    accountId: String,
+    switcherState: AccountSwitcherUiState,
+    onSwitcherIntent: (AccountSwitcherIntent) -> Unit,
     onOpenSwitcher: () -> Unit,
     onAddAccount: () -> Unit,
+    onReLogin: (siteUrl: String, email: String) -> Unit,
+    openFilesAt: (uri: String) -> Unit,
 ) {
-    var confirmSignOut by remember { mutableStateOf<AccountItem?>(null) }
-    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.tab_me)) }) }) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState()),
-        ) {
-            state.active?.let { active ->
-                AccountCard(active, onOpenSwitcher)
-            }
-            ListItem(
-                modifier = Modifier.clickable(onClick = onOpenSwitcher),
-                leadingContent = { Icon(Icons.Outlined.SwitchAccount, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.account_switch)) },
+    val nav = rememberNavController()
+    val back: () -> Unit = { nav.popBackStack() }
+    NavHost(navController = nav, startDestination = MeHomeRoute) {
+        composable<MeHomeRoute> {
+            val vm: SettingsViewModel = koinViewModel { parametersOf(accountId) }
+            val state by vm.state.collectAsStateWithLifecycle()
+            MeHomeScreen(
+                state = state,
+                effects = vm.effects,
+                onIntent = vm::on,
+                switcher = switcherState,
+                onSwitcherIntent = onSwitcherIntent,
+                onOpenSwitcher = onOpenSwitcher,
+                onAddAccount = onAddAccount,
+                onOpenSettings = { nav.navigate(SettingsRoute) },
+                onOpenAdmin = { nav.navigate(AdminHomeRoute) },
             )
-            ListItem(
-                modifier = Modifier.clickable(onClick = onAddAccount),
-                leadingContent = { Icon(Icons.Outlined.PersonAdd, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.account_add)) },
+        }
+        composable<SettingsRoute> {
+            val vm: SettingsViewModel = koinViewModel { parametersOf(accountId) }
+            val state by vm.state.collectAsStateWithLifecycle()
+            val themePrefs: ThemePreferences = koinInject()
+            val theme by themePrefs.settings.collectAsStateWithLifecycle()
+            SettingsScreen(
+                state = state,
+                effects = vm.effects,
+                onIntent = vm::on,
+                theme = theme,
+                themePrefs = themePrefs,
+                nav = SettingsDestinations(
+                    onBack = back,
+                    onSecurity = { nav.navigate(SecurityRoute) },
+                    onWebDav = { nav.navigate(DavAccountsRoute) },
+                    onPolicies = { nav.navigate(PoliciesRoute) },
+                    onAbout = { nav.navigate(AboutRoute) },
+                ),
             )
-            state.active?.let { active ->
-                ListItem(
-                    modifier = Modifier.clickable { confirmSignOut = active },
-                    leadingContent = {
-                        Icon(
-                            Icons.AutoMirrored.Outlined.Logout,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                        )
-                    },
-                    headlineContent = {
-                        Text(stringResource(R.string.account_sign_out), color = MaterialTheme.colorScheme.error)
-                    },
-                )
-            }
         }
-    }
-    confirmSignOut?.let { item ->
-        SignOutDialog(
-            item = item,
-            onConfirm = {
-                confirmSignOut = null
-                onIntent(AccountSwitcherIntent.SignOut(item.account.id))
-            },
-            onDismiss = { confirmSignOut = null },
-        )
-    }
-}
-
-@Composable
-private fun AccountCard(item: AccountItem, onClick: () -> Unit) {
-    val account = item.account
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            AccountAvatar(item, 64.dp)
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = account.nickname.ifBlank { account.email },
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = account.email,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = account.host,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Icon(Icons.Outlined.SwitchAccount, contentDescription = stringResource(R.string.account_switch))
+        composable<SecurityRoute> {
+            val vm: SecurityViewModel = koinViewModel { parametersOf(accountId) }
+            val state by vm.state.collectAsStateWithLifecycle()
+            SecurityScreen(state = state, effects = vm.effects, onIntent = vm::on, onBack = back, onReLogin = onReLogin)
         }
+        composable<DavAccountsRoute> { entry ->
+            val vm: DavAccountsViewModel = koinViewModel { parametersOf(accountId) }
+            val state by vm.state.collectAsStateWithLifecycle()
+            val picked by entry.savedStateHandle.getStateFlow<String?>(DAV_ROOT_KEY, null).collectAsStateWithLifecycle()
+            DavAccountsScreen(
+                state = state,
+                effects = vm.effects,
+                onIntent = vm::on,
+                onBack = back,
+                onPickFolder = { nav.navigate(DavRootPickerRoute(it)) },
+                pickedUri = picked,
+                onPickedConsumed = { entry.savedStateHandle[DAV_ROOT_KEY] = null },
+            )
+        }
+        composable<DavRootPickerRoute> { entry ->
+            val route = entry.toRoute<DavRootPickerRoute>()
+            FolderPickerScreen(
+                accountId = accountId,
+                initialUri = route.initialUri,
+                excluded = emptyList(),
+                confirmLabel = stringResource(R.string.dav_pick_root),
+                onPicked = { uri ->
+                    nav.previousBackStackEntry?.savedStateHandle?.set(DAV_ROOT_KEY, uri)
+                    nav.popBackStack()
+                },
+                onCancel = back,
+            )
+        }
+        composable<PoliciesRoute> {
+            val vm: PoliciesViewModel = koinViewModel { parametersOf(accountId) }
+            val state by vm.state.collectAsStateWithLifecycle()
+            PoliciesScreen(state = state, onIntent = vm::on, onBack = back)
+        }
+        composable<AboutRoute> {
+            AboutScreen(accountId = accountId, onBack = back, onLicenses = { nav.navigate(LicensesRoute) })
+        }
+        composable<LicensesRoute> {
+            LicensesScreen(onBack = back)
+        }
+        adminGraph(navController = nav, accountId = accountId, openFilesAt = openFilesAt)
     }
 }
