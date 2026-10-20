@@ -60,9 +60,7 @@ final class FileBrowserUITests: XCTestCase {
         // 上下文菜单 → 重命名
         let renameTarget = element(app, "file.待重命名.txt")
         XCTAssertTrue(renameTarget.waitForExistence(timeout: 10))
-        renameTarget.press(forDuration: 1.2)
-        let renameItem = app.buttons["重命名"].firstMatch
-        XCTAssertTrue(renameItem.waitForExistence(timeout: 10), "上下文菜单未出现")
+        let renameItem = openContextMenu(app, on: renameTarget, item: "重命名")
         capture(app, "files-06-context-menu")
         renameItem.tap()
         let field = app.alerts.firstMatch.textFields.firstMatch
@@ -77,9 +75,7 @@ final class FileBrowserUITests: XCTestCase {
         // 删除到回收站
         let deleteTarget = element(app, "file.待删除.txt")
         XCTAssertTrue(deleteTarget.waitForExistence(timeout: 10))
-        deleteTarget.press(forDuration: 1.2)
-        let deleteItem = app.buttons["删除"].firstMatch
-        XCTAssertTrue(deleteItem.waitForExistence(timeout: 10))
+        let deleteItem = openContextMenu(app, on: deleteTarget, item: "删除")
         deleteItem.tap()
         let toTrash = app.buttons["移到回收站"].firstMatch
         XCTAssertTrue(toTrash.waitForExistence(timeout: 10), "删除确认未出现")
@@ -102,8 +98,6 @@ final class FileBrowserUITests: XCTestCase {
         searchField.typeText("note-00\n")
         XCTAssertTrue(element(app, "file.note-001.txt").waitForExistence(timeout: 30), "搜索没有结果")
         capture(app, "files-09-search")
-
-        signOut(app)
     }
 
     // MARK: - 步骤
@@ -137,6 +131,35 @@ final class FileBrowserUITests: XCTestCase {
             app.buttons["login.submit"].tap()
         }
         XCTAssertTrue(filesTab.waitForExistence(timeout: 30), "未进入主界面")
+    }
+
+    /// 测试结束（含中途失败）时仍处于登录状态则退出登录，避免后续从服务器地址页开始的 UI 测试连锁失败
+    override func tearDown() {
+        MainActor.assumeIsolated {
+            let app = XCUIApplication()
+            guard app.state == .runningForeground, !app.textFields["server.url"].exists else { return }
+            // 关掉可能残留的 sheet / 菜单 / 弹窗
+            for title in ["完成", "取消", "关闭"] where app.buttons[title].firstMatch.exists {
+                app.buttons[title].firstMatch.tap()
+            }
+            signOut(app)
+        }
+        super.tearDown()
+    }
+
+    /// 长按打开上下文菜单并返回其中的菜单项。长按偶尔被识别为点按（打开详细信息），此时关闭后重试
+    @MainActor
+    private func openContextMenu(_ app: XCUIApplication, on target: XCUIElement, item title: String) -> XCUIElement {
+        let item = app.buttons[title].firstMatch
+        for _ in 0..<3 {
+            target.press(forDuration: 2.0)
+            if item.waitForExistence(timeout: 5) { return item }
+            let done = app.buttons["完成"].firstMatch
+            if done.exists { done.tap() }
+            Thread.sleep(forTimeInterval: 1)
+        }
+        XCTFail("上下文菜单未出现")
+        return item
     }
 
     /// 结束时退出登录（其它 UI 测试从服务器地址页开始）
