@@ -1,1 +1,25 @@
 .agent-logs/
+# Gradle / IDE
+.gradle/
+build/
+.kotlin/
+local.properties
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+# iOS
+iosApp/OpenCloudreve.xcodeproj/
+iosApp/Frameworks/
+iosApp/build/
+xcuserdata/
+DerivedData/
+*.xcresult
+# 签名
+*.jks
+*.keystore
+keystore.properties
+.DS_Store
+iosApp/*/Info.plist
+iosApp/*/*.entitlements

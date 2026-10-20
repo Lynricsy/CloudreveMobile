@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 云朵图标：108dp 画布，安全区 66dp -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="@color/brand"
+        android:pathData="M40,70h30a12,12 0,0 0,1.5 -23.9a16,16 0,0 0,-30.6 -3.3A13.5,13.5 0,0 0,40 70z" />
+</vector>

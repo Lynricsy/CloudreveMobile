@@ -1,0 +1,212 @@
+name: OpenCloudreve
+options:
+  bundleIdPrefix: plus.ling
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+  developmentLanguage: zh-Hans
+  defaultConfig: Debug
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    SWIFT_STRICT_CONCURRENCY: complete
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+    FRAMEWORK_SEARCH_PATHS: $(inherited) $(PROJECT_DIR)/Frameworks
+
+packages:
+  Nuke:
+    url: https://github.com/kean/Nuke
+    from: "12.8.0"
+  MarkdownUI:
+    url: https://github.com/gonzalezreal/swift-markdown-ui
+    from: "2.4.1"
+
+targets:
+  OpenCloudreve:
+    type: application
+    platform: iOS
+    sources:
+      - path: OpenCloudreve
+      - path: Shared
+    dependencies:
+      - framework: Frameworks/OpenCloudreveCore.xcframework
+        embed: true
+      - package: Nuke
+        product: Nuke
+      - package: Nuke
+        product: NukeUI
+      - package: MarkdownUI
+        product: MarkdownUI
+      - target: ShareExtension
+        embed: true
+      - target: FileProviderExtension
+        embed: true
+    entitlements:
+      path: OpenCloudreve/OpenCloudreve.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.plus.ling.opencloudreve
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)plus.ling.opencloudreve.shared
+    info:
+      path: OpenCloudreve/Info.plist
+      properties:
+        CFBundleDisplayName: OpenCloudreve
+        CFBundleDevelopmentRegion: zh-Hans
+        CFBundleLocalizations: [zh-Hans, en]
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        CFBundleURLTypes:
+          - CFBundleURLName: plus.ling.opencloudreve
+            CFBundleURLSchemes: [opencloudreve, cloudreve]
+        NSPhotoLibraryUsageDescription: 用于选择要上传到 OpenCloudreve 的照片和视频
+        NSPhotoLibraryAddUsageDescription: 用于把下载的照片和视频保存到相册
+        NSCameraUsageDescription: 用于拍照后直接上传
+        NSLocalNetworkUsageDescription: 用于连接局域网内的自托管服务器
+        NSFaceIDUsageDescription: 用于保护账户安全
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        UIBackgroundModes: [audio]
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
+        AppGroupIdentifier: group.plus.ling.opencloudreve
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: plus.ling.opencloudreve
+        PRODUCT_NAME: OpenCloudreve
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        LD_RUNPATH_SEARCH_PATHS: $(inherited) @executable_path/Frameworks
+
+  ShareExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ShareExtension
+      - path: Shared
+    dependencies:
+      - framework: Frameworks/OpenCloudreveCore.xcframework
+        embed: false
+      - package: Nuke
+        product: Nuke
+    entitlements:
+      path: ShareExtension/ShareExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.plus.ling.opencloudreve
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)plus.ling.opencloudreve.shared
+    info:
+      path: ShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: 上传到 OpenCloudreve
+        AppGroupIdentifier: group.plus.ling.opencloudreve
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsFileWithMaxCount: 50
+              NSExtensionActivationSupportsImageWithMaxCount: 50
+              NSExtensionActivationSupportsMovieWithMaxCount: 50
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+              NSExtensionActivationSupportsText: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: plus.ling.opencloudreve.share
+        APPLICATION_EXTENSION_API_ONLY: YES
+        LD_RUNPATH_SEARCH_PATHS: $(inherited) @executable_path/Frameworks @executable_path/../../Frameworks
+
+  FileProviderExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: FileProviderExtension
+      - path: Shared
+    dependencies:
+      - framework: Frameworks/OpenCloudreveCore.xcframework
+        embed: false
+      - sdk: UniformTypeIdentifiers.framework
+      - sdk: FileProvider.framework
+    entitlements:
+      path: FileProviderExtension/FileProviderExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.plus.ling.opencloudreve
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)plus.ling.opencloudreve.shared
+    info:
+      path: FileProviderExtension/Info.plist
+      properties:
+        CFBundleDisplayName: OpenCloudreve
+        AppGroupIdentifier: group.plus.ling.opencloudreve
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.fileprovider-nonui
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).FileProviderExtension
+          NSExtensionFileProviderDocumentGroup: group.plus.ling.opencloudreve
+          NSExtensionFileProviderSupportsEnumeration: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: plus.ling.opencloudreve.fileprovider
+        APPLICATION_EXTENSION_API_ONLY: YES
+        LD_RUNPATH_SEARCH_PATHS: $(inherited) @executable_path/Frameworks @executable_path/../../Frameworks
+
+  OpenCloudreveTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: OpenCloudreveTests
+    dependencies:
+      - target: OpenCloudreve
+      - framework: Frameworks/OpenCloudreveCore.xcframework
+        embed: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: plus.ling.opencloudreve.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/OpenCloudreve.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OpenCloudreve
+        BUNDLE_LOADER: $(TEST_HOST)
+
+  OpenCloudreveUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: OpenCloudreveUITests
+    dependencies:
+      - target: OpenCloudreve
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: plus.ling.opencloudreve.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: OpenCloudreve
+
+schemes:
+  OpenCloudreve:
+    build:
+      targets:
+        OpenCloudreve: all
+    test:
+      config: Debug
+      gatherCoverageData: false
+      targets:
+        - OpenCloudreveTests
+        - OpenCloudreveUITests
