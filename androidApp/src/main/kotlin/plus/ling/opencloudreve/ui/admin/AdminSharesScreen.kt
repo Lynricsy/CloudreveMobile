@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -69,7 +70,9 @@ internal fun AdminSharesScreen(accountId: String, onBack: () -> Unit) {
             headline = shareFileName(share),
             overline = ownerName(share),
             supporting = buildString {
-                append(stringResource(R.string.admin_share_stats, share.views, share.downloads))
+                append(pluralStringResource(R.plurals.info_views, share.views, share.views))
+                append(" · ")
+                append(pluralStringResource(R.plurals.info_downloads, share.downloads, share.downloads))
                 append(" · ")
                 append(expiryText(share))
             },

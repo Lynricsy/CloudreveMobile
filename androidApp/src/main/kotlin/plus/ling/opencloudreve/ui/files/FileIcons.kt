@@ -33,6 +33,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -145,6 +147,28 @@ internal fun parseHexColor(value: String?): Color? {
     return full.toLongOrNull(16)?.let { Color(it.toInt()) }
 }
 
+/** 两色相对亮度对比度（WCAG） */
+private fun contrastRatio(a: Color, b: Color): Float {
+    val la = a.luminance() + 0.05f
+    val lb = b.luminance() + 0.05f
+    return if (la > lb) la / lb else lb / la
+}
+
+/**
+ * 站点配色（如浅色模式下的黄色、深色模式下的灰蓝）在卡片背景上可能难以辨认：
+ * 对比度不足 3:1（WCAG 非文本对比度）时逐步向黑（浅背景）/白（深背景）混合，
+ * 向纯黑混合等于按比例压暗，比混向偏灰的前景色更能保留饱和度。
+ */
+private fun Color.legibleOn(background: Color): Color {
+    if (contrastRatio(this, background) >= 3f) return this
+    val target = if (background.luminance() < 0.5f) Color.White else Color.Black
+    for (step in 1..10) {
+        val mixed = lerp(this, target, step / 10f)
+        if (contrastRatio(mixed, background) >= 3f) return mixed
+    }
+    return target
+}
+
 private fun Color.toHex(): String {
     val rgb = ((red * 255).toInt() shl 16) or ((green * 255).toInt() shl 8) or (blue * 255).toInt()
     return rgb.toString(16).padStart(6, '0')
@@ -170,16 +194,18 @@ fun FileTypeIconView(file: FileItem, size: Dp, modifier: Modifier = Modifier) {
     val theme = LocalFileIconTheme.current
     val setting = theme.settingFor(file)
     val color = custom ?: parseHexColor(if (dark) setting?.colorDark ?: setting?.color else setting?.color)
+    // 网格卡片背景（surfaceContainerHighest）比列表背景更接近图标色，按它校正即可覆盖两种布局
+    val tint = color?.legibleOn(MaterialTheme.colorScheme.surfaceContainerHighest) ?: MaterialTheme.colorScheme.onSurfaceVariant
     val builtIn = FileIconTheme.builtIn(setting?.icon)
     val imageUrl = if (builtIn == null && setting != null) theme.imageUrl(setting, color) else null
     when {
-        builtIn != null -> Icon(builtIn, contentDescription = null, modifier = modifier.size(size), tint = color ?: MaterialTheme.colorScheme.onSurfaceVariant)
+        builtIn != null -> Icon(builtIn, contentDescription = null, modifier = modifier.size(size), tint = tint)
         imageUrl != null -> AsyncImage(model = imageUrl, contentDescription = null, modifier = modifier.size(size))
         else -> Icon(
             Icons.AutoMirrored.Filled.InsertDriveFile,
             contentDescription = null,
             modifier = modifier.size(size),
-            tint = color ?: MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = tint,
         )
     }
 }

@@ -47,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -118,7 +119,7 @@ internal fun ArchiveViewerScreen(
                 BottomAppBar {
                     Text(
                         if (state.selection.isEmpty()) stringResource(R.string.viewer_archive_all)
-                        else stringResource(R.string.viewer_archive_selected, state.selection.size),
+                        else pluralStringResource(R.plurals.viewer_archive_selected, state.selection.size, state.selection.size),
                         modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                     )
                     if (state.selection.isNotEmpty()) {
@@ -290,7 +291,7 @@ private fun ExtractDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (request.mask.isNotEmpty()) {
-                    Text(stringResource(R.string.viewer_archive_selected, request.mask.size), style = MaterialTheme.typography.bodyMedium)
+                    Text(pluralStringResource(R.plurals.viewer_archive_selected, request.mask.size, request.mask.size), style = MaterialTheme.typography.bodyMedium)
                 }
                 Text(stringResource(R.string.viewer_archive_destination), style = MaterialTheme.typography.labelLarge)
                 OutlinedButton(onClick = { picking = true }, modifier = Modifier.fillMaxWidth()) {

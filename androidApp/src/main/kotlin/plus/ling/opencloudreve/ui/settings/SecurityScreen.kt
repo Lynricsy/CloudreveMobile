@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
@@ -269,7 +270,7 @@ private fun passkeySubtitle(passkey: Passkey): String {
 
 @Composable
 private fun grantSubtitle(grant: OAuthGrant): String {
-    val scopes = stringResource(R.string.security_grant_scopes, grant.scopes.size)
+    val scopes = pluralStringResource(R.plurals.security_grant_scopes, grant.scopes.size, grant.scopes.size)
     val used = grant.lastUsedAt?.let { stringResource(R.string.security_passkey_used, formatDateTime(it)) }
     return listOfNotNull(scopes, used).joinToString(" · ")
 }

@@ -26,6 +26,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -197,7 +198,7 @@ private fun FileDetail(
                     Text(
                         listOfNotNull(
                             e.edges.storagePolicy?.name,
-                            stringResource(R.string.admin_entity_refs, e.referenceCount),
+                            pluralStringResource(R.plurals.admin_entity_refs, e.referenceCount, e.referenceCount),
                             formatTime(e.createdAt),
                             e.source.ifEmpty { null },
                         ).joinToString("\n"),
@@ -211,7 +212,13 @@ private fun FileDetail(
         SectionTitle(stringResource(R.string.admin_file_direct_links))
         file.directLinkMap.forEach { (id, url) ->
             val link = file.edges.directLinks.firstOrNull { it.id.toString() == id }
-            val label = link?.let { stringResource(R.string.admin_direct_link_label, it.name.ifEmpty { "#$id" }, it.downloads) } ?: "#$id"
+            val label = link?.let {
+                stringResource(
+                    R.string.admin_direct_link_label,
+                    it.name.ifEmpty { "#$id" },
+                    pluralStringResource(R.plurals.info_downloads, it.downloads, it.downloads),
+                )
+            } ?: "#$id"
             InfoRow(label, url, onCopy = onCopy)
         }
     }

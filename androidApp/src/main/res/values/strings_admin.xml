@@ -2,8 +2,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="zh-rCN">
     <!-- 管理：通用 -->
     <string name="admin_open_in_web">在网页后台打开</string>
-    <string name="admin_total_count">共 %1$d 项</string>
-    <string name="admin_selected_count">已选 %1$d 项</string>
+    <plurals name="admin_total_count">
+        <item quantity="other">共 %1$d 项</item>
+    </plurals>
+    <plurals name="admin_selected_count">
+        <item quantity="other">已选 %1$d 项</item>
+    </plurals>
     <string name="admin_select_all">全选</string>
     <string name="admin_clear_selection">退出多选</string>
     <string name="admin_enter_selection">多选</string>
@@ -108,7 +112,6 @@
     <!-- 分享 -->
     <string name="admin_share_file_missing">（文件不存在）</string>
     <string name="admin_share_owner">所有者</string>
-    <string name="admin_share_stats">浏览 %1$d · 下载 %2$d</string>
     <string name="admin_share_expires">过期时间</string>
     <string name="admin_share_expires_at">%1$s 过期</string>
     <string name="admin_share_expired_at">已于 %1$s 过期</string>
@@ -140,8 +143,10 @@
     <string name="admin_entity_version">版本</string>
     <string name="admin_entity_thumbnail">缩略图</string>
     <string name="admin_entity_live_photo">实况照片</string>
-    <string name="admin_entity_refs">引用 %1$d 次</string>
-    <string name="admin_direct_link_label">%1$s（下载 %2$d 次）</string>
+    <plurals name="admin_entity_refs">
+        <item quantity="other">引用 %1$d 次</item>
+    </plurals>
+    <string name="admin_direct_link_label">%1$s（%2$s）</string>
 
     <!-- 任务队列 -->
     <string name="admin_queue_metrics">队列指标</string>

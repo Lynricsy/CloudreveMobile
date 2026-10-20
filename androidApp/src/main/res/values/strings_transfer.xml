@@ -36,6 +36,7 @@
     </plurals>
     <string name="upload_rejected_title">部分文件未加入上传</string>
     <string name="upload_rejected_message">以下文件不符合目标目录存储策略的限制：</string>
+    <string name="upload_rejected_item">%1$s：%2$s</string>
     <string name="upload_reject_illegal_name">文件名不合法</string>
     <string name="upload_reject_suffix_not_allowed">扩展名不在允许列表中</string>
     <string name="upload_reject_suffix_denied">扩展名已被禁止</string>
@@ -47,7 +48,9 @@
     <string name="tasks_segment_transfers">传输</string>
     <string name="tasks_segment_background">后台任务</string>
     <string name="tasks_background_placeholder">压缩、解压、离线下载等后台任务将显示在这里</string>
-    <string name="transfer_badge_cd">%1$d 个传输进行中</string>
+    <plurals name="transfer_badge_cd">
+        <item quantity="other">%1$d 个传输进行中</item>
+    </plurals>
     <string name="transfer_view_list">查看传输</string>
     <string name="transfer_clear_finished">清除已完成</string>
     <string name="transfer_empty">暂无传输</string>

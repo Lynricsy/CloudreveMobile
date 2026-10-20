@@ -71,7 +71,9 @@
     <string name="viewer_archive_encoding_value">编码：%1$s</string>
     <string name="viewer_archive_empty">此目录为空</string>
     <string name="viewer_archive_all">解压全部文件</string>
-    <string name="viewer_archive_selected">已选 %1$d 项</string>
+    <plurals name="viewer_archive_selected">
+        <item quantity="other">已选 %1$d 项</item>
+    </plurals>
     <string name="viewer_archive_clear">清除选择</string>
     <string name="viewer_archive_extract_to">解压到…</string>
     <string name="viewer_archive_extract">解压</string>

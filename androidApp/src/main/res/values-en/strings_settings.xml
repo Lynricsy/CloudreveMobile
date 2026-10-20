@@ -50,7 +50,10 @@
     <string name="settings_retention_max_hint">0 means unlimited</string>
     <string name="settings_retention_all_types">All types</string>
     <string name="settings_retention_unlimited">Unlimited versions</string>
-    <string name="settings_retention_max_n">Up to %1$d versions</string>
+    <plurals name="settings_retention_max_n">
+        <item quantity="one">Up to %1$d version</item>
+        <item quantity="other">Up to %1$d versions</item>
+    </plurals>
     <string name="settings_profile_shares">Shares on public profile</string>
     <string name="settings_profile_shares_public">Public shares only</string>
     <string name="settings_profile_shares_all">All shares</string>
@@ -90,7 +93,10 @@
     <string name="security_passkey_created">Added %1$s</string>
     <string name="security_passkey_used">Last used %1$s</string>
     <string name="security_apps_empty">No authorized apps</string>
-    <string name="security_grant_scopes">%1$d permissions</string>
+    <plurals name="security_grant_scopes">
+        <item quantity="one">%1$d permission</item>
+        <item quantity="other">%1$d permissions</item>
+    </plurals>
     <string name="security_grant_revoke">Revoke access</string>
     <string name="security_grant_revoke_message">\"%1$s\" will no longer be able to access your account.</string>
     <string name="security_grant_revoked">Access revoked</string>

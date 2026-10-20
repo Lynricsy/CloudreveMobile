@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -314,7 +315,7 @@ private fun versionRetentionSummary(state: SettingsState): String {
     val max = if (state.versionRetentionMax == 0) {
         stringResource(R.string.settings_retention_unlimited)
     } else {
-        stringResource(R.string.settings_retention_max_n, state.versionRetentionMax)
+        pluralStringResource(R.plurals.settings_retention_max_n, state.versionRetentionMax, state.versionRetentionMax)
     }
     return "$exts · $max"
 }

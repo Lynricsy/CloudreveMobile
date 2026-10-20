@@ -65,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.Flow
@@ -252,7 +253,7 @@ private fun <T : Any> ListTopBar(
                 Text(title, maxLines = 1)
                 if (!state.loading && state.error == null) {
                     Text(
-                        stringResource(R.string.admin_total_count, state.totalItems),
+                        pluralStringResource(R.plurals.admin_total_count, state.totalItems, state.totalItems),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -323,7 +324,7 @@ private fun SelectionTopBar(count: Int, deleting: Boolean, onClose: () -> Unit, 
                 Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.admin_clear_selection))
             }
         },
-        title = { Text(stringResource(R.string.admin_selected_count, count)) },
+        title = { Text(pluralStringResource(R.plurals.admin_selected_count, count, count)) },
         actions = {
             IconButton(onClick = onSelectAll) {
                 Icon(Icons.Outlined.SelectAll, contentDescription = stringResource(R.string.admin_select_all))

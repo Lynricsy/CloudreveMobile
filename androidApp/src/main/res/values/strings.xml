@@ -94,7 +94,6 @@
     <string name="tab_me">我的</string>
     <string name="tab_me_long_press">切换账户</string>
     <string name="placeholder_shares">你创建的分享将显示在这里</string>
-    <string name="placeholder_tasks">上传、下载与后台任务将显示在这里</string>
 
     <!-- 账户 -->
     <string name="account_switch">切换账户</string>
@@ -158,7 +157,9 @@
     <string name="selection_enter">多选</string>
     <string name="selection_exit">退出多选</string>
     <string name="selection_all">全选</string>
-    <string name="selection_count">已选 %1$d 项</string>
+    <plurals name="selection_count">
+        <item quantity="other">已选 %1$d 项</item>
+    </plurals>
     <string name="selection_selected">已选中</string>
     <string name="selection_not_selected">未选中</string>
     <plurals name="selection_over_limit">
@@ -182,7 +183,9 @@
     <string name="action_direct_link">获取直链</string>
     <string name="direct_link_force_download">强制下载</string>
     <string name="direct_link_show_name">复制时带文件名</string>
-    <string name="direct_link_limit">一次最多获取 %1$d 个直链</string>
+    <plurals name="direct_link_limit">
+        <item quantity="other">一次最多获取 %1$d 个直链</item>
+    </plurals>
     <string name="direct_link_folder_denied">当前用户组不允许为文件夹创建直链</string>
     <string name="action_reset_thumbnail">重新生成缩略图</string>
     <string name="action_disable_thumbnail">不生成缩略图</string>

@@ -331,7 +331,7 @@ private fun DirectLinksDialog(accountId: String, uris: List<String>, onDismiss: 
                         Text(stringResource(R.string.direct_link_folder_denied), color = MaterialTheme.colorScheme.error)
                     }
                     state.exceedsLimit -> item(key = "limit") {
-                        Text(stringResource(R.string.direct_link_limit, state.batchLimit), color = MaterialTheme.colorScheme.error)
+                        Text(pluralStringResource(R.plurals.direct_link_limit, state.batchLimit, state.batchLimit), color = MaterialTheme.colorScheme.error)
                     }
                     state.generating -> item(key = "progress") { LoadingMore() }
                 }

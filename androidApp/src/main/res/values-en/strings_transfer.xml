@@ -40,6 +40,7 @@
     </plurals>
     <string name="upload_rejected_title">Some files were not added</string>
     <string name="upload_rejected_message">These files do not meet the destination storage policy:</string>
+    <string name="upload_rejected_item">%1$s: %2$s</string>
     <string name="upload_reject_illegal_name">Invalid file name</string>
     <string name="upload_reject_suffix_not_allowed">File extension is not allowed</string>
     <string name="upload_reject_suffix_denied">File extension is blocked</string>
@@ -51,7 +52,10 @@
     <string name="tasks_segment_transfers">Transfers</string>
     <string name="tasks_segment_background">Background tasks</string>
     <string name="tasks_background_placeholder">Background tasks such as compression, extraction and remote downloads will appear here</string>
-    <string name="transfer_badge_cd">%1$d transfers in progress</string>
+    <plurals name="transfer_badge_cd">
+        <item quantity="one">%1$d transfer in progress</item>
+        <item quantity="other">%1$d transfers in progress</item>
+    </plurals>
     <string name="transfer_view_list">View transfers</string>
     <string name="transfer_clear_finished">Clear finished</string>
     <string name="transfer_empty">No transfers</string>

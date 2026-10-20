@@ -215,7 +215,13 @@ private fun PdfPages(document: PdfDocument, listState: androidx.compose.foundati
                 Surface(shape = RoundedCornerShape(4.dp), shadowElevation = 2.dp, color = Color.White) {
                     val bitmap by produceState<Bitmap?>(null, index, renderWidth) { value = document.render(index, renderWidth) }
                     Box(Modifier.fillMaxWidth().aspectRatio(document.ratios[index])) {
-                        bitmap?.let { Image(it.asImageBitmap(), contentDescription = null, modifier = Modifier.fillMaxSize()) }
+                        bitmap?.let {
+                            Image(
+                                it.asImageBitmap(),
+                                contentDescription = stringResource(R.string.viewer_pdf_page, index + 1, document.pageCount),
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
                     }
                 }
             }

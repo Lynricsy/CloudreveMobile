@@ -57,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -109,7 +110,7 @@ fun MetadataEditScreen(accountId: String, uris: List<String>, onClose: () -> Uni
                     Column {
                         Text(stringResource(R.string.action_metadata))
                         Text(
-                            title ?: stringResource(R.string.selection_count, uris.size),
+                            title ?: pluralStringResource(R.plurals.selection_count, uris.size, uris.size),
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 1,
                             overflow = TextOverflow.MiddleEllipsis,

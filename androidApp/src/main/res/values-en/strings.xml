@@ -92,7 +92,6 @@
     <string name="tab_me">Me</string>
     <string name="tab_me_long_press">Switch account</string>
     <string name="placeholder_shares">Shares you create will appear here</string>
-    <string name="placeholder_tasks">Uploads, downloads and background tasks will appear here</string>
 
     <!-- Accounts -->
     <string name="account_switch">Switch account</string>
@@ -158,7 +157,10 @@
     <string name="selection_enter">Select</string>
     <string name="selection_exit">Exit selection</string>
     <string name="selection_all">Select all</string>
-    <string name="selection_count">%1$d selected</string>
+    <plurals name="selection_count">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
     <string name="selection_selected">Selected</string>
     <string name="selection_not_selected">Not selected</string>
     <plurals name="selection_over_limit">
@@ -183,7 +185,10 @@
     <string name="action_direct_link">Get direct link</string>
     <string name="direct_link_force_download">Force download</string>
     <string name="direct_link_show_name">Include file name when copying</string>
-    <string name="direct_link_limit">At most %1$d direct links at a time</string>
+    <plurals name="direct_link_limit">
+        <item quantity="one">At most %1$d direct link at a time</item>
+        <item quantity="other">At most %1$d direct links at a time</item>
+    </plurals>
     <string name="direct_link_folder_denied">Your group can\'t create direct links for folders</string>
     <string name="action_reset_thumbnail">Regenerate thumbnail</string>
     <string name="action_disable_thumbnail">Don\'t generate thumbnail</string>

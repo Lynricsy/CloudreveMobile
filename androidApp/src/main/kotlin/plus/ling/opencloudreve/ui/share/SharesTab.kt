@@ -125,7 +125,7 @@ fun SharesTab(accountId: String, openFilesAt: (String) -> Unit) {
                             Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_cancel))
                         }
                     },
-                    title = { Text(stringResource(R.string.selection_count, state.selection.size)) },
+                    title = { Text(pluralStringResource(R.plurals.selection_count, state.selection.size, state.selection.size)) },
                     actions = {
                         IconButton(onClick = { vm.on(ShareListIntent.SelectAll) }) {
                             Icon(Icons.Filled.SelectAll, contentDescription = stringResource(R.string.selection_all))

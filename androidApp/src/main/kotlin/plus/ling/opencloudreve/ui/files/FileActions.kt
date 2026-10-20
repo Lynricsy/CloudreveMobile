@@ -60,6 +60,7 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -392,7 +393,7 @@ private fun FileActionsSheet(
                     },
                     headlineContent = {
                         Text(
-                            single?.name ?: stringResource(R.string.selection_count, targets.size),
+                            single?.name ?: pluralStringResource(R.plurals.selection_count, targets.size, targets.size),
                             maxLines = 2,
                             overflow = TextOverflow.MiddleEllipsis,
                             style = MaterialTheme.typography.titleMedium,

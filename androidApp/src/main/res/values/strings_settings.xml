@@ -50,7 +50,9 @@
     <string name="settings_retention_max_hint">0 表示不限</string>
     <string name="settings_retention_all_types">全部类型</string>
     <string name="settings_retention_unlimited">不限版本数</string>
-    <string name="settings_retention_max_n">最多 %1$d 个版本</string>
+    <plurals name="settings_retention_max_n">
+        <item quantity="other">最多 %1$d 个版本</item>
+    </plurals>
     <string name="settings_profile_shares">个人主页分享可见性</string>
     <string name="settings_profile_shares_public">仅展示公开分享</string>
     <string name="settings_profile_shares_all">展示全部分享</string>
@@ -90,7 +92,9 @@
     <string name="security_passkey_created">添加于 %1$s</string>
     <string name="security_passkey_used">最近使用 %1$s</string>
     <string name="security_apps_empty">没有已授权的应用</string>
-    <string name="security_grant_scopes">%1$d 项权限</string>
+    <plurals name="security_grant_scopes">
+        <item quantity="other">%1$d 项权限</item>
+    </plurals>
     <string name="security_grant_revoke">撤销授权</string>
     <string name="security_grant_revoke_message">“%1$s”将无法再访问你的账户。</string>
     <string name="security_grant_revoked">已撤销授权</string>

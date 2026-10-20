@@ -287,7 +287,9 @@ private fun ReceiverContent(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(stringResource(R.string.upload_rejected_message))
-                    items.forEach { Text("${it.name}：${rejectionText(it.reason)}", style = MaterialTheme.typography.bodySmall) }
+                    items.forEach {
+                        Text(stringResource(R.string.upload_rejected_item, it.name, rejectionText(it.reason)), style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             },
             confirmButton = { TextButton(onClick = onFinished) { Text(stringResource(R.string.action_close)) } },

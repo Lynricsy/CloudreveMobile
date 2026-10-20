@@ -71,7 +71,10 @@
     <string name="viewer_archive_encoding_value">Encoding: %1$s</string>
     <string name="viewer_archive_empty">This folder is empty</string>
     <string name="viewer_archive_all">Extract all files</string>
-    <string name="viewer_archive_selected">%1$d selected</string>
+    <plurals name="viewer_archive_selected">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
     <string name="viewer_archive_clear">Clear</string>
     <string name="viewer_archive_extract_to">Extract to…</string>
     <string name="viewer_archive_extract">Extract</string>

@@ -425,7 +425,7 @@ private fun SelectionTopBar(count: Int, onClose: () -> Unit, onSelectAll: () -> 
                 Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.selection_exit))
             }
         },
-        title = { Text(stringResource(R.string.selection_count, count)) },
+        title = { Text(pluralStringResource(R.plurals.selection_count, count, count)) },
         actions = {
             IconButton(onClick = onSelectAll) {
                 Icon(Icons.Filled.SelectAll, contentDescription = stringResource(R.string.selection_all))

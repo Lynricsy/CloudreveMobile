@@ -40,6 +40,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
@@ -151,7 +152,7 @@ fun MainScreen(
                         val glyph = if (selected) item.selectedIcon else item.icon
                         if (item == MainTab.Tasks && summary.activeCount > 0) {
                             BadgedBox(badge = { Badge { Text(summary.activeCount.toString()) } }) {
-                                Icon(glyph, contentDescription = stringResource(R.string.transfer_badge_cd, summary.activeCount))
+                                Icon(glyph, contentDescription = pluralStringResource(R.plurals.transfer_badge_cd, summary.activeCount, summary.activeCount))
                             }
                         } else {
                             Icon(glyph, contentDescription = null)
