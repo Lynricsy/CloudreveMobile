@@ -59,7 +59,6 @@ class IosPlatformContext(
 class IosFileSystemBridge(private val appGroupId: String) : FileSystemBridge {
     private val fm get() = NSFileManager.defaultManager
 
-    @Throws(Exception::class)
     override suspend fun size(sourceRef: String): Long? = withContext(Dispatchers.IO) {
         val url = resolve(sourceRef) ?: return@withContext null
         withAccess(url) {
@@ -69,7 +68,6 @@ class IosFileSystemBridge(private val appGroupId: String) : FileSystemBridge {
         }
     }
 
-    @Throws(Exception::class)
     override suspend fun readRange(sourceRef: String, offset: Long, length: Int): ByteArray =
         withContext(Dispatchers.IO) {
             val url = resolve(sourceRef) ?: throw IllegalStateException("Source unavailable: $sourceRef")
@@ -100,7 +98,6 @@ class IosFileSystemBridge(private val appGroupId: String) : FileSystemBridge {
         return base
     }
 
-    @Throws(Exception::class)
     override suspend fun writeFile(path: String, bytes: ByteArray) = withContext(Dispatchers.IO) {
         ensureParent(path)
         if (!bytes.toNSData().writeToFile(path, atomically = true)) {
@@ -108,7 +105,6 @@ class IosFileSystemBridge(private val appGroupId: String) : FileSystemBridge {
         }
     }
 
-    @Throws(Exception::class)
     override suspend fun appendFile(path: String, bytes: ByteArray) = withContext(Dispatchers.IO) {
         ensureParent(path)
         if (!fm.fileExistsAtPath(path) && !fm.createFileAtPath(path, contents = null, attributes = null)) {
@@ -127,7 +123,6 @@ class IosFileSystemBridge(private val appGroupId: String) : FileSystemBridge {
         }
     }
 
-    @Throws(Exception::class)
     override suspend fun delete(path: String) {
         withContext(Dispatchers.IO) {
             if (fm.fileExistsAtPath(path)) fm.removeItemAtPath(path, null)
