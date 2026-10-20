@@ -43,7 +43,7 @@ struct LoginForm: View {
         .alert(noticeTitle, isPresented: $host.isNoticePresented) {
             Button("好") {}
         } message: {
-            Text(noticeMessage)
+            noticeMessage
         }
         .task {
             await host.effects(handle)
