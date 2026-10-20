@@ -4,13 +4,13 @@ import Foundation
 enum FileNaming {
     /// 去掉 `/`、`:`、控制字符与首尾空白；结果为空或为 `.`/`..` 时用 [fallback]
     static func sanitize(_ name: String, fallback: String) -> String {
-        let cleaned = String(name.unicodeScalars.map { scalar -> Character in
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleaned = String(trimmed.unicodeScalars.map { scalar -> Character in
             if scalar == "/" || scalar == ":" || scalar == "\\" || CharacterSet.controlCharacters.contains(scalar) {
                 return "_"
             }
             return Character(scalar)
         })
-        .trimmingCharacters(in: .whitespacesAndNewlines)
         if cleaned.isEmpty || cleaned == "." || cleaned == ".." {
             return fallback == name ? "file" : sanitize(fallback, fallback: "file")
         }

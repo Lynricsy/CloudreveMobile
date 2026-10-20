@@ -33,6 +33,10 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
     private static let progressInterval: TimeInterval = 1
     /// File Provider 扩展自行执行的任务（其路径都在 App Group `tmp/FileProvider/` 下），本执行器不接管
     private static let fileProviderMarker = "/tmp/FileProvider/"
+    #if DEBUG
+    /// UI 测试（仅 Debug）：启动参数 `-OCRUITestChunkDelay <秒>` 让每批分片发送前等待，便于截取进行中的上传
+    private static let debugChunkDelay = UserDefaults.standard.double(forKey: "OCRUITestChunkDelay")
+    #endif
 
     private let state = Mutex(State())
     private let chains = SerialTaskChains()
@@ -185,6 +189,11 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
             }
             return
         }
+        #if DEBUG
+        if Self.debugChunkDelay > 0 {
+            try? await Task.sleep(for: .seconds(Self.debugChunkDelay))
+        }
+        #endif
         let materializer = CoreGraph.shared.chunkMaterializer()
         for request in requests {
             do {

@@ -72,9 +72,10 @@ struct TransferExecutorIntegrationTests {
             overwrite: false
         )
         let uploadId = try #require(items.first?.id)
-        let uploaded = try await Self.waitUntilFinished(uploadId)
+        let (uploaded, chunkCount) = try await Self.waitUntilFinished(uploadId)
         #expect(uploaded.state == .completed, "上传失败：\(uploaded.errorCode?.int32Value ?? 0) \(uploaded.errorMessage ?? "")")
-        #expect(uploaded.chunkCount == 2)
+        // 会话结束后分片信息会被清空，这里看上传过程中观察到的分片数
+        #expect(chunkCount == 2)
         #expect(uploaded.bytesDone == Int64(size))
         // 临时分片已删除
         let chunks = URL(filePath: CoreGraph.shared.platform().fileSystem.tempDir()).appending(path: "chunks")
@@ -94,7 +95,7 @@ struct TransferExecutorIntegrationTests {
             size: Int64(size),
             destPath: destination.path(percentEncoded: false)
         )
-        let downloaded = try await Self.waitUntilFinished(download.id)
+        let (downloaded, _) = try await Self.waitUntilFinished(download.id)
         #expect(downloaded.state == .completed, "下载失败：\(downloaded.errorMessage ?? "")")
         #expect(try Data(contentsOf: destination) == original)
 
@@ -103,14 +104,16 @@ struct TransferExecutorIntegrationTests {
         _ = try? await manager.remove(taskId: download.id)
     }
 
-    /// 轮询任务表直到进入完成/失败/取消
-    private static func waitUntilFinished(_ taskId: String) async throws -> TransferItem {
+    /// 轮询任务表直到进入完成/失败/取消；同时返回过程中观察到的最大分片数
+    private static func waitUntilFinished(_ taskId: String) async throws -> (TransferItem, Int32) {
         let repository = CoreGraph.shared.transferRepository()
+        var chunkCount: Int32 = 0
         while true {
             let item = try #require(try await repository.task(id: taskId))
+            chunkCount = max(chunkCount, item.chunkCount)
             switch item.state {
-            case .completed, .failed, .canceled: return item
-            default: try await Task.sleep(for: .milliseconds(250))
+            case .completed, .failed, .canceled: return (item, chunkCount)
+            default: try await Task.sleep(for: .milliseconds(100))
             }
         }
     }

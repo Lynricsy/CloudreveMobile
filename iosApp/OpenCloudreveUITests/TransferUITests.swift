@@ -8,14 +8,30 @@ final class TransferUITests: XCTestCase {
     private let password = "User@12345"
     private let uploadName = "transfer-uitest.bin"
 
+    private var launchedApp: XCUIApplication?
+
     override func setUp() {
         continueAfterFailure = false
+    }
+
+    /// 中途失败时也退出登录，避免影响之后的 UI 测试
+    override func tearDown() {
+        MainActor.assumeIsolated {
+            guard let app = launchedApp, app.state == .runningForeground,
+                  !app.textFields["server.url"].exists else { return }
+            signOut(app)
+        }
     }
 
     @MainActor
     func testUploadAndDownloadTransfers() {
         let app = XCUIApplication()
-        app.launchArguments += ["-AppleLanguages", "(zh-Hans)", "-AppleLocale", "zh_CN", "-OCRUITestLargeUpload", "1024"]
+        launchedApp = app
+        // 256 MiB（11 片）+ 每批分片前等 2 秒（Debug 夹具），保证截图时上传仍在进行
+        app.launchArguments += [
+            "-AppleLanguages", "(zh-Hans)", "-AppleLocale", "zh_CN",
+            "-OCRUITestLargeUpload", "256", "-OCRUITestChunkDelay", "2",
+        ]
         app.launch()
         ensureSignedIn(app)
 
@@ -25,7 +41,11 @@ final class TransferUITests: XCTestCase {
         capture(app, "transfers-01-mini-bar")
 
         // 点按迷你栏进入任务 Tab：上传进行中
-        miniBar.tap()
+        if miniBar.isHittable {
+            miniBar.tap()
+        } else {
+            openTab(app, "任务")
+        }
         XCTAssertTrue(element(app, "transfer." + uploadName).waitForExistence(timeout: 20), "传输列表中没有上传项")
         capture(app, "transfers-02-uploading")
 
