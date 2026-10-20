@@ -19,7 +19,7 @@ data class User(
     @SerialName("created_at") val createdAt: CrInstant? = null,
     @SerialName("preferred_theme") val preferredTheme: String? = null,
     val anonymous: Boolean = false,
-    val group: Group? = null,
+    val group: UserGroup? = null,
     val pined: List<PinedFile> = emptyList(),
     val language: String? = null,
     @SerialName("disable_view_sync") val disableViewSync: Boolean = false,
@@ -39,9 +39,11 @@ data class User(
     }
 }
 
-/** 用户组（`response.go:Group`） */
+/**
+ * 用户组（`response.go:Group`）。不叫 `Group`：导出到 Swift 后会与 SwiftUI 的 `Group` 视图重名。
+ */
 @Serializable
-data class Group(
+data class UserGroup(
     val id: String,
     val name: String = "",
     val permission: BoolSet? = null,

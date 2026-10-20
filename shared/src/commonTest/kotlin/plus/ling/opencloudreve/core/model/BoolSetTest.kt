@@ -52,7 +52,8 @@ class BoolSetTest {
     @Test
     fun serializer() {
         val h = CloudreveJson.decodeFromString(Holder.serializer(), """{"capability":"Aw==","permission":"not base64!"}""")
-        assertTrue(h.capability!!.has(0) && h.capability!!.has(1))
+        val cap = h.capability!!
+        assertTrue(cap.has(0) && cap.has(1))
         // 非法输入宽容地解析为空集合
         assertEquals(BoolSet.EMPTY, h.permission)
         assertEquals("""{"capability":"Aw==","permission":""}""", CloudreveJson.encodeToString(Holder.serializer(), h))
