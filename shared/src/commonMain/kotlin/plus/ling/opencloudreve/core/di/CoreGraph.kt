@@ -38,6 +38,26 @@ import plus.ling.opencloudreve.core.transfer.TransferManager
 import plus.ling.opencloudreve.core.transfer.TransferRepository
 import plus.ling.opencloudreve.core.transfer.UploadPlanner
 import plus.ling.opencloudreve.core.workflow.WorkflowRepository
+import plus.ling.opencloudreve.core.presentation.admin.AdminFilesViewModel
+import plus.ling.opencloudreve.core.presentation.admin.AdminNodesViewModel
+import plus.ling.opencloudreve.core.presentation.admin.AdminQueueViewModel
+import plus.ling.opencloudreve.core.presentation.admin.AdminSharesViewModel
+import plus.ling.opencloudreve.core.presentation.admin.AdminSummaryViewModel
+import plus.ling.opencloudreve.core.presentation.admin.AdminUserEditViewModel
+import plus.ling.opencloudreve.core.presentation.admin.AdminUsersViewModel
+import plus.ling.opencloudreve.core.presentation.handoff.WebHandoff
+import plus.ling.opencloudreve.core.presentation.settings.DavAccountsViewModel
+import plus.ling.opencloudreve.core.presentation.settings.PoliciesViewModel
+import plus.ling.opencloudreve.core.presentation.settings.SecurityViewModel
+import plus.ling.opencloudreve.core.presentation.settings.SettingsViewModel
+import plus.ling.opencloudreve.core.presentation.viewer.ViewerArchiveViewModel
+import plus.ling.opencloudreve.core.presentation.viewer.ViewerAudioViewModel
+import plus.ling.opencloudreve.core.presentation.viewer.ViewerImageViewModel
+import plus.ling.opencloudreve.core.presentation.viewer.ViewerParams
+import plus.ling.opencloudreve.core.presentation.viewer.ViewerPdfViewModel
+import plus.ling.opencloudreve.core.presentation.viewer.ViewerTextViewModel
+import plus.ling.opencloudreve.core.presentation.viewer.ViewerVideoViewModel
+import plus.ling.opencloudreve.core.presentation.viewer.ViewerWebViewModel
 
 /**
  * 共享核心的依赖图入口（Koin 全局容器）。
@@ -66,6 +86,7 @@ object CoreGraph {
         startKoin {
             modules(
                 listOf(platformModule(platform), authModule, transferModule, dataModule, authPresentationModule) +
+                    listOf(settingsPresentationModule, adminPresentationModule, viewerPresentationModule) +
                     extraModules,
             )
         }
@@ -139,4 +160,51 @@ object CoreGraph {
 
     fun fileInfoViewModel(accountId: String, uri: String): FileInfoViewModel =
         koin.get { parametersOf(accountId, uri) }
+
+    // ---- 设置、会话交接 ----
+
+    /** 网页会话交接（“在网页中打开”、管理后台、网页预览器） */
+    fun webHandoff(): WebHandoff = koin.get()
+
+    fun settingsViewModel(accountId: String): SettingsViewModel = koin.get { parametersOf(accountId) }
+
+    fun securityViewModel(accountId: String): SecurityViewModel = koin.get { parametersOf(accountId) }
+
+    fun davAccountsViewModel(accountId: String): DavAccountsViewModel = koin.get { parametersOf(accountId) }
+
+    fun policiesViewModel(accountId: String): PoliciesViewModel = koin.get { parametersOf(accountId) }
+
+    // ---- 轻量管理 ----
+
+    fun adminSummaryViewModel(accountId: String): AdminSummaryViewModel = koin.get { parametersOf(accountId) }
+
+    fun adminUsersViewModel(accountId: String): AdminUsersViewModel = koin.get { parametersOf(accountId) }
+
+    fun adminUserEditViewModel(accountId: String, userId: Int): AdminUserEditViewModel =
+        koin.get { parametersOf(accountId, userId) }
+
+    fun adminSharesViewModel(accountId: String): AdminSharesViewModel = koin.get { parametersOf(accountId) }
+
+    fun adminFilesViewModel(accountId: String): AdminFilesViewModel = koin.get { parametersOf(accountId) }
+
+    fun adminQueueViewModel(accountId: String): AdminQueueViewModel = koin.get { parametersOf(accountId) }
+
+    fun adminNodesViewModel(accountId: String): AdminNodesViewModel = koin.get { parametersOf(accountId) }
+
+    // ---- 预览器 ----
+
+    fun viewerImageViewModel(params: ViewerParams): ViewerImageViewModel = koin.get { parametersOf(params) }
+
+    fun viewerVideoViewModel(params: ViewerParams): ViewerVideoViewModel = koin.get { parametersOf(params) }
+
+    fun viewerAudioViewModel(params: ViewerParams): ViewerAudioViewModel = koin.get { parametersOf(params) }
+
+    fun viewerPdfViewModel(params: ViewerParams): ViewerPdfViewModel = koin.get { parametersOf(params) }
+
+    fun viewerTextViewModel(params: ViewerParams): ViewerTextViewModel = koin.get { parametersOf(params) }
+
+    fun viewerArchiveViewModel(params: ViewerParams): ViewerArchiveViewModel = koin.get { parametersOf(params) }
+
+    fun viewerWebViewModel(params: ViewerParams, darkMode: Boolean): ViewerWebViewModel =
+        koin.get { parametersOf(params, darkMode) }
 }
