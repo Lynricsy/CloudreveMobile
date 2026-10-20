@@ -13,9 +13,9 @@ data class ServerInfo(
     val siteUrl: String,
     val version: String,
     val title: String,
-    /** 深色背景用的 Logo（绝对地址，可能是 SVG） */
+    /** 浅色主题用的 Logo（绝对地址，可能是 SVG） */
     val logoUrl: String?,
-    /** 浅色背景用的 Logo（绝对地址，可能是 SVG） */
+    /** 深色主题用的 Logo（`logo_light`，浅色图形；绝对地址，可能是 SVG） */
     val logoLightUrl: String?,
     val enhanced: Boolean,
     val basic: SiteBasic,
