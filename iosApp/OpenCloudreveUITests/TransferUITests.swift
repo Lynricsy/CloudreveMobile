@@ -8,25 +8,15 @@ final class TransferUITests: XCTestCase {
     private let password = "User@12345"
     private let uploadName = "transfer-uitest.bin"
 
-    private var launchedApp: XCUIApplication?
-
     override func setUp() {
         continueAfterFailure = false
-    }
-
-    /// 中途失败时也退出登录，避免影响之后的 UI 测试
-    override func tearDown() {
-        MainActor.assumeIsolated {
-            guard let app = launchedApp, app.state == .runningForeground,
-                  !app.textFields["server.url"].exists else { return }
-            signOut(app)
-        }
     }
 
     @MainActor
     func testUploadAndDownloadTransfers() {
         let app = XCUIApplication()
-        launchedApp = app
+        // 中途失败时也退出登录，避免影响之后的 UI 测试
+        addTeardownBlock { @MainActor in TransferUITests.bestEffortSignOut(XCUIApplication()) }
         // 256 MiB（11 片）+ 每批分片前等 2 秒（Debug 夹具），保证截图时上传仍在进行
         app.launchArguments += [
             "-AppleLanguages", "(zh-Hans)", "-AppleLocale", "zh_CN",
@@ -86,6 +76,26 @@ final class TransferUITests: XCTestCase {
     }
 
     // MARK: - 辅助
+
+    /// 测试结束（含中途失败）时若仍在登录状态则退出登录；不做断言
+    @MainActor
+    private static func bestEffortSignOut(_ app: XCUIApplication) {
+        guard app.state == .runningForeground, !app.textFields["server.url"].exists else { return }
+        let me = app.tabBars.buttons["我的"]
+        guard me.waitForExistence(timeout: 3) else { return }
+        me.tap()
+        let button = app.buttons["me.signOut"]
+        var attempts = 0
+        while !(button.exists && button.isHittable) && attempts < 6 {
+            app.swipeUp()
+            attempts += 1
+        }
+        guard button.exists else { return }
+        button.tap()
+        let confirm = app.sheets.buttons["退出登录"]
+        if confirm.waitForExistence(timeout: 5) { confirm.tap() }
+        _ = app.textFields["server.url"].waitForExistence(timeout: 10)
+    }
 
     @MainActor
     private func ensureSignedIn(_ app: XCUIApplication) {
