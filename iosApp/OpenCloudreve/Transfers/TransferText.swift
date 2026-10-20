@@ -52,7 +52,6 @@ enum TransferText {
             case TransferErrorCode.shared.STORAGE_REJECTED: return String(localized: "存储服务拒绝了请求")
             case TransferErrorCode.shared.MISSING_ETAG: return String(localized: "存储服务未返回 ETag，请检查存储桶的跨域设置")
             case TransferErrorCode.shared.UNSUPPORTED_POLICY: return String(localized: "暂不支持此存储策略")
-            case TransferErrorCode.shared.RETRIES_EXHAUSTED: return String(localized: "多次重试后仍然失败")
             case ErrorCode.shared.TRANSPORT: return String(localized: "网络连接失败")
             default: break
             }

@@ -3646,22 +3646,6 @@
         }
       }
     },
-    "多次重试后仍然失败": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Still failing after several retries"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "多次重试后仍然失败"
-          }
-        }
-      }
-    },
     "大小": {
       "localizations": {
         "en": {

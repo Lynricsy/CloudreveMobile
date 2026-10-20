@@ -49,10 +49,7 @@ struct TransferExecutorIntegrationTests {
     private func exercise(accountId: String) async throws {
         // 25 MiB + 1 MiB：两片（第二片 1 MiB），内容为可校验的字节序列
         let size = (25 << 20) + (1 << 20)
-        var original = Data(count: size)
-        original.withUnsafeMutableBytes { buffer in
-            for index in 0..<size { buffer[index] = UInt8(truncatingIfNeeded: index &* 31 &+ index >> 12) }
-        }
+        let original = Data((0..<size).lazy.map { UInt8(truncatingIfNeeded: $0 &* 31 &+ ($0 >> 12)) })
         let name = "ios-executor-\(UUID().uuidString.prefix(8)).bin"
         let source = FileManager.default.temporaryDirectory.appending(path: name)
         try original.write(to: source)
