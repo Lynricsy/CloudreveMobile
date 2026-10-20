@@ -6,22 +6,61 @@ concurrency:
   group: ios-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # UI 测试登录用的服务端版本与账号（与 iosApp/OpenCloudreveUITests 中一致）
+  OCR_SERVER_REF: "4.19.11"
+  OCR_TEST_EMAIL: user@example.com
+  OCR_TEST_PASSWORD: User@12345
+
 jobs:
   build:
     runs-on: macos-26
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with:
+          repository: Lynricsy/OpenCloudreve
+          ref: ${{ env.OCR_SERVER_REF }}
+          path: server
+          submodules: false
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
       - name: Xcode 信息
         run: |
-          ls -d /Applications/Xcode*.app
           xcodebuild -version
           xcrun simctl list runtimes
+      - name: 构建并启动 OpenCloudreve 服务端
+        run: |
+          # 只测 API：用只含 index.html 的占位前端代替子模块构建产物（go:embed 需要 assets.zip 存在）
+          python3 - <<'EOF'
+          import zipfile
+          with zipfile.ZipFile("server/application/statics/assets.zip", "w") as z:
+              z.writestr("assets/build/index.html", "<!doctype html><title>OpenCloudreve</title>")
+          EOF
+          SERVER_DIR="$RUNNER_TEMP/ocr-server"
+          mkdir -p "$SERVER_DIR"
+          (cd server && go build -o "$SERVER_DIR/cloudreve" .)
+          cd "$SERVER_DIR"
+          printf '[System]\nMode = master\nListen = :5212\n' > conf.ini
+          nohup ./cloudreve -c conf.ini > server.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:5212/api/v4/site/ping; then echo; break; fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:5212/api/v4/site/ping | grep -q "$OCR_SERVER_REF"
+          RESP=$(curl -fsS -X POST -H 'Content-Type: application/json' \
+            -d "{\"email\":\"$OCR_TEST_EMAIL\",\"password\":\"$OCR_TEST_PASSWORD\"}" \
+            http://127.0.0.1:5212/api/v4/user)
+          echo "注册：$RESP"
+          echo "$RESP" | grep -q '"code":0'
       - name: 构建 KMP XCFramework
         run: ./scripts/build-ios-framework.sh debug
       - name: 生成 Xcode 工程
@@ -44,11 +83,14 @@ jobs:
         run: |
           set -o pipefail
           cd iosApp
+          # 模拟器用 ad-hoc 签名（无需开发者团队）：完全不签名时 entitlements 不会写入，
+          # Keychain 会以 -34018 拒绝一切访问，App Group 容器也取不到
           xcodebuild -project OpenCloudreve.xcodeproj -scheme OpenCloudreve \
             -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
             -resultBundlePath build/OpenCloudreve.xcresult \
             -skipPackagePluginValidation -skipMacroValidation \
-            CODE_SIGNING_ALLOWED=NO build test
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= \
+            build test
       - name: 导出截图
         if: always()
         run: |
@@ -56,6 +98,7 @@ jobs:
           if [ -d iosApp/build/OpenCloudreve.xcresult ]; then
             xcrun xcresulttool export attachments --path iosApp/build/OpenCloudreve.xcresult --output-path iosApp/build/screenshots || true
           fi
+          cp "$RUNNER_TEMP/ocr-server/server.log" iosApp/build/ || true
       - uses: actions/upload-artifact@v5
         if: always()
         with:
@@ -63,3 +106,4 @@ jobs:
           path: |
             iosApp/build/OpenCloudreve.xcresult
             iosApp/build/screenshots
+            iosApp/build/server.log
