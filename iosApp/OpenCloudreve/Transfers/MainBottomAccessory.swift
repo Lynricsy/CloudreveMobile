@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// 主 `TabView` 的底部附件：有进行中的传输时显示迷你栏，点按切到任务 Tab
+/// 主 `TabView` 的底部附件：有进行中的传输时显示迷你栏（点按切到任务 Tab）；
+/// 否则在后台播放音乐时显示“正在播放”（`AudioPlayback`）
 struct MainBottomAccessory: ViewModifier {
     let accountId: String
     @Binding var selection: MainTab
@@ -9,13 +10,17 @@ struct MainBottomAccessory: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .compatibleBottomAccessory(isEnabled: summary.isActive) {
-                TransferMiniBar(
-                    uploads: summary.activeUploads,
-                    downloads: summary.activeDownloads,
-                    progress: summary.progress
-                ) {
-                    selection = .tasks
+            .compatibleBottomAccessory(isEnabled: summary.isActive || AudioPlayback.shared.isActive) {
+                if summary.isActive {
+                    TransferMiniBar(
+                        uploads: summary.activeUploads,
+                        downloads: summary.activeDownloads,
+                        progress: summary.progress
+                    ) {
+                        selection = .tasks
+                    }
+                } else {
+                    NowPlayingAccessoryContent(playback: AudioPlayback.shared)
                 }
             }
             .task(id: accountId) {

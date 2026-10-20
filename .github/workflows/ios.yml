@@ -74,6 +74,11 @@ jobs:
       - name: 预置文件浏览测试数据
         # 照片（PNG 缩略图）、文档（65 个文件）等，供 FileBrowserUITests 使用
         run: python3 scripts/ci/seed-files.py
+      - name: 预置预览测试素材
+        # 「预览」目录：带 EXIF 的 jpg、mp4 + 同名 srt、两首 mp3、pdf、md、zip，供 ViewerUITests 使用
+        run: |
+          command -v ffmpeg >/dev/null || brew install ffmpeg
+          python3 scripts/ci/seed-viewer-media.py
       - name: 构建 KMP XCFramework
         run: ./scripts/build-ios-framework.sh debug
       - name: 生成 Xcode 工程

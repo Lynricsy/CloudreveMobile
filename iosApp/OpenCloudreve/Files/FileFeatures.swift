@@ -35,7 +35,8 @@ struct FileFeatures {
         download: TransferHooks.download,
         uploadFiles: TransferHooks.uploadFiles,
         uploadMedia: TransferHooks.uploadMedia,
-        uploadCamera: TransferHooks.uploadCamera
+        uploadCamera: TransferHooks.uploadCamera,
+        preview: ViewerHooks.preview
     )
 
     /// 动作对应的入口；不是后续阶段动作时为 nil

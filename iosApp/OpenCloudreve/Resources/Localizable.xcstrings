@@ -35,6 +35,23 @@
         }
       }
     },
+    "%@ 副本": {
+      "comment": "另存为的默认文件名，参数为原文件名（不含扩展名）",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ copy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 副本"
+          }
+        }
+      }
+    },
     "%@/秒": {
       "comment": "传输速度",
       "localizations": {
@@ -302,6 +319,54 @@
         }
       }
     },
+    "EPUB 阅读器": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EPUB Reader"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EPUB 阅读器"
+          }
+        }
+      }
+    },
+    "EXIF": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EXIF"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EXIF"
+          }
+        }
+      }
+    },
+    "Google Docs 预览": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Docs Viewer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Docs 预览"
+          }
+        }
+      }
+    },
     "ID": {
       "localizations": {
         "en": {
@@ -334,6 +399,38 @@
         }
       }
     },
+    "Markdown 编辑器": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Markdown Editor"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Markdown 编辑器"
+          }
+        }
+      }
+    },
+    "Microsoft 365 在线预览": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microsoft 365 Online Viewer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microsoft 365 在线预览"
+          }
+        }
+      }
+    },
     "OneDrive 不支持上传空文件": {
       "localizations": {
         "en": {
@@ -346,6 +443,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "OneDrive 不支持上传空文件"
+          }
+        }
+      }
+    },
+    "PDF 阅读器": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF Reader"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF 阅读器"
           }
         }
       }
@@ -443,6 +556,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "上一级"
+          }
+        }
+      }
+    },
+    "上一首": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上一首"
           }
         }
       }
@@ -641,6 +770,22 @@
         }
       }
     },
+    "下一首": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一首"
+          }
+        }
+      }
+    },
     "下载": {
       "localizations": {
         "en": {
@@ -670,6 +815,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "下载 %lld 项"
+          }
+        }
+      }
+    },
+    "下载失败，请检查网络后重试": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download failed. Check your connection and try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载失败，请检查网络后重试"
           }
         }
       }
@@ -1444,6 +1605,22 @@
         }
       }
     },
+    "保存到同一文件夹": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saves to the same folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存到同一文件夹"
+          }
+        }
+      }
+    },
     "保存到我的文件": {
       "localizations": {
         "en": {
@@ -1568,6 +1745,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "修改昵称"
+          }
+        }
+      }
+    },
+    "停止播放": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop Playback"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止播放"
           }
         }
       }
@@ -1781,6 +1974,22 @@
         }
       }
     },
+    "关闭字幕": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitles Off"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭字幕"
+          }
+        }
+      }
+    },
     "其他用户访问你的个人主页时能看到的分享链接。": {
       "localizations": {
         "en": {
@@ -1809,6 +2018,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "内部状态"
+          }
+        }
+      }
+    },
+    "再次打开": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Again"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再次打开"
           }
         }
       }
@@ -2522,6 +2747,54 @@
         }
       }
     },
+    "压缩包密码（没有可留空）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archive password (leave empty if none)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "压缩包密码（没有可留空）"
+          }
+        }
+      }
+    },
+    "压缩包是空的": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The archive is empty"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "压缩包是空的"
+          }
+        }
+      }
+    },
+    "压缩包预览": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archive Preview"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "压缩包预览"
+          }
+        }
+      }
+    },
     "原位置：%@": {
       "comment": "回收站条目的原始位置",
       "localizations": {
@@ -2684,6 +2957,54 @@
         }
       }
     },
+    "取消选择": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deselect"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消选择"
+          }
+        }
+      }
+    },
+    "另存为": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save As"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "另存为"
+          }
+        }
+      }
+    },
+    "另存为…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save As…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "另存为…"
+          }
+        }
+      }
+    },
     "只能上传文件、照片和视频，或打开 OpenCloudreve 分享链接。": {
       "localizations": {
         "en": {
@@ -2700,6 +3021,23 @@
         }
       }
     },
+    "只解压所选的 %lld 项": {
+      "comment": "参数为所选条目数",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only the %lld selected items will be extracted"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只解压所选的 %lld 项"
+          }
+        }
+      }
+    },
     "只读": {
       "localizations": {
         "en": {
@@ -2712,6 +3050,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "只读"
+          }
+        }
+      }
+    },
+    "可以分享给其他应用打开。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can share it to another app to open it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可以分享给其他应用打开。"
+          }
+        }
+      }
+    },
+    "可以在“任务”中查看进度。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can follow its progress in Tasks."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可以在“任务”中查看进度。"
           }
         }
       }
@@ -2956,6 +3326,38 @@
         }
       }
     },
+    "图片信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image Info"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图片信息"
+          }
+        }
+      }
+    },
+    "图片查看器": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image Viewer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图片查看器"
+          }
+        }
+      }
+    },
     "图表样式": {
       "localizations": {
         "en": {
@@ -3180,6 +3582,22 @@
         }
       }
     },
+    "处理节点": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Node"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "处理节点"
+          }
+        }
+      }
+    },
     "复制": {
       "localizations": {
         "en": {
@@ -3325,6 +3743,22 @@
         }
       }
     },
+    "始终使用此方式打开此类文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always open this file type this way"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "始终使用此方式打开此类文件"
+          }
+        }
+      }
+    },
     "媒体信息": {
       "localizations": {
         "en": {
@@ -3337,6 +3771,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "媒体信息"
+          }
+        }
+      }
+    },
+    "字幕": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕"
           }
         }
       }
@@ -3529,6 +3979,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "完成"
+          }
+        }
+      }
+    },
+    "实况": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实况"
+          }
+        }
+      }
+    },
+    "实况照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live Photo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实况照片"
           }
         }
       }
@@ -3727,6 +4209,22 @@
         }
       }
     },
+    "已交给其他应用打开": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opened in another app"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已交给其他应用打开"
+          }
+        }
+      }
+    },
     "已使用 %@，共 %@": {
       "comment": "已用容量与总容量",
       "localizations": {
@@ -3792,6 +4290,22 @@
         }
       }
     },
+    "已创建解压任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extraction task created"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已创建解压任务"
+          }
+        }
+      }
+    },
     "已取消": {
       "localizations": {
         "en": {
@@ -3821,6 +4335,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "已在“%@”中创建快捷方式“%@”。"
+          }
+        }
+      }
+    },
+    "已在浏览器中打开": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opened in the browser"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已在浏览器中打开"
           }
         }
       }
@@ -4100,6 +4630,22 @@
         }
       }
     },
+    "开始解压": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始解压"
+          }
+        }
+      }
+    },
     "开源许可": {
       "localizations": {
         "en": {
@@ -4112,6 +4658,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "开源许可"
+          }
+        }
+      }
+    },
+    "强制解锁并保存": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Force Unlock and Save"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "强制解锁并保存"
           }
         }
       }
@@ -4368,6 +4930,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "打开分享链接"
+          }
+        }
+      }
+    },
+    "打开方式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open With"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开方式"
+          }
+        }
+      }
+    },
+    "打开方式…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open With…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开方式…"
           }
         }
       }
@@ -4836,6 +5430,54 @@
         }
       }
     },
+    "播放": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放"
+          }
+        }
+      }
+    },
+    "播放列表": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playlist"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放列表"
+          }
+        }
+      }
+    },
+    "播放进度": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback position"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放进度"
+          }
+        }
+      }
+    },
     "操作失败": {
       "localizations": {
         "en": {
@@ -4864,6 +5506,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "支持"
+          }
+        }
+      }
+    },
+    "放弃更改并关闭": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard Changes and Close"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放弃更改并关闭"
           }
         }
       }
@@ -4960,6 +5618,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "文件名包含不允许的字符"
+          }
+        }
+      }
+    },
+    "文件名编码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File Name Encoding"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件名编码"
           }
         }
       }
@@ -5124,6 +5798,22 @@
         }
       }
     },
+    "文件超过在线编辑的大小上限，无法保存": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file exceeds the online editing size limit and can’t be saved"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件超过在线编辑的大小上限，无法保存"
+          }
+        }
+      }
+    },
     "文件超过存储策略的大小限制": {
       "localizations": {
         "en": {
@@ -5168,6 +5858,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "文本文件"
+          }
+        }
+      }
+    },
+    "文本编辑器": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text Editor"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文本编辑器"
           }
         }
       }
@@ -5428,6 +6134,38 @@
         }
       }
     },
+    "无法在应用内预览": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can’t preview in the app"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法在应用内预览"
+          }
+        }
+      }
+    },
+    "无法打开": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can’t Open"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法打开"
+          }
+        }
+      }
+    },
     "无法打开分享": {
       "localizations": {
         "en": {
@@ -5440,6 +6178,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法打开分享"
+          }
+        }
+      }
+    },
+    "无法打开此 PDF 文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can’t open this PDF file"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法打开此 PDF 文件"
           }
         }
       }
@@ -5473,6 +6227,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法打开网页：%@"
+          }
+        }
+      }
+    },
+    "无法播放实况照片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can’t play this Live Photo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法播放实况照片"
+          }
+        }
+      }
+    },
+    "无法显示此图片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can’t display this image"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法显示此图片"
           }
         }
       }
@@ -5633,6 +6419,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "显示缩略图"
+          }
+        }
+      }
+    },
+    "显示选项": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Display Options"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示选项"
           }
         }
       }
@@ -5861,6 +6663,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "有效期至 %@"
+          }
+        }
+      }
+    },
+    "有未保存的更改": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You have unsaved changes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有未保存的更改"
           }
         }
       }
@@ -6171,6 +6989,38 @@
         }
       }
     },
+    "模式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mode"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模式"
+          }
+        }
+      }
+    },
+    "正在下载以便打开…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloading to open…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在下载以便打开…"
+          }
+        }
+      }
+    },
     "正在加载更多": {
       "localizations": {
         "en": {
@@ -6215,6 +7065,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在开始上传…"
+          }
+        }
+      }
+    },
+    "正在播放": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now Playing"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在播放"
           }
         }
       }
@@ -6411,6 +7277,22 @@
         }
       }
     },
+    "此预览器需要 OpenCloudreve 服务端 4.19.11 或更高版本。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This viewer requires OpenCloudreve server 4.19.11 or later."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此预览器需要 OpenCloudreve 服务端 4.19.11 或更高版本。"
+          }
+        }
+      }
+    },
     "每个账号有独立的密码和根目录；长按账号可拷贝连接信息。": {
       "localizations": {
         "en": {
@@ -6439,6 +7321,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "永不过期"
+          }
+        }
+      }
+    },
+    "没有 EXIF 信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No EXIF information"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有 EXIF 信息"
           }
         }
       }
@@ -6475,6 +7373,22 @@
         }
       }
     },
+    "没有创建解压任务的权限": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You don’t have permission to create extraction tasks"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有创建解压任务的权限"
+          }
+        }
+      }
+    },
     "没有可上传的内容": {
       "localizations": {
         "en": {
@@ -6487,6 +7401,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有可上传的内容"
+          }
+        }
+      }
+    },
+    "没有可显示的图片": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No images to display"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可显示的图片"
           }
         }
       }
@@ -7037,6 +7967,22 @@
         }
       }
     },
+    "用其他应用打开": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in Another App"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用其他应用打开"
+          }
+        }
+      }
+    },
     "用户": {
       "localizations": {
         "en": {
@@ -7290,6 +8236,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "目标位置已有同名文件，换一个名称再上传。"
+          }
+        }
+      }
+    },
+    "目标文件夹": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destination Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目标文件夹"
           }
         }
       }
@@ -7548,6 +8510,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "站点未启用此功能"
+          }
+        }
+      }
+    },
+    "章节": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chapters"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "章节"
+          }
+        }
+      }
+    },
+    "等宽字体": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monospaced Font"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等宽字体"
           }
         }
       }
@@ -7826,6 +8820,38 @@
         }
       }
     },
+    "自动": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动"
+          }
+        }
+      }
+    },
+    "自动换行": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wrap Lines"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动换行"
+          }
+        }
+      }
+    },
     "节点": {
       "localizations": {
         "en": {
@@ -7922,6 +8948,22 @@
         }
       }
     },
+    "覆盖": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overwrite"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "覆盖"
+          }
+        }
+      }
+    },
     "覆盖上传同名文件时保留旧版本，可在文件信息中查看和恢复。": {
       "localizations": {
         "en": {
@@ -7950,6 +8992,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "覆盖为新版本"
+          }
+        }
+      }
+    },
+    "覆盖会丢弃其他地方的修改；也可以另存为新文件。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overwriting discards the changes made elsewhere. You can also save as a new file."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "覆盖会丢弃其他地方的修改；也可以另存为新文件。"
           }
         }
       }
@@ -7986,6 +9044,22 @@
         }
       }
     },
+    "视频播放器": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video Player"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频播放器"
+          }
+        }
+      }
+    },
     "解压": {
       "localizations": {
         "en": {
@@ -7998,6 +9072,71 @@
           "stringUnit": {
             "state": "translated",
             "value": "解压"
+          }
+        }
+      }
+    },
+    "解压全部": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解压全部"
+          }
+        }
+      }
+    },
+    "解压到": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract To"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解压到"
+          }
+        }
+      }
+    },
+    "解压到…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract To…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解压到…"
+          }
+        }
+      }
+    },
+    "解压所选（%lld 项）": {
+      "comment": "参数为所选条目数",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extract Selected (%lld)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解压所选（%lld 项）"
           }
         }
       }
@@ -8498,6 +9637,22 @@
         }
       }
     },
+    "返回上一级": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up One Level"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "返回上一级"
+          }
+        }
+      }
+    },
     "还原": {
       "localizations": {
         "en": {
@@ -8510,6 +9665,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "还原"
+          }
+        }
+      }
+    },
+    "还原更改": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revert Changes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还原更改"
           }
         }
       }
@@ -8674,6 +9845,23 @@
         }
       }
     },
+    "选择打开“%@”的方式": {
+      "comment": "打开方式列表标题，参数为文件名",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose how to open “%@”"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择打开“%@”的方式"
+          }
+        }
+      }
+    },
     "选择文件": {
       "localizations": {
         "en": {
@@ -8734,6 +9922,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择照片或视频"
+          }
+        }
+      }
+    },
+    "选择目标文件夹": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Destination Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择目标文件夹"
           }
         }
       }
@@ -8910,6 +10114,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "重新计算已用空间"
+          }
+        }
+      }
+    },
+    "重新载入": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reload"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新载入"
           }
         }
       }
@@ -9107,6 +10327,22 @@
         }
       }
     },
+    "需要更新服务端": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server Update Required"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要更新服务端"
+          }
+        }
+      }
+    },
     "需要服务端 4.19.11 或更高版本": {
       "localizations": {
         "en": {
@@ -9139,6 +10375,22 @@
         }
       }
     },
+    "音乐播放器": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Music Player"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音乐播放器"
+          }
+        }
+      }
+    },
     "音频": {
       "localizations": {
         "en": {
@@ -9167,6 +10419,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "顺序"
+          }
+        }
+      }
+    },
+    "预览": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preview"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预览"
           }
         }
       }
