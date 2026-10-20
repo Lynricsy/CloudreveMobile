@@ -152,13 +152,26 @@ class FileRepository internal constructor(
     suspend fun createFile(parentUri: String, name: String): FileItem =
         api().create(childUri(parentUri, name), CreateFileRequest.TYPE_FILE, errOnConflict = true)
 
+    /**
+     * “保存分享到我的文件”：在 [parentUri] 下建指向分享的快捷方式（软链接，元数据 `sys:shared_redirect` + `sys:shared_owner`）。
+     * [shareUri] 为分享根（带密码）或单文件分享中该文件的 path；重名返回 40004。服务端不支持从分享复制/移动文件。
+     */
+    @Throws(Exception::class)
+    suspend fun createShareShortcut(parentUri: String, name: String, isFolder: Boolean, shareUri: String, ownerId: String): FileItem =
+        api().create(
+            childUri(parentUri, name),
+            if (isFolder) CreateFileRequest.TYPE_FOLDER else CreateFileRequest.TYPE_FILE,
+            mapOf(MetadataKeys.SHARED_REDIRECT to shareUri, MetadataKeys.SHARED_OWNER to ownerId),
+            errOnConflict = true,
+        )
+
     @Throws(Exception::class)
     suspend fun rename(uri: String, newName: String): FileItem = api().rename(uri, newName)
 
     @Throws(Exception::class)
     suspend fun move(uris: List<String>, dst: String) = api().move(uris, dst, copy = false)
 
-    /** 复制；也用于“保存分享到我的文件”（40059 = 自己的分享） */
+    /** 复制（仅限“我的文件”内；分享内文件不能复制，保存分享用 [createShareShortcut]） */
     @Throws(Exception::class)
     suspend fun copy(uris: List<String>, dst: String) = api().move(uris, dst, copy = true)
 

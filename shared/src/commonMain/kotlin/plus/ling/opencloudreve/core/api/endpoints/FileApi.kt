@@ -148,7 +148,7 @@ class FileApi(private val client: ApiClient) {
     suspend fun rename(uri: String, newName: String): FileItem =
         client.post("/file/rename", RenameFileRequest(uri, newName))
 
-    /** `POST /file/move`；[copy] 为 true 时复制（也用于保存分享到我的文件） */
+    /** `POST /file/move`；[copy] 为 true 时复制（复制仅限 `my` 文件系统内，见后端 `canMoveOrCopyTo`） */
     @Throws(Exception::class)
     suspend fun move(uris: List<String>, dst: String, copy: Boolean = false) {
         client.post<Unit, MoveFileRequest>("/file/move", MoveFileRequest(uris, dst, copy))

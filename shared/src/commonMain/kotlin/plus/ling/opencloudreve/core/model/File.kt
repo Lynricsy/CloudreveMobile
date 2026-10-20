@@ -240,7 +240,7 @@ data class RenameFileRequest(
     @SerialName("new_name") val newName: String,
 )
 
-/** `POST /file/move`（[copy] 为 true 时复制；也用于“保存分享到我的文件”） */
+/** `POST /file/move`（[copy] 为 true 时复制；复制仅限 `my` 文件系统内） */
 @Serializable
 data class MoveFileRequest(
     val uris: List<String>,
