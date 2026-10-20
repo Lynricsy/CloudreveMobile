@@ -17,11 +17,11 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v5
-      - name: 选择 Xcode
+      - name: Xcode 信息
         run: |
           ls -d /Applications/Xcode*.app
-          if [ -d /Applications/Xcode_26.0.app ]; then sudo xcode-select -s /Applications/Xcode_26.0.app; fi
           xcodebuild -version
+          xcrun simctl list runtimes
       - name: 构建 KMP XCFramework
         run: ./scripts/build-ios-framework.sh debug
       - name: 生成 Xcode 工程
@@ -31,14 +31,21 @@ jobs:
       - name: 选择模拟器
         id: sim
         run: |
-          NAME=$(xcrun simctl list devices available -j | python3 -c "import json,sys;d=json.load(sys.stdin)['devices'];n=[x['name'] for k,v in d.items() if 'iOS' in k for x in v if x['name'].startswith('iPhone')];print('iPhone 17' if 'iPhone 17' in n else n[0])")
-          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          d = json.load(sys.stdin)['devices']
+          cands = [(k, x) for k, v in d.items() if 'iOS' in k for x in v if x['name'].startswith('iPhone')]
+          cands.sort(key=lambda kv: kv[0], reverse=True)
+          pick = next((x for k, x in cands if x['name'] == 'iPhone 17'), cands[0][1])
+          print(pick['udid'])
+          ")
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
       - name: 构建并测试
         run: |
           set -o pipefail
           cd iosApp
           xcodebuild -project OpenCloudreve.xcodeproj -scheme OpenCloudreve \
-            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
             -resultBundlePath build/OpenCloudreve.xcresult \
             -skipPackagePluginValidation -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO build test
