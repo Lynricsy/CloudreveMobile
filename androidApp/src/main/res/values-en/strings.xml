@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common -->
+    <string name="action_back">Back</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_next">Next</string>
+    <string name="action_open_in_browser">Open in browser</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
+
+    <!-- Errors -->
+    <string name="error_network">Can\'t reach the server. Check your network and the address.</string>
+    <string name="error_bad_response">Invalid server response. Make sure this is an OpenCloudreve site.</string>
+    <string name="error_unauthorized">Please sign in first</string>
+    <string name="error_session_expired">Your session has expired. Please sign in again.</string>
+    <string name="error_not_found">The requested item doesn\'t exist</string>
+    <string name="error_permission">You don\'t have permission to do this</string>
+    <string name="error_conflict">An item with the same name already exists</string>
+    <string name="error_email_existed">This email is already registered</string>
+    <string name="error_lock_conflict">The file is locked</string>
+    <string name="error_stale_version">The file was modified by someone else</string>
+    <string name="error_validation">Invalid input</string>
+    <string name="error_invalid_url">Enter a valid server address</string>
+    <string name="error_captcha">Incorrect captcha, please try again</string>
+    <string name="error_two_factor">Incorrect verification code</string>
+    <string name="error_incorrect_credentials">Incorrect email or password</string>
+    <string name="error_incorrect_password">Incorrect password</string>
+    <string name="error_quota">Not enough storage space</string>
+    <string name="error_file_too_large">File is too large</string>
+    <string name="error_partial">Some operations could not be completed</string>
+    <string name="error_feature_disabled">This feature is not enabled on the server</string>
+    <string name="error_user_banned">This account has been banned</string>
+    <string name="error_user_not_activated">This account is not activated yet. Check your inbox for the activation email.</string>
+    <string name="error_link_expired">The link has expired</string>
+    <string name="error_passkey_fingerprint">Passkey verification failed: the server has not registered this app\'s signing fingerprint</string>
+    <string name="passkey_none">No passkey for this site is available on this device</string>
+    <string name="error_unknown">Something went wrong</string>
+    <string name="error_with_detail">%1$s (%2$s)</string>
+
+    <!-- Server -->
+    <string name="server_title">Connect to server</string>
+    <string name="server_subtitle">Enter the address of your OpenCloudreve site</string>
+    <string name="server_url_label">Server address</string>
+    <string name="server_url_placeholder">cloud.example.com</string>
+    <string name="server_url_hint">https:// is used when no scheme is given</string>
+
+    <!-- Sign in -->
+    <string name="login_title">Sign in</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_password_confirm">Confirm password</string>
+    <string name="login_sign_in">Sign in</string>
+    <string name="login_change_email">Change</string>
+    <string name="login_forgot_password">Forgot password?</string>
+    <string name="login_register">Create account</string>
+    <string name="login_have_account">Have an account? Sign in</string>
+    <string name="login_passkey">Sign in with a passkey</string>
+    <string name="login_email_not_found">No account uses this email</string>
+    <string name="login_password_disabled">This account has no password. Sign in with a passkey.</string>
+    <string name="login_agreement">By continuing you agree to the</string>
+    <string name="login_tos">Terms of Service</string>
+    <string name="login_privacy">Privacy Policy</string>
+    <string name="login_config_failed">Couldn\'t load the site configuration</string>
+    <string name="twofa_title">Two-factor authentication</string>
+    <string name="twofa_message">Enter the 6-digit code from your authenticator app</string>
+    <string name="twofa_input">Verification code</string>
+    <string name="register_title">Create account</string>
+    <string name="register_submit">Create account</string>
+    <string name="register_password_hint">At least 6 characters</string>
+    <string name="register_password_mismatch">Passwords don\'t match</string>
+    <string name="register_done">Account created. Please sign in.</string>
+    <string name="register_activation">Account created. Open the link in the email to activate it first.</string>
+    <string name="forgot_title">Reset password</string>
+    <string name="forgot_message">We\'ll send a password reset link to this email</string>
+    <string name="forgot_submit">Send reset email</string>
+    <string name="forgot_sent">Reset email sent. Check your inbox.</string>
+
+    <!-- Captcha -->
+    <string name="captcha_label">Captcha</string>
+    <string name="captcha_image_desc">Captcha image, tap to refresh</string>
+    <string name="captcha_refresh">Refresh captcha</string>
+    <string name="captcha_load_failed">Couldn\'t load the captcha. Tap to retry.</string>
+    <string name="captcha_unsupported">This site\'s human verification needs server version 4.19.11 or later to work in the app. Please sign in on the web.</string>
+    <string name="captcha_done">Verification complete</string>
+
+    <!-- Main -->
+    <string name="tab_files">Files</string>
+    <string name="tab_shares">Shares</string>
+    <string name="tab_tasks">Tasks</string>
+    <string name="tab_me">Me</string>
+    <string name="tab_me_long_press">Switch account</string>
+    <string name="placeholder_files">Your files will appear here</string>
+    <string name="placeholder_shares">Shares you create will appear here</string>
+    <string name="placeholder_tasks">Uploads, downloads and background tasks will appear here</string>
+
+    <!-- Accounts -->
+    <string name="account_switch">Switch account</string>
+    <string name="account_add">Add account</string>
+    <string name="account_sign_out">Sign out</string>
+    <string name="account_sign_out_title">Sign out?</string>
+    <string name="account_sign_out_message">Sign-in data for %1$s will be removed from this device.</string>
+    <string name="account_expired">Sign in again</string>
+    <string name="account_current">Current account</string>
+    <string name="account_avatar_desc">Avatar</string>
+</resources>

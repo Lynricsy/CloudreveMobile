@@ -1,4 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="zh-rCN">
     <string name="app_name" translatable="false">OpenCloudreve</string>
+
+    <!-- 通用 -->
+    <string name="action_back">返回</string>
+    <string name="action_retry">重试</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_continue">继续</string>
+    <string name="action_next">下一步</string>
+    <string name="action_open_in_browser">在浏览器中打开</string>
+    <string name="show_password">显示密码</string>
+    <string name="hide_password">隐藏密码</string>
+
+    <!-- 错误 -->
+    <string name="error_network">无法连接到服务器，请检查网络与地址</string>
+    <string name="error_bad_response">服务器响应无效，请确认这是 OpenCloudreve 站点</string>
+    <string name="error_unauthorized">请先登录</string>
+    <string name="error_session_expired">登录已过期，请重新登录</string>
+    <string name="error_not_found">请求的内容不存在</string>
+    <string name="error_permission">没有执行此操作的权限</string>
+    <string name="error_conflict">已存在同名项目</string>
+    <string name="error_email_existed">该邮箱已被注册</string>
+    <string name="error_lock_conflict">文件已被锁定</string>
+    <string name="error_stale_version">文件已被其他人修改</string>
+    <string name="error_validation">输入内容无效</string>
+    <string name="error_invalid_url">请输入有效的服务器地址</string>
+    <string name="error_captcha">验证码错误，请重试</string>
+    <string name="error_two_factor">两步验证码不正确</string>
+    <string name="error_incorrect_credentials">邮箱或密码错误</string>
+    <string name="error_incorrect_password">密码错误</string>
+    <string name="error_quota">存储空间不足</string>
+    <string name="error_file_too_large">文件过大</string>
+    <string name="error_partial">部分操作未能完成</string>
+    <string name="error_feature_disabled">该功能未在服务端启用</string>
+    <string name="error_user_banned">该账户已被封禁</string>
+    <string name="error_user_not_activated">该账户尚未激活，请查收激活邮件</string>
+    <string name="error_link_expired">链接已过期</string>
+    <string name="error_passkey_fingerprint">Passkey 验证失败：服务端未配置本应用的签名指纹</string>
+    <string name="passkey_none">此设备上没有该站点可用的 Passkey</string>
+    <string name="error_unknown">出现未知错误</string>
+    <string name="error_with_detail">%1$s（%2$s）</string>
+
+    <!-- 服务器地址 -->
+    <string name="server_title">连接到服务器</string>
+    <string name="server_subtitle">输入你的 OpenCloudreve 站点地址</string>
+    <string name="server_url_label">服务器地址</string>
+    <string name="server_url_placeholder">cloud.example.com</string>
+    <string name="server_url_hint">未填写协议时默认使用 https://</string>
+
+    <!-- 登录 -->
+    <string name="login_title">登录</string>
+    <string name="login_email">邮箱</string>
+    <string name="login_password">密码</string>
+    <string name="login_password_confirm">确认密码</string>
+    <string name="login_sign_in">登录</string>
+    <string name="login_change_email">更换</string>
+    <string name="login_forgot_password">忘记密码？</string>
+    <string name="login_register">注册账号</string>
+    <string name="login_have_account">已有账号？登录</string>
+    <string name="login_passkey">使用 Passkey 登录</string>
+    <string name="login_email_not_found">该邮箱尚未注册</string>
+    <string name="login_password_disabled">该账户未设置密码，请使用 Passkey 登录</string>
+    <string name="login_agreement">继续即表示你同意</string>
+    <string name="login_tos">服务条款</string>
+    <string name="login_privacy">隐私政策</string>
+    <string name="login_config_failed">无法加载站点配置</string>
+    <string name="twofa_title">两步验证</string>
+    <string name="twofa_message">请输入身份验证器应用中的 6 位验证码</string>
+    <string name="twofa_input">两步验证码</string>
+    <string name="register_title">注册</string>
+    <string name="register_submit">注册</string>
+    <string name="register_password_hint">至少 6 位</string>
+    <string name="register_password_mismatch">两次输入的密码不一致</string>
+    <string name="register_done">注册成功，请登录</string>
+    <string name="register_activation">注册成功，请先点击邮件中的链接激活账户</string>
+    <string name="forgot_title">找回密码</string>
+    <string name="forgot_message">我们会向该邮箱发送重置密码的链接</string>
+    <string name="forgot_submit">发送重置邮件</string>
+    <string name="forgot_sent">重置邮件已发送，请查收</string>
+
+    <!-- 验证码 -->
+    <string name="captcha_label">验证码</string>
+    <string name="captcha_image_desc">图形验证码，点按刷新</string>
+    <string name="captcha_refresh">刷新验证码</string>
+    <string name="captcha_load_failed">验证码加载失败，点按重试</string>
+    <string name="captcha_unsupported">此站点的人机验证需要服务端 4.19.11 及以上版本才能在应用内完成，请在网页端登录</string>
+    <string name="captcha_done">已完成人机验证</string>
+
+    <!-- 主界面 -->
+    <string name="tab_files">文件</string>
+    <string name="tab_shares">分享</string>
+    <string name="tab_tasks">任务</string>
+    <string name="tab_me">我的</string>
+    <string name="tab_me_long_press">切换账户</string>
+    <string name="placeholder_files">文件浏览即将在此呈现</string>
+    <string name="placeholder_shares">你创建的分享将显示在这里</string>
+    <string name="placeholder_tasks">上传、下载与后台任务将显示在这里</string>
+
+    <!-- 账户 -->
+    <string name="account_switch">切换账户</string>
+    <string name="account_add">添加账户</string>
+    <string name="account_sign_out">退出登录</string>
+    <string name="account_sign_out_title">退出登录？</string>
+    <string name="account_sign_out_message">将从本设备移除 %1$s 的登录信息。</string>
+    <string name="account_expired">需要重新登录</string>
+    <string name="account_current">当前账户</string>
+    <string name="account_avatar_desc">头像</string>
 </resources>
