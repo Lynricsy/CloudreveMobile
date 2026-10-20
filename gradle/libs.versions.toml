@@ -31,6 +31,7 @@ zxing = "3.5.4"
 markdown-renderer = "0.46.0"
 material-color-utilities = "5.0.1"
 junit = "4.13.2"
+okhttp = "5.5.0"
 
 [libraries]
 # 共享层
@@ -80,6 +81,7 @@ androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
 androidx-documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
 androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }

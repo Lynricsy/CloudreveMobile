@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- 预览器下载到缓存后交给其它应用打开 -->
+    <cache-path name="viewer" path="viewer/" />
+    <!-- 传输：拍照上传写入的收件箱文件（TakePicture 需要可写 URI） -->
+    <files-path name="transfer_inbox" path="transfer-inbox/" />
+    <!-- 传输：API 28 的下载落在应用专属外部目录，打开/分享时经此授权 -->
+    <external-files-path name="downloads" path="Download/" />
+</paths>

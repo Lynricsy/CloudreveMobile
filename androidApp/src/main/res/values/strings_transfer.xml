@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="zh-rCN">
+    <!-- 通知 -->
+    <string name="transfer_channel_progress">传输进度</string>
+    <string name="transfer_channel_result">传输结果</string>
+    <string name="transfer_notif_uploading">正在上传 %1$s</string>
+    <string name="transfer_notif_downloading">正在下载 %1$s</string>
+    <string name="transfer_notif_preparing">正在准备…</string>
+    <string name="transfer_notif_progress">%1$s / %2$s（%3$d%%）</string>
+    <string name="transfer_notif_upload_done">上传完成</string>
+    <string name="transfer_notif_upload_failed">上传失败</string>
+    <string name="transfer_notif_download_done">下载完成</string>
+    <string name="transfer_notif_download_failed">下载失败</string>
+
+    <!-- 下载入口 -->
+    <plurals name="transfer_download_added">
+        <item quantity="other">已加入 %d 个下载</item>
+    </plurals>
+    <plurals name="transfer_download_skipped_folders">
+        <item quantity="other">已跳过 %d 个目录（暂不支持下载目录）</item>
+    </plurals>
+    <plurals name="transfer_download_failed">
+        <item quantity="other">%d 个文件无法创建下载</item>
+    </plurals>
+
+    <!-- 上传入口 -->
+    <string name="upload_to">上传到：%1$s</string>
+    <string name="upload_pick_media">从相册选择</string>
+    <string name="upload_take_photo">拍照</string>
+    <string name="upload_preparing">正在准备文件…</string>
+    <string name="upload_checking_policy">正在读取目标目录的存储策略…</string>
+    <string name="upload_no_camera">没有可用的相机应用</string>
+    <string name="upload_nothing_readable">无法读取所选文件</string>
+    <plurals name="upload_added">
+        <item quantity="other">已加入 %d 个上传</item>
+    </plurals>
+    <string name="upload_rejected_title">部分文件未加入上传</string>
+    <string name="upload_rejected_message">以下文件不符合目标目录存储策略的限制：</string>
+    <string name="upload_reject_illegal_name">文件名不合法</string>
+    <string name="upload_reject_suffix_not_allowed">扩展名不在允许列表中</string>
+    <string name="upload_reject_suffix_denied">扩展名已被禁止</string>
+    <string name="upload_reject_name_not_allowed">文件名不符合允许的规则</string>
+    <string name="upload_reject_name_denied">文件名已被禁止</string>
+    <string name="upload_reject_too_large">超过单个文件大小上限</string>
+
+    <!-- 任务 Tab / 传输列表 -->
+    <string name="tasks_segment_transfers">传输</string>
+    <string name="tasks_segment_background">后台任务</string>
+    <string name="tasks_background_placeholder">压缩、解压、离线下载等后台任务将显示在这里</string>
+    <string name="transfer_badge_cd">%1$d 个传输进行中</string>
+    <string name="transfer_view_list">查看传输</string>
+    <string name="transfer_clear_finished">清除已完成</string>
+    <string name="transfer_empty">暂无传输</string>
+    <string name="transfer_empty_hint">在文件列表中上传或下载的文件会显示在这里</string>
+    <string name="transfer_section_uploads">上传（%1$d）</string>
+    <string name="transfer_section_downloads">下载（%1$d）</string>
+    <string name="transfer_upload_to">上传到 %1$s</string>
+    <string name="transfer_saved_public">保存到 Download/OpenCloudreve</string>
+    <string name="transfer_saved_app">保存到应用下载目录</string>
+    <string name="transfer_state_queued">排队中</string>
+    <string name="transfer_state_preparing">准备中</string>
+    <string name="transfer_state_finishing">正在完成…</string>
+    <string name="transfer_state_completed">已完成 · %1$s</string>
+    <string name="transfer_state_paused">已暂停 · %1$s / %2$s</string>
+    <string name="transfer_state_canceled">已取消</string>
+    <string name="transfer_state_failed">失败</string>
+    <string name="transfer_progress">%1$s / %2$s</string>
+    <string name="transfer_speed">%1$s/s</string>
+    <string name="transfer_eta">剩余 %1$s</string>
+    <string name="transfer_action_pause">暂停</string>
+    <string name="transfer_action_resume">继续</string>
+    <string name="transfer_action_cancel">取消传输</string>
+    <string name="transfer_action_remove">从列表移除</string>
+    <string name="transfer_more_actions">更多操作</string>
+    <string name="transfer_conflict">目标目录已有同名文件</string>
+    <string name="transfer_conflict_rename">重命名</string>
+    <string name="transfer_conflict_overwrite">覆盖为新版本</string>
+    <string name="transfer_rename_title">重命名后重试</string>
+    <string name="transfer_rename_label">新文件名</string>
+    <string name="transfer_open_failed">没有可打开此文件的应用</string>
+    <string name="transfer_error_source">无法读取源文件</string>
+    <string name="transfer_error_onedrive_empty">OneDrive 不接受空文件</string>
+    <string name="transfer_error_storage">存储端拒绝了请求</string>
+    <string name="transfer_error_etag">存储端未返回 ETag（请检查存储桶 CORS 的 ExposeHeaders）</string>
+    <string name="transfer_error_unsupported">不支持该存储策略</string>
+    <string name="transfer_error_network">网络错误</string>
+    <string name="transfer_error_with_detail">%1$s：%2$s</string>
+    <string name="transfer_error_code">错误 %1$d：%2$s</string>
+
+    <!-- 系统分享菜单 -->
+    <string name="share_receiver_label">上传到 OpenCloudreve</string>
+    <string name="share_receiver_title">上传到 OpenCloudreve</string>
+    <string name="share_receiver_copying">正在读取分享的文件…</string>
+    <plurals name="share_receiver_items">
+        <item quantity="other">%1$d 个文件，共 %2$s</item>
+    </plurals>
+    <string name="share_receiver_account">账户</string>
+    <string name="share_receiver_target">目标目录</string>
+    <string name="share_receiver_change">更改</string>
+    <string name="share_receiver_upload">上传</string>
+    <string name="share_receiver_upload_here">上传到此处</string>
+    <string name="share_receiver_no_account">请先在 OpenCloudreve 中登录账户</string>
+    <string name="share_receiver_open_app">打开 OpenCloudreve</string>
+    <string name="share_receiver_unsupported">没有可上传的文件或可打开的分享链接</string>
+</resources>

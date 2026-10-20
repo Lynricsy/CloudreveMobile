@@ -74,6 +74,8 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services)
     implementation(libs.androidx.work.runtime)
+    // 传输执行器直接用 OkHttp 流式写分片请求体（与 Ktor/Coil 共用同一 OkHttp 版本）
+    implementation(libs.okhttp)
     implementation(libs.androidx.webkit)
     implementation(libs.androidx.documentfile)
     implementation(libs.androidx.browser)

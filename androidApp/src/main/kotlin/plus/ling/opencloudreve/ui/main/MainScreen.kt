@@ -53,6 +53,15 @@ import plus.ling.opencloudreve.core.auth.AccountRepository
 import plus.ling.opencloudreve.core.presentation.auth.AccountSwitcherViewModel
 import plus.ling.opencloudreve.ui.account.AccountSwitcherSheet
 import plus.ling.opencloudreve.ui.files.FilesTab
+import plus.ling.opencloudreve.ui.transfer.RequestNotificationPermission
+import plus.ling.opencloudreve.ui.transfer.TasksTab
+import plus.ling.opencloudreve.core.transfer.TransferManager
+import plus.ling.opencloudreve.core.transfer.TransferSummary
+import kotlinx.coroutines.flow.flowOf
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 
 /** 主界面顶层 Tab */
 enum class MainTab(
@@ -77,6 +86,7 @@ fun MainScreen(
     onReLogin: (siteUrl: String, email: String) -> Unit,
     switcher: AccountSwitcherViewModel = koinViewModel(),
     accounts: AccountRepository = koinInject(),
+    transfers: TransferManager = koinInject(),
 ) {
     var tab by rememberSaveable { mutableStateOf(MainTab.Files) }
     var showSwitcher by rememberSaveable { mutableStateOf(false) }
@@ -95,6 +105,25 @@ fun MainScreen(
         filesOpenRequest = uri
         tab = MainTab.Files
     }
+    // 系统分享菜单转来的分享链接：在“文件”Tab 打开
+    var filesShareRequest by rememberSaveable { mutableStateOf<String?>(null) }
+    val externalRequest by MainRequests.pending.collectAsStateWithLifecycle()
+    LaunchedEffect(externalRequest) {
+        val request = externalRequest ?: return@LaunchedEffect
+        when (request) {
+            MainRequest.OpenTasks -> tab = MainTab.Tasks
+            is MainRequest.OpenShareLink -> {
+                filesShareRequest = request.link
+                tab = MainTab.Files
+            }
+        }
+        MainRequests.consume(request)
+    }
+    // 活动传输数（“任务”导航项徽标）；出现传输时请求通知权限
+    val summary by remember(active?.id, transfers) {
+        active?.let { transfers.observeSummary(it.id) } ?: flowOf(TransferSummary.EMPTY)
+    }.collectAsStateWithLifecycle(TransferSummary.EMPTY)
+    RequestNotificationPermission(summary.activeCount > 0)
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -103,7 +132,16 @@ fun MainScreen(
                 item(
                     selected = selected,
                     onClick = { tab = item },
-                    icon = { Icon(if (selected) item.selectedIcon else item.icon, contentDescription = null) },
+                    icon = {
+                        val glyph = if (selected) item.selectedIcon else item.icon
+                        if (item == MainTab.Tasks && summary.activeCount > 0) {
+                            BadgedBox(badge = { Badge { Text(summary.activeCount.toString()) } }) {
+                                Icon(glyph, contentDescription = stringResource(R.string.transfer_badge_cd, summary.activeCount))
+                            }
+                        } else {
+                            Icon(glyph, contentDescription = null)
+                        }
+                    },
                     label = { Text(stringResource(item.label)) },
                     modifier = if (item == MainTab.Me) {
                         Modifier
@@ -128,10 +166,14 @@ fun MainScreen(
                         account = account,
                         openRequest = filesOpenRequest,
                         onOpenRequestConsumed = { filesOpenRequest = null },
+                        shareRequest = filesShareRequest,
+                        onShareRequestConsumed = { filesShareRequest = null },
                     )
                 }
                 MainTab.Shares -> PlaceholderTab(MainTab.Shares, R.string.placeholder_shares)
-                MainTab.Tasks -> PlaceholderTab(MainTab.Tasks, R.string.placeholder_tasks)
+                MainTab.Tasks -> active?.let { account ->
+                    key(account.id) { TasksTab(accountId = account.id) }
+                }
                 MainTab.Me -> active?.let { account ->
                     // 切换账户时重建“我的”Tab 内的导航栈与 ViewModel
                     key(account.id) {

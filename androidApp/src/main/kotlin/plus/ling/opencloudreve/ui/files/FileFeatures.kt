@@ -3,6 +3,7 @@ package plus.ling.opencloudreve.ui.files
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavHostController
 import plus.ling.opencloudreve.core.model.FileItem
+import plus.ling.opencloudreve.ui.transfer.TransferHooks
 
 /**
  * 调用后续阶段动作时的上下文。
@@ -56,6 +57,10 @@ data class FileFeatures(
 )
 
 /** 当前接入的实现：后续阶段在此填入各自的 Hook */
-internal val InstalledFileFeatures = FileFeatures()
+internal val InstalledFileFeatures = FileFeatures(
+    download = TransferHooks.download,
+    uploadFiles = TransferHooks.uploadFiles,
+    uploadMedia = TransferHooks.uploadMedia,
+)
 
 val LocalFileFeatures = staticCompositionLocalOf { InstalledFileFeatures }

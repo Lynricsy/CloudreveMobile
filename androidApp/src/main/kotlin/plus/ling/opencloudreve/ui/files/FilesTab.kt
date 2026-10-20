@@ -37,6 +37,8 @@ import plus.ling.opencloudreve.core.model.FileItem
 import plus.ling.opencloudreve.core.model.SiteExplorer
 import plus.ling.opencloudreve.core.model.User
 import plus.ling.opencloudreve.core.site.SiteConfigRepository
+import plus.ling.opencloudreve.ui.transfer.UploadDialog
+import plus.ling.opencloudreve.ui.transfer.UploadRoute
 
 /** 当前账户的用户资料（固定项、用户组权限），供没有自带用户状态的页面（搜索）计算动作规则 */
 val LocalAccountUser = compositionLocalOf<User?> { null }
@@ -48,11 +50,18 @@ private val routeJson = Json { ignoreUnknownKeys = true }
  * 右侧详情窗格显示文件信息（手机上点开后全屏，返回关闭）。
  *
  * @param openRequest 其它 Tab 请求在文件 Tab 打开的目录 URI（如管理页“打开此用户的文件”），处理后调用 [onOpenRequestConsumed]
+ * @param shareRequest 外部入口（系统分享菜单）请求打开的分享链接，处理后调用 [onShareRequestConsumed]
  */
 @Composable
-fun FilesTab(account: Account, openRequest: String?, onOpenRequestConsumed: () -> Unit) {
+fun FilesTab(
+    account: Account,
+    openRequest: String?,
+    onOpenRequestConsumed: () -> Unit,
+    shareRequest: String? = null,
+    onShareRequestConsumed: () -> Unit = {},
+) {
     key(account.id) {
-        FilesTabContent(account, openRequest, onOpenRequestConsumed)
+        FilesTabContent(account, openRequest, onOpenRequestConsumed, shareRequest, onShareRequestConsumed)
     }
 }
 
@@ -62,6 +71,8 @@ private fun FilesTabContent(
     account: Account,
     openRequest: String?,
     onOpenRequestConsumed: () -> Unit,
+    shareRequest: String?,
+    onShareRequestConsumed: () -> Unit,
     repositories: DataRepositories = koinInject(),
     site: SiteConfigRepository = koinInject(),
 ) {
@@ -119,6 +130,13 @@ private fun FilesTabContent(
         if (openRequest != null) {
             navController.navigate(FolderRoute(openRequest))
             consumeOpen()
+        }
+    }
+    val consumeShare by rememberUpdatedState(onShareRequestConsumed)
+    LaunchedEffect(shareRequest) {
+        if (shareRequest != null) {
+            navController.navigate(ShareVisitRoute(shareRequest))
+            consumeShare()
         }
     }
 
@@ -208,6 +226,15 @@ private fun FilesNavHost(accountId: String, navController: NavHostController, na
                     navController.popBackStack()
                 },
                 onCancel = { navController.popBackStack() },
+            )
+        }
+        dialog<UploadRoute> { entry ->
+            val route = entry.toRoute<UploadRoute>()
+            UploadDialog(
+                accountId = accountId,
+                folderUri = route.folderUri,
+                media = route.media,
+                onDismiss = { navController.popBackStack(entry.destination.id, inclusive = true) },
             )
         }
     }

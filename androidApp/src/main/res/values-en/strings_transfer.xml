@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notifications -->
+    <string name="transfer_channel_progress">Transfer progress</string>
+    <string name="transfer_channel_result">Transfer results</string>
+    <string name="transfer_notif_uploading">Uploading %1$s</string>
+    <string name="transfer_notif_downloading">Downloading %1$s</string>
+    <string name="transfer_notif_preparing">Preparing…</string>
+    <string name="transfer_notif_progress">%1$s / %2$s (%3$d%%)</string>
+    <string name="transfer_notif_upload_done">Upload complete</string>
+    <string name="transfer_notif_upload_failed">Upload failed</string>
+    <string name="transfer_notif_download_done">Download complete</string>
+    <string name="transfer_notif_download_failed">Download failed</string>
+
+    <!-- Download entry -->
+    <plurals name="transfer_download_added">
+        <item quantity="one">Added %d download</item>
+        <item quantity="other">Added %d downloads</item>
+    </plurals>
+    <plurals name="transfer_download_skipped_folders">
+        <item quantity="one">Skipped %d folder (folder download is not supported yet)</item>
+        <item quantity="other">Skipped %d folders (folder download is not supported yet)</item>
+    </plurals>
+    <plurals name="transfer_download_failed">
+        <item quantity="one">Could not start %d download</item>
+        <item quantity="other">Could not start %d downloads</item>
+    </plurals>
+
+    <!-- Upload entry -->
+    <string name="upload_to">Upload to: %1$s</string>
+    <string name="upload_pick_media">Choose from gallery</string>
+    <string name="upload_take_photo">Take photo</string>
+    <string name="upload_preparing">Preparing files…</string>
+    <string name="upload_checking_policy">Reading the storage policy of the destination…</string>
+    <string name="upload_no_camera">No camera app available</string>
+    <string name="upload_nothing_readable">The selected files could not be read</string>
+    <plurals name="upload_added">
+        <item quantity="one">Added %d upload</item>
+        <item quantity="other">Added %d uploads</item>
+    </plurals>
+    <string name="upload_rejected_title">Some files were not added</string>
+    <string name="upload_rejected_message">These files do not meet the destination storage policy:</string>
+    <string name="upload_reject_illegal_name">Invalid file name</string>
+    <string name="upload_reject_suffix_not_allowed">File extension is not allowed</string>
+    <string name="upload_reject_suffix_denied">File extension is blocked</string>
+    <string name="upload_reject_name_not_allowed">File name does not match the allowed pattern</string>
+    <string name="upload_reject_name_denied">File name is blocked</string>
+    <string name="upload_reject_too_large">Exceeds the maximum file size</string>
+
+    <!-- Tasks tab / transfer list -->
+    <string name="tasks_segment_transfers">Transfers</string>
+    <string name="tasks_segment_background">Background tasks</string>
+    <string name="tasks_background_placeholder">Background tasks such as compression, extraction and remote downloads will appear here</string>
+    <string name="transfer_badge_cd">%1$d transfers in progress</string>
+    <string name="transfer_view_list">View transfers</string>
+    <string name="transfer_clear_finished">Clear finished</string>
+    <string name="transfer_empty">No transfers</string>
+    <string name="transfer_empty_hint">Files you upload or download from the file list appear here</string>
+    <string name="transfer_section_uploads">Uploads (%1$d)</string>
+    <string name="transfer_section_downloads">Downloads (%1$d)</string>
+    <string name="transfer_upload_to">To %1$s</string>
+    <string name="transfer_saved_public">Saved to Download/OpenCloudreve</string>
+    <string name="transfer_saved_app">Saved to the app download folder</string>
+    <string name="transfer_state_queued">Queued</string>
+    <string name="transfer_state_preparing">Preparing</string>
+    <string name="transfer_state_finishing">Finishing…</string>
+    <string name="transfer_state_completed">Completed · %1$s</string>
+    <string name="transfer_state_paused">Paused · %1$s / %2$s</string>
+    <string name="transfer_state_canceled">Canceled</string>
+    <string name="transfer_state_failed">Failed</string>
+    <string name="transfer_progress">%1$s / %2$s</string>
+    <string name="transfer_speed">%1$s/s</string>
+    <string name="transfer_eta">%1$s left</string>
+    <string name="transfer_action_pause">Pause</string>
+    <string name="transfer_action_resume">Resume</string>
+    <string name="transfer_action_cancel">Cancel transfer</string>
+    <string name="transfer_action_remove">Remove from list</string>
+    <string name="transfer_more_actions">More actions</string>
+    <string name="transfer_conflict">A file with the same name already exists</string>
+    <string name="transfer_conflict_rename">Rename</string>
+    <string name="transfer_conflict_overwrite">Overwrite as new version</string>
+    <string name="transfer_rename_title">Rename and retry</string>
+    <string name="transfer_rename_label">New file name</string>
+    <string name="transfer_open_failed">No app can open this file</string>
+    <string name="transfer_error_source">The source file cannot be read</string>
+    <string name="transfer_error_onedrive_empty">OneDrive does not accept empty files</string>
+    <string name="transfer_error_storage">The storage provider rejected the request</string>
+    <string name="transfer_error_etag">The storage provider returned no ETag (check ExposeHeaders in the bucket CORS)</string>
+    <string name="transfer_error_unsupported">Unsupported storage policy</string>
+    <string name="transfer_error_network">Network error</string>
+    <string name="transfer_error_with_detail">%1$s: %2$s</string>
+    <string name="transfer_error_code">Error %1$d: %2$s</string>
+
+    <!-- Share menu -->
+    <string name="share_receiver_label">Upload to OpenCloudreve</string>
+    <string name="share_receiver_title">Upload to OpenCloudreve</string>
+    <string name="share_receiver_copying">Reading shared files…</string>
+    <plurals name="share_receiver_items">
+        <item quantity="one">%1$d file, %2$s</item>
+        <item quantity="other">%1$d files, %2$s in total</item>
+    </plurals>
+    <string name="share_receiver_account">Account</string>
+    <string name="share_receiver_target">Destination folder</string>
+    <string name="share_receiver_change">Change</string>
+    <string name="share_receiver_upload">Upload</string>
+    <string name="share_receiver_upload_here">Upload here</string>
+    <string name="share_receiver_no_account">Sign in to an account in OpenCloudreve first</string>
+    <string name="share_receiver_open_app">Open OpenCloudreve</string>
+    <string name="share_receiver_unsupported">Nothing to upload and no share link to open</string>
+</resources>
