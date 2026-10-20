@@ -128,6 +128,10 @@ final class SettingsAdminUITests: XCTestCase {
         let urlField = app.textFields["server.url"]
         XCTAssertTrue(urlField.waitForExistence(timeout: 30), "服务器地址页未出现")
         urlField.tap()
+        // 地址栏可能预填了 “https://”：先删掉已有内容再输入完整地址
+        if let current = urlField.value as? String, !current.isEmpty, current != urlField.placeholderValue {
+            urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count))
+        }
         urlField.typeText(serverURL)
         app.buttons["server.continue"].tap()
 
