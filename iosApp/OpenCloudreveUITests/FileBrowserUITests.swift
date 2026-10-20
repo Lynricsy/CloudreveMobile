@@ -119,6 +119,10 @@ final class FileBrowserUITests: XCTestCase {
         }
         if urlField.exists {
             urlField.tap()
+            // 地址框可能已预填（如 https://），先清空
+            if let existing = urlField.value as? String, !existing.isEmpty, existing != urlField.placeholderValue {
+                urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: existing.count))
+            }
             urlField.typeText(serverURL)
             app.buttons["server.continue"].tap()
             let emailField = app.textFields["login.email"]
