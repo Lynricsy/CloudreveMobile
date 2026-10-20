@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common -->
+    <string name="action_save">Save</string>
+    <string name="action_confirm">OK</string>
+    <string name="action_done">Done</string>
+    <string name="action_change">Change</string>
+    <string name="picker_select_here">Select this folder</string>
+
+    <!-- Shares -->
+    <string name="share_create_title">New share</string>
+    <string name="share_edit_title">Edit share</string>
+    <string name="share_create_confirm">Create</string>
+    <string name="share_private">Private (password required)</string>
+    <string name="share_password_auto">Leave blank to generate</string>
+    <string name="share_password_invalid">Password must be 1–32 letters or digits</string>
+    <string name="share_password_value">Password: %1$s</string>
+    <string name="share_limit_downloads">Limit downloads</string>
+    <string name="share_download_times">Number of downloads</string>
+    <string name="share_expire">Expiration</string>
+    <string name="share_expire_never">Never</string>
+    <string name="share_expire_custom">Custom</string>
+    <string name="share_expire_days">Days</string>
+    <string name="share_expire_keep">Currently expires %1$s (pick a new duration to change)</string>
+    <plurals name="share_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <string name="share_view_option">Allow browsing folder contents</string>
+    <string name="share_readme_option">Show README automatically</string>
+    <string name="share_created_title">Share link</string>
+    <string name="share_qr">QR code</string>
+    <string name="share_qr_cd">Share link QR code</string>
+    <string name="share_system_share">Send link</string>
+    <string name="share_edit">Edit</string>
+    <string name="share_open_source">Go to source</string>
+    <string name="share_sort">Sort</string>
+    <string name="share_sort_created">Created</string>
+    <string name="share_sort_views">Views</string>
+    <string name="share_sort_downloads">Downloads</string>
+    <string name="share_sort_remain">Remaining downloads</string>
+    <string name="share_delete_message">The link stops working immediately. Source files are not affected.</string>
+    <plurals name="share_delete_title">
+        <item quantity="one">Delete %1$d share?</item>
+        <item quantity="other">Delete %1$d shares?</item>
+    </plurals>
+    <plurals name="share_deleted">
+        <item quantity="one">Deleted %1$d share</item>
+        <item quantity="other">Deleted %1$d shares</item>
+    </plurals>
+    <plurals name="share_downloads">
+        <item quantity="one">%1$d download</item>
+        <item quantity="other">%1$d downloads</item>
+    </plurals>
+
+    <!-- Background tasks -->
+    <string name="task_category_general">General</string>
+    <string name="task_category_downloading">Downloading</string>
+    <string name="task_category_downloaded">Downloaded</string>
+    <string name="task_type">Type</string>
+    <string name="task_type_create_archive">Compress</string>
+    <string name="task_type_extract_archive">Extract</string>
+    <string name="task_type_relocate">Relocate storage</string>
+    <string name="task_type_remote_download">Remote download</string>
+    <string name="task_type_import">Import</string>
+    <string name="task_type_gdrive_backup">Google Drive backup</string>
+    <string name="task_type_gdrive_restore">Google Drive restore</string>
+    <string name="task_type_unknown">Background task</string>
+    <string name="task_status_queued">Queued</string>
+    <string name="task_status_processing">Processing</string>
+    <string name="task_status_suspending">Waiting</string>
+    <string name="task_status_error">Failed</string>
+    <string name="task_status_canceled">Canceled</string>
+    <string name="task_status_completed">Completed</string>
+    <string name="task_status_unknown">Unknown</string>
+    <string name="task_step_queued">Queued</string>
+    <string name="task_step_finished">Finished</string>
+    <string name="task_step_download">Download</string>
+    <string name="task_step_transfer">Transfer</string>
+    <string name="task_step_seeding">Seeding</string>
+    <string name="task_step_importing">Import files</string>
+    <string name="task_step_indexing">Index files</string>
+    <string name="task_step_committing">Commit changes</string>
+    <string name="task_step_download_zip">Download archive</string>
+    <string name="task_step_extracting">Extract files</string>
+    <string name="task_step_prepare">Prepare</string>
+    <string name="task_step_compress">Compress files</string>
+    <string name="task_step_send">Send task</string>
+    <string name="task_step_restoring">Restore files</string>
+    <string name="task_phase">Phase</string>
+    <string name="task_progress">Progress</string>
+    <string name="task_source">Source</string>
+    <string name="task_destination">Destination</string>
+    <string name="task_dst_policy">Target storage policy</string>
+    <string name="task_node">Node</string>
+    <string name="task_node_auto">Automatic</string>
+    <string name="task_duration">Elapsed</string>
+    <string name="task_retry_count">Retries</string>
+    <string name="task_error">Error</string>
+    <string name="task_error_history">Error history</string>
+    <string name="task_download_status">Download status</string>
+    <string name="task_downloaded">Downloaded</string>
+    <string name="task_download_speed">Speed</string>
+    <string name="task_speed">%1$s/s</string>
+    <string name="task_failed_count">Failed: %1$d</string>
+    <string name="task_download_files">Files</string>
+    <string name="task_apply_selection">Apply selection</string>
+    <string name="task_files_selected">Download selection updated</string>
+    <string name="task_cancel">Cancel task</string>
+    <string name="task_canceled">Task canceled</string>
+    <string name="task_created">Task created. Track it in Tasks › Background</string>
+    <string name="task_not_permitted">Your group is not allowed to create this task</string>
+    <string name="remote_download_new">Remote download</string>
+    <string name="remote_download_start">Start</string>
+    <string name="remote_download_urls">Links</string>
+    <string name="remote_download_urls_hint">One HTTP(S) or magnet link per line</string>
+    <string name="remote_download_torrent">Torrent file</string>
+    <string name="remote_download_use_urls">Use links instead</string>
+    <plurals name="remote_download_created">
+        <item quantity="one">Created %1$d remote download</item>
+        <item quantity="other">Created %1$d remote downloads</item>
+    </plurals>
+    <string name="archive_compress_title">Compress</string>
+    <string name="archive_extract_title">Extract</string>
+    <string name="archive_relocate_title">Relocate storage</string>
+    <string name="archive_name">Archive name</string>
+    <string name="archive_save_to">Save to</string>
+    <string name="archive_extract_to">Extract to</string>
+    <string name="archive_encoding">File name encoding</string>
+    <string name="archive_encoding_default">Default</string>
+    <string name="archive_password">Archive password</string>
+    <string name="archive_relocate_target">Target storage policy</string>
+    <plurals name="archive_sources">
+        <item quantity="one">%1$s and %2$d more</item>
+        <item quantity="other">%1$s and %2$d more</item>
+    </plurals>
+
+    <!-- Versions -->
+    <string name="versions_empty">No previous versions</string>
+    <string name="versions_current">Current version</string>
+    <string name="versions_preview">Preview this version</string>
+    <string name="versions_set_current">Set as current</string>
+    <string name="versions_delete_title">Delete this version?</string>
+    <string name="versions_delete_message">The data of this version will be permanently deleted.</string>
+    <string name="info_versions_count">Versions (%1$d)</string>
+
+    <!-- Metadata -->
+    <string name="info_meta_exif">Camera</string>
+    <string name="info_meta_location">Location</string>
+    <string name="info_meta_music">Music</string>
+    <string name="info_meta_stream">Media streams</string>
+    <string name="metadata_readonly">You can\'t change metadata of these files</string>
+    <string name="metadata_add_tag">Add tag</string>
+    <string name="metadata_remove_tag">Remove tag %1$s</string>
+    <string name="metadata_tag_name">Tag name</string>
+    <string name="metadata_tag_color">Tag color</string>
+    <string name="metadata_no_tags">No tags</string>
+    <string name="metadata_save_tags">Save tags</string>
+    <string name="metadata_reset_tags">Discard changes</string>
+    <string name="metadata_icon">Icon</string>
+    <string name="metadata_icon_default">Default icon</string>
+    <string name="metadata_icon_reset">Reset</string>
+    <string name="metadata_emoji_pick">Choose emoji</string>
+    <string name="metadata_emoji_hide">Hide emoji</string>
+    <string name="metadata_icon_color">Icon color</string>
+    <string name="metadata_color_none">No color</string>
+    <string name="metadata_props">Custom properties</string>
+    <string name="metadata_add_prop">Add property</string>
+    <string name="metadata_remove_prop">Remove property</string>
+    <string name="metadata_rating">Rating: %1$d</string>
+    <string name="metadata_user_none">Not set</string>
+    <string name="metadata_user_search">Search users (2+ characters)</string>
+    <string name="metadata_err_too_short">Minimum length (bytes): %1$d</string>
+    <string name="metadata_err_too_long">Maximum length (bytes): %1$d</string>
+    <string name="metadata_err_nan">Enter a whole number</string>
+    <string name="metadata_err_too_small">Must be at least %1$d</string>
+    <string name="metadata_err_too_large">Must be at most %1$d</string>
+    <string name="metadata_err_option">Invalid option</string>
+    <string name="metadata_err_boolean">Invalid boolean</string>
+    <string name="site_text_description">Description</string>
+    <string name="site_text_rating">Rating</string>
+    <string name="metadata_err_unknown">The site removed this property</string>
+</resources>

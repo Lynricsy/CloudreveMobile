@@ -41,6 +41,13 @@ import plus.ling.opencloudreve.ui.transfer.UploadDialog
 import plus.ling.opencloudreve.ui.transfer.UploadRoute
 import plus.ling.opencloudreve.ui.viewer.ViewerHostScreen
 import plus.ling.opencloudreve.ui.viewer.ViewerRoute
+import plus.ling.opencloudreve.core.presentation.workflow.ArchiveTaskMode
+import plus.ling.opencloudreve.ui.share.ShareCreateRoute
+import plus.ling.opencloudreve.ui.share.ShareEditDialog
+import plus.ling.opencloudreve.ui.workflow.ArchiveTaskDialog
+import plus.ling.opencloudreve.ui.workflow.ArchiveTaskRoute
+import plus.ling.opencloudreve.ui.workflow.RemoteDownloadDialog
+import plus.ling.opencloudreve.ui.workflow.RemoteDownloadRoute
 
 /** 当前账户的用户资料（固定项、用户组权限），供没有自带用户状态的页面（搜索）计算动作规则 */
 val LocalAccountUser = compositionLocalOf<User?> { null }
@@ -141,6 +148,13 @@ private fun FilesTabContent(
             consumeShare()
         }
     }
+    // 从详情窗格打开版本/元数据页：单窗格时先关闭详情，使列表侧导航可见
+    val openTool: (Any) -> Unit = { route ->
+        scope.launch {
+            if (singlePane) pane.navigateBack()
+            navController.navigate(route)
+        }
+    }
 
     CompositionLocalProvider(LocalFileIconTheme provides icons, LocalAccountUser provides user) {
         ListDetailPaneScaffold(
@@ -160,7 +174,13 @@ private fun FilesTabContent(
                         val close: () -> Unit = { scope.launch { pane.navigateBack() } }
                         // 手机单窗格时详情覆盖列表：系统返回关闭详情（注册晚于列表导航，优先级更高）
                         BackHandler(enabled = singlePane, onBack = close)
-                        FileInfoScreen(accountId = accountId, uri = key, onClose = close)
+                        FileInfoScreen(
+                            accountId = accountId,
+                            uri = key,
+                            onClose = close,
+                            onOpenVersions = { uri -> openTool(VersionsRoute(uri)) },
+                            onEditMetadata = { uri -> openTool(MetadataEditRoute(listOf(uri))) },
+                        )
                     }
                 }
             },
@@ -245,6 +265,50 @@ private fun FilesNavHost(accountId: String, navController: NavHostController, na
                 folderUri = route.folderUri,
                 media = route.media,
                 onDismiss = { navController.popBackStack(entry.destination.id, inclusive = true) },
+            )
+        }
+        dialog<ShareCreateRoute> { entry ->
+            ShareEditDialog(
+                accountId = accountId,
+                fileUri = entry.toRoute<ShareCreateRoute>().fileUri,
+                onDismiss = { navController.popBackStack(entry.destination.id, inclusive = true) },
+            )
+        }
+        dialog<ArchiveTaskRoute> { entry ->
+            val route = entry.toRoute<ArchiveTaskRoute>()
+            ArchiveTaskDialog(
+                accountId = accountId,
+                mode = ArchiveTaskMode.valueOf(route.mode),
+                srcUris = route.srcUris,
+                dstUri = route.dstUri,
+                initialArchiveName = route.archiveName,
+                onDismiss = { navController.popBackStack(entry.destination.id, inclusive = true) },
+            )
+        }
+        dialog<RemoteDownloadRoute> { entry ->
+            val route = entry.toRoute<RemoteDownloadRoute>()
+            val close = { navController.popBackStack(entry.destination.id, inclusive = true) }
+            RemoteDownloadDialog(
+                accountId = accountId,
+                dstUri = route.dstUri,
+                torrentUri = route.torrentUri,
+                onDismiss = { close() },
+                onCreated = { close() },
+            )
+        }
+        composable<VersionsRoute> { entry ->
+            VersionsScreen(
+                accountId = accountId,
+                uri = entry.toRoute<VersionsRoute>().uri,
+                onClose = { navController.popBackStack() },
+                onPreview = { file, version -> navController.navigate(ViewerRoute(file, version = version)) },
+            )
+        }
+        composable<MetadataEditRoute> { entry ->
+            MetadataEditScreen(
+                accountId = accountId,
+                uris = entry.toRoute<MetadataEditRoute>().uris,
+                onClose = { navController.popBackStack() },
             )
         }
     }

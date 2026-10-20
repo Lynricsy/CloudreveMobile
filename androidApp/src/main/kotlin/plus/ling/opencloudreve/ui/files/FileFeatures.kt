@@ -5,6 +5,8 @@ import androidx.navigation.NavHostController
 import plus.ling.opencloudreve.core.model.FileItem
 import plus.ling.opencloudreve.ui.transfer.TransferHooks
 import plus.ling.opencloudreve.ui.viewer.PreviewHook
+import plus.ling.opencloudreve.ui.share.ShareHook
+import plus.ling.opencloudreve.ui.workflow.WorkflowHooks
 
 /**
  * 调用后续阶段动作时的上下文。
@@ -63,6 +65,13 @@ internal val InstalledFileFeatures = FileFeatures(
     uploadFiles = TransferHooks.uploadFiles,
     uploadMedia = TransferHooks.uploadMedia,
     preview = PreviewHook,
+    share = ShareHook,
+    versions = FileToolHooks.versions,
+    metadata = FileToolHooks.metadata,
+    createArchive = WorkflowHooks.createArchive,
+    extractArchive = WorkflowHooks.extractArchive,
+    remoteDownload = WorkflowHooks.remoteDownload,
+    relocate = WorkflowHooks.relocate,
 )
 
 val LocalFileFeatures = staticCompositionLocalOf { InstalledFileFeatures }

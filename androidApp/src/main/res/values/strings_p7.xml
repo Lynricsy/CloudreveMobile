@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="zh-rCN">
+    <!-- 通用 -->
+    <string name="action_save">保存</string>
+    <string name="action_confirm">确定</string>
+    <string name="action_done">完成</string>
+    <string name="action_change">更改</string>
+    <string name="picker_select_here">选择此目录</string>
+
+    <!-- 分享 -->
+    <string name="share_create_title">新建分享</string>
+    <string name="share_edit_title">编辑分享</string>
+    <string name="share_create_confirm">创建</string>
+    <string name="share_private">私密分享（需要密码）</string>
+    <string name="share_password_auto">留空自动生成</string>
+    <string name="share_password_invalid">密码须为 1–32 位字母或数字</string>
+    <string name="share_password_value">密码：%1$s</string>
+    <string name="share_limit_downloads">限制下载次数</string>
+    <string name="share_download_times">下载次数</string>
+    <string name="share_expire">有效期</string>
+    <string name="share_expire_never">永久</string>
+    <string name="share_expire_custom">自定义</string>
+    <string name="share_expire_days">天数</string>
+    <string name="share_expire_keep">当前到期时间：%1$s（选择新的有效期以修改）</string>
+    <plurals name="share_days">
+        <item quantity="other">%1$d 天</item>
+    </plurals>
+    <string name="share_view_option">允许预览目录内容</string>
+    <string name="share_readme_option">自动展示 README</string>
+    <string name="share_created_title">分享链接</string>
+    <string name="share_qr">二维码</string>
+    <string name="share_qr_cd">分享链接二维码</string>
+    <string name="share_system_share">发送链接</string>
+    <string name="share_edit">编辑</string>
+    <string name="share_open_source">前往源文件</string>
+    <string name="share_sort">排序</string>
+    <string name="share_sort_created">创建时间</string>
+    <string name="share_sort_views">访问次数</string>
+    <string name="share_sort_downloads">下载次数</string>
+    <string name="share_sort_remain">剩余下载次数</string>
+    <string name="share_delete_message">删除后链接将立即失效，源文件不受影响。</string>
+    <plurals name="share_delete_title">
+        <item quantity="other">删除 %1$d 个分享？</item>
+    </plurals>
+    <plurals name="share_deleted">
+        <item quantity="other">已删除 %1$d 个分享</item>
+    </plurals>
+    <plurals name="share_downloads">
+        <item quantity="other">下载 %1$d 次</item>
+    </plurals>
+
+    <!-- 后台任务 -->
+    <string name="task_category_general">常规</string>
+    <string name="task_category_downloading">下载中</string>
+    <string name="task_category_downloaded">已完成下载</string>
+    <string name="task_type">类型</string>
+    <string name="task_type_create_archive">压缩</string>
+    <string name="task_type_extract_archive">解压</string>
+    <string name="task_type_relocate">转移存储策略</string>
+    <string name="task_type_remote_download">离线下载</string>
+    <string name="task_type_import">导入</string>
+    <string name="task_type_gdrive_backup">Google Drive 备份</string>
+    <string name="task_type_gdrive_restore">Google Drive 恢复</string>
+    <string name="task_type_unknown">后台任务</string>
+    <string name="task_status_queued">排队中</string>
+    <string name="task_status_processing">处理中</string>
+    <string name="task_status_suspending">等待中</string>
+    <string name="task_status_error">失败</string>
+    <string name="task_status_canceled">已取消</string>
+    <string name="task_status_completed">已完成</string>
+    <string name="task_status_unknown">未知</string>
+    <string name="task_step_queued">排队等待</string>
+    <string name="task_step_finished">完成</string>
+    <string name="task_step_download">下载</string>
+    <string name="task_step_transfer">转存</string>
+    <string name="task_step_seeding">等待做种</string>
+    <string name="task_step_importing">导入文件</string>
+    <string name="task_step_indexing">索引文件</string>
+    <string name="task_step_committing">提交更改</string>
+    <string name="task_step_download_zip">下载压缩包</string>
+    <string name="task_step_extracting">解压文件</string>
+    <string name="task_step_prepare">准备</string>
+    <string name="task_step_compress">压缩文件</string>
+    <string name="task_step_send">发送任务</string>
+    <string name="task_step_restoring">恢复文件</string>
+    <string name="task_phase">阶段</string>
+    <string name="task_progress">进度</string>
+    <string name="task_source">源</string>
+    <string name="task_destination">目标目录</string>
+    <string name="task_dst_policy">目标存储策略</string>
+    <string name="task_node">处理节点</string>
+    <string name="task_node_auto">自动分配</string>
+    <string name="task_duration">已执行</string>
+    <string name="task_retry_count">重试次数</string>
+    <string name="task_error">错误</string>
+    <string name="task_error_history">错误记录</string>
+    <string name="task_download_status">下载状态</string>
+    <string name="task_downloaded">已下载</string>
+    <string name="task_download_speed">下载速度</string>
+    <string name="task_speed">%1$s/s</string>
+    <string name="task_failed_count">%1$d 项失败</string>
+    <string name="task_download_files">文件</string>
+    <string name="task_apply_selection">应用选择</string>
+    <string name="task_files_selected">已更新要下载的文件</string>
+    <string name="task_cancel">取消任务</string>
+    <string name="task_canceled">任务已取消</string>
+    <string name="task_created">任务已创建，可在“任务 › 后台任务”查看进度</string>
+    <string name="task_not_permitted">当前用户组无权创建此类任务</string>
+    <string name="remote_download_new">离线下载</string>
+    <string name="remote_download_start">开始下载</string>
+    <string name="remote_download_urls">下载链接</string>
+    <string name="remote_download_urls_hint">每行一个 HTTP(S) 或磁力链接</string>
+    <string name="remote_download_torrent">种子文件</string>
+    <string name="remote_download_use_urls">改用下载链接</string>
+    <plurals name="remote_download_created">
+        <item quantity="other">已创建 %1$d 个离线下载任务</item>
+    </plurals>
+    <string name="archive_compress_title">压缩</string>
+    <string name="archive_extract_title">解压</string>
+    <string name="archive_relocate_title">转移存储策略</string>
+    <string name="archive_name">压缩包名称</string>
+    <string name="archive_save_to">保存到</string>
+    <string name="archive_extract_to">解压到</string>
+    <string name="archive_encoding">文件名编码</string>
+    <string name="archive_encoding_default">默认</string>
+    <string name="archive_password">压缩包密码</string>
+    <string name="archive_relocate_target">目标存储策略</string>
+    <plurals name="archive_sources">
+        <item quantity="other">%1$s 等 %2$d 项</item>
+    </plurals>
+
+    <!-- 版本 -->
+    <string name="versions_empty">没有历史版本</string>
+    <string name="versions_current">当前版本</string>
+    <string name="versions_preview">预览此版本</string>
+    <string name="versions_set_current">设为当前版本</string>
+    <string name="versions_delete_title">删除此版本？</string>
+    <string name="versions_delete_message">该版本的数据将被永久删除。</string>
+    <string name="info_versions_count">版本（%1$d）</string>
+
+    <!-- 元数据 -->
+    <string name="info_meta_exif">拍摄信息</string>
+    <string name="info_meta_location">位置</string>
+    <string name="info_meta_music">音乐信息</string>
+    <string name="info_meta_stream">媒体流</string>
+    <string name="metadata_readonly">没有修改这些文件元数据的权限</string>
+    <string name="metadata_add_tag">添加标签</string>
+    <string name="metadata_remove_tag">移除标签 %1$s</string>
+    <string name="metadata_tag_name">标签名称</string>
+    <string name="metadata_tag_color">标签颜色</string>
+    <string name="metadata_no_tags">没有标签</string>
+    <string name="metadata_save_tags">保存标签</string>
+    <string name="metadata_reset_tags">撤销修改</string>
+    <string name="metadata_icon">图标</string>
+    <string name="metadata_icon_default">默认图标</string>
+    <string name="metadata_icon_reset">恢复默认</string>
+    <string name="metadata_emoji_pick">选择表情</string>
+    <string name="metadata_emoji_hide">收起表情</string>
+    <string name="metadata_icon_color">图标颜色</string>
+    <string name="metadata_color_none">无颜色</string>
+    <string name="metadata_props">自定义属性</string>
+    <string name="metadata_add_prop">添加属性</string>
+    <string name="metadata_remove_prop">移除属性</string>
+    <string name="metadata_rating">%1$d 星</string>
+    <string name="metadata_user_none">未设置</string>
+    <string name="metadata_user_search">搜索用户（至少 2 个字符）</string>
+    <string name="metadata_err_too_short">至少 %1$d 个字节</string>
+    <string name="metadata_err_too_long">最多 %1$d 个字节</string>
+    <string name="metadata_err_nan">请输入整数</string>
+    <string name="metadata_err_too_small">不能小于 %1$d</string>
+    <string name="metadata_err_too_large">不能大于 %1$d</string>
+    <string name="metadata_err_option">无效的选项</string>
+    <string name="metadata_err_boolean">无效的布尔值</string>
+    <string name="site_text_description">描述</string>
+    <string name="site_text_rating">评分</string>
+    <string name="metadata_err_unknown">站点已删除该属性定义</string>
+</resources>

@@ -19,6 +19,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,6 +56,7 @@ import plus.ling.opencloudreve.R
 import plus.ling.opencloudreve.core.model.CrUri
 import plus.ling.opencloudreve.core.model.FileItem
 import plus.ling.opencloudreve.core.model.MetadataKeys
+import plus.ling.opencloudreve.core.model.EntityType
 import plus.ling.opencloudreve.core.presentation.files.FileInfoEffect
 import plus.ling.opencloudreve.core.presentation.files.FileInfoIntent
 import plus.ling.opencloudreve.core.presentation.files.FileInfoState
@@ -72,6 +75,10 @@ fun FileInfoScreen(
     uri: String,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    /** 打开版本页（参数为链接目标 URI）；null 不显示入口 */
+    onOpenVersions: ((String) -> Unit)? = null,
+    /** 打开标签与元数据编辑页（参数为文件 URI）；null 不显示入口 */
+    onEditMetadata: ((String) -> Unit)? = null,
 ) {
     val vm: FileInfoViewModel = koinViewModel(key = "info:$uri") { parametersOf(accountId, uri) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -109,7 +116,7 @@ fun FileInfoScreen(
             when {
                 state.loading && file == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
                 error != null && file == null -> FullError(error) { vm.on(FileInfoIntent.Refresh) }
-                file != null -> FileInfoContent(state, file, snackbar, vm::on)
+                file != null -> FileInfoContent(state, file, snackbar, vm::on, onOpenVersions, onEditMetadata)
             }
             if (state.mutating) LinearProgressIndicator(Modifier.fillMaxWidth())
         }
@@ -123,6 +130,8 @@ private fun FileInfoContent(
     file: FileItem,
     snackbar: SnackbarHostState,
     onIntent: (FileInfoIntent) -> Unit,
+    onOpenVersions: ((String) -> Unit)?,
+    onEditMetadata: ((String) -> Unit)?,
 ) {
     val context = LocalContext.current
     val copy = rememberCopyToClipboard(snackbar)
@@ -141,6 +150,24 @@ private fun FileInfoContent(
             }
         }
         HorizontalDivider()
+        val versionCount = ext?.entities?.count { it.type == EntityType.VERSION } ?: 0
+        if (onOpenVersions != null && !file.isFolder || onEditMetadata != null) {
+            Row(Modifier.padding(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (onOpenVersions != null && !file.isFolder) {
+                    TextButton(onClick = { onOpenVersions(file.linkedUri) }) {
+                        Icon(Icons.Filled.History, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Text(" " + if (versionCount > 0) stringResource(R.string.info_versions_count, versionCount) else stringResource(R.string.action_versions))
+                    }
+                }
+                if (onEditMetadata != null) {
+                    TextButton(onClick = { onEditMetadata(file.path) }) {
+                        Icon(Icons.AutoMirrored.Filled.Label, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Text(" " + stringResource(R.string.action_metadata))
+                    }
+                }
+            }
+            HorizontalDivider()
+        }
 
         SectionLabel(stringResource(R.string.info_basic))
         if (!file.isFolder) InfoLine(stringResource(R.string.info_size), formatBytes(context, file.size))
@@ -264,6 +291,27 @@ private fun FileInfoContent(
                     )
                 }
             }
+        }
+
+        MetadataSections(file)
+    }
+}
+
+/** 媒体元数据（EXIF/位置/音乐/流媒体）与自定义属性，按前缀分组只读展示 */
+@Composable
+private fun MetadataSections(file: FileItem) {
+    val groups = listOf(
+        MetadataKeys.EXIF_PREFIX to R.string.info_meta_exif,
+        MetadataKeys.GEOCODING_PREFIX to R.string.info_meta_location,
+        MetadataKeys.MUSIC_PREFIX to R.string.info_meta_music,
+        MetadataKeys.STREAM_PREFIX to R.string.info_meta_stream,
+        MetadataKeys.CUSTOM_PROPS_PREFIX to R.string.metadata_props,
+    )
+    groups.forEach { (prefix, label) ->
+        val entries = file.metadata.filterKeys { it.startsWith(prefix) }.toSortedMap()
+        if (entries.isNotEmpty()) {
+            SectionLabel(stringResource(label))
+            entries.forEach { (key, value) -> InfoLine(key.removePrefix(prefix), value) }
         }
     }
 }

@@ -55,6 +55,8 @@ fun siteText(context: Context, raw: String): String {
         "fileManager.archivePreview" -> R.string.site_text_archive_preview
         "fileManager.googledocs" -> R.string.site_text_googledocs
         "fileManager.m365viewer" -> R.string.site_text_m365_viewer
+        "fileManager.description" -> R.string.site_text_description
+        "fileManager.rating" -> R.string.site_text_rating
         else -> return raw
     }
     return context.getString(res)

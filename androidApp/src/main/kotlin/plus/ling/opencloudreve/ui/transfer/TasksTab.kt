@@ -32,7 +32,6 @@ import androidx.compose.material.icons.outlined.CleaningServices
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.CloudUpload
 import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.PendingActions
 import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -84,6 +83,7 @@ import plus.ling.opencloudreve.core.transfer.TransferState
 import plus.ling.opencloudreve.transfer.DownloadTargets
 import plus.ling.opencloudreve.ui.common.CollectEffects
 import plus.ling.opencloudreve.ui.common.message
+import plus.ling.opencloudreve.ui.workflow.BackgroundTasks
 
 /** “任务”Tab 的分段：传输列表（P5）与后台任务（P7 工作流） */
 private enum class TasksSegment(val label: Int) {
@@ -136,7 +136,7 @@ fun TasksTab(accountId: String) {
             }
             when (TasksSegment.entries[segment]) {
                 TasksSegment.Transfers -> TransferList(state, vm::on)
-                TasksSegment.Background -> EmptyMessage(Icons.Outlined.PendingActions, R.string.tasks_background_placeholder, null)
+                TasksSegment.Background -> BackgroundTasks(accountId, snackbar)
             }
         }
     }

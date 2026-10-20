@@ -53,6 +53,7 @@ import plus.ling.opencloudreve.core.auth.AccountRepository
 import plus.ling.opencloudreve.core.presentation.auth.AccountSwitcherViewModel
 import plus.ling.opencloudreve.ui.account.AccountSwitcherSheet
 import plus.ling.opencloudreve.ui.files.FilesTab
+import plus.ling.opencloudreve.ui.share.SharesTab
 import plus.ling.opencloudreve.ui.transfer.RequestNotificationPermission
 import plus.ling.opencloudreve.ui.transfer.TasksTab
 import plus.ling.opencloudreve.core.transfer.TransferManager
@@ -170,7 +171,9 @@ fun MainScreen(
                         onShareRequestConsumed = { filesShareRequest = null },
                     )
                 }
-                MainTab.Shares -> PlaceholderTab(MainTab.Shares, R.string.placeholder_shares)
+                MainTab.Shares -> active?.let { account ->
+                    key(account.id) { SharesTab(accountId = account.id, openFilesAt = openFilesAt) }
+                }
                 MainTab.Tasks -> active?.let { account ->
                     key(account.id) { TasksTab(accountId = account.id) }
                 }
@@ -219,31 +222,6 @@ private fun Modifier.detectLongPress(onLongPress: () -> Unit): Modifier = pointe
                 val event = awaitPointerEvent(PointerEventPass.Initial)
                 event.changes.forEach { it.consume() }
             } while (event.changes.any { it.pressed })
-        }
-    }
-}
-
-/** 尚未实现的 Tab 的占位页（后续阶段替换为真实内容） */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PlaceholderTab(tab: MainTab, @StringRes message: Int) {
-    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(tab.label)) }) }) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Icon(
-                    tab.icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(56.dp),
-                    tint = MaterialTheme.colorScheme.outline,
-                )
-                Text(
-                    text = stringResource(message),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 32.dp),
-                )
-            }
         }
     }
 }
