@@ -178,7 +178,9 @@ class ShareListViewModel(
     private fun openSource(id: String) {
         scope.launch {
             try {
-                val info = shares.info(id, ownerExtended = true)
+                // 带密码的分享解析 source_uri 时服务端会校验密码（列表中所有者可见密码）
+                val password = currentState.shares.firstOrNull { it.id == id }?.password?.ifEmpty { null }
+                val info = shares.info(id, password = password, ownerExtended = true)
                 val uri = info.sourceUri
                 if (uri.isNullOrEmpty()) {
                     sendEffect(ShareListEffect.Failed(UiError(ErrorKind.NotFound)))

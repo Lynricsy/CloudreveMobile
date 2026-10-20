@@ -145,7 +145,10 @@ class ShareEditViewModel(
             try {
                 val id = currentState.shareId
                 if (id != null) {
-                    applyShare(shares.info(id, ownerExtended = true))
+                    // 带密码的分享：服务端解析 owner_extended 的 source_uri 时要校验密码（网页端同样传入密码），
+                    // 所以先取基本信息（所有者可见密码），再带密码取扩展信息
+                    val basic = shares.info(id)
+                    applyShare(shares.info(id, password = basic.password?.ifEmpty { null }, ownerExtended = true))
                 } else {
                     val file = files.info(currentState.fileUri!!)
                     updateState { it.copy(name = file.name, isFolder = file.isFolder, loading = false) }
