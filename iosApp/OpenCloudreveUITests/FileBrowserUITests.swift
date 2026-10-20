@@ -142,7 +142,7 @@ final class FileBrowserUITests: XCTestCase {
             for title in ["完成", "取消", "关闭"] where app.buttons[title].firstMatch.exists {
                 app.buttons[title].firstMatch.tap()
             }
-            signOut(app)
+            Self.signOut(app)
         }
         super.tearDown()
     }
@@ -164,7 +164,7 @@ final class FileBrowserUITests: XCTestCase {
 
     /// 结束时退出登录（其它 UI 测试从服务器地址页开始）
     @MainActor
-    private func signOut(_ app: XCUIApplication) {
+    private static func signOut(_ app: XCUIApplication) {
         openMeTab(app)
         let signOutButton = app.buttons["me.signOut"]
         var attempts = 0
@@ -185,7 +185,7 @@ final class FileBrowserUITests: XCTestCase {
 
     /// 切到“我的”Tab。搜索 Tab 激活时 Tab 栏会收起成搜索框，需要先取消搜索或点收起后的 Tab 按钮
     @MainActor
-    private func openMeTab(_ app: XCUIApplication) {
+    private static func openMeTab(_ app: XCUIApplication) {
         for _ in 0..<4 {
             let candidates = [app.tabBars.buttons["我的"], app.buttons["我的"].firstMatch]
             if let tab = candidates.first(where: { $0.waitForExistence(timeout: 3) && $0.isHittable }) {
