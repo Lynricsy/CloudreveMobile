@@ -5,16 +5,14 @@ import OpenCloudreveCore
 /// 根视图以账户 id 作为视图标识，切换账户时整棵树重建。
 struct MainTabView: View {
     @State private var selection: MainTab = .files
+    @Environment(AppSession.self) private var session
 
     var body: some View {
         TabView(selection: $selection) {
             Tab("文件", systemImage: "folder", value: MainTab.files) {
-                TabPlaceholder(
-                    title: "文件",
-                    systemImage: "folder",
-                    message: "你的文件和文件夹会显示在这里。",
-                    identifier: "tab.files"
-                )
+                if let account = session.activeAccount {
+                    FilesTab(account: account)
+                }
             }
             Tab("分享", systemImage: "square.and.arrow.up", value: MainTab.shares) {
                 TabPlaceholder(
@@ -36,7 +34,9 @@ struct MainTabView: View {
                 MeScreen()
             }
             Tab(value: MainTab.search, role: .search) {
-                SearchTabRoot()
+                if let account = session.activeAccount {
+                    SearchTabRoot(account: account)
+                }
             }
         }
         .tabViewStyle(.sidebarAdaptable)

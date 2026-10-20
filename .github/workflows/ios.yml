@@ -62,6 +62,9 @@ jobs:
             http://127.0.0.1:5212/api/v4/user)
           echo "注册：$RESP"
           echo "$RESP" | grep -q '"code":0'
+      - name: 预置文件浏览测试数据
+        # 照片（PNG 缩略图）、文档（65 个文件）等，供 FileBrowserUITests 使用
+        run: python3 scripts/ci/seed-files.py
       - name: 构建 KMP XCFramework
         run: ./scripts/build-ios-framework.sh debug
       - name: 生成 Xcode 工程
