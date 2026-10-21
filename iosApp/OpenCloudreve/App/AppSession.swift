@@ -10,6 +10,8 @@ final class AppSession {
     var reloginHint: ReloginHint?
     /// 待打开的分享链接：深链到达时可能尚未登录（或会话失效），进入主界面后由 `ShareLinkDeepLink` 取走并打开
     var pendingShareLink: String?
+    /// 键盘命令请求切换到的主界面 Tab（⌘F 搜索）；`MainTabView` 取走后清空
+    var requestedTab: MainTab?
     @ObservationIgnored private var task: Task<Void, Never>?
 
     init(accounts: AccountRepository) {

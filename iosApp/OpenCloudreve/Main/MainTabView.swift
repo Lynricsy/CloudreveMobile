@@ -37,6 +37,10 @@ struct MainTabView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .modifier(MainBottomAccessory(accountId: session.activeAccount?.id ?? "", selection: $selection))
         .modifier(ShareLinkDeepLink(accountId: session.activeAccount?.id))
-        .focusedSceneValue(\.mainTabSelection, $selection)
+        .onChange(of: session.requestedTab, initial: true) { _, tab in
+            guard let tab else { return }
+            selection = tab
+            session.requestedTab = nil
+        }
     }
 }

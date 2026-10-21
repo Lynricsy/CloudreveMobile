@@ -21,6 +21,6 @@ struct OpenCloudreveApp: App {
                 .environment(session)
                 .preferredColorScheme(UITestAppearance.colorScheme)
         }
-        .commands { AppCommands() }
+        .commands { AppCommands(session: session) }
     }
 }
