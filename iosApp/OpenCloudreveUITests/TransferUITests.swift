@@ -30,12 +30,12 @@ final class TransferUITests: XCTestCase {
         XCTAssertTrue(miniBar.waitForExistence(timeout: 60), "迷你栏未出现")
         capture(app, "transfers-01-mini-bar")
 
-        // 点按迷你栏进入任务 Tab：上传进行中
-        if miniBar.isHittable {
-            miniBar.tap()
-        } else {
-            openTab(app, "任务")
-        }
+        // 点按迷你栏进入任务 Tab：上传进行中。迷你栏在底部附件里随出现动画与进度刷新不断重建，
+        // `isHittable` 可能报“激活点无效”，所以等布局稳定后按元素中心坐标点按
+        XCTAssertTrue(waitForStableFrame(miniBar, timeout: 10), "迷你栏位置未稳定")
+        miniBar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let tasksSelected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "selected == true"), object: app.tabBars.buttons["任务"])
+        XCTAssertEqual(XCTWaiter.wait(for: [tasksSelected], timeout: 10), .completed, "点按迷你栏未切到任务 Tab")
         XCTAssertTrue(element(app, "transfer." + uploadName).waitForExistence(timeout: 20), "传输列表中没有上传项")
         capture(app, "transfers-02-uploading")
 
@@ -167,6 +167,22 @@ final class TransferUITests: XCTestCase {
             }
         }
         XCTFail("找不到“\(title)” Tab")
+    }
+
+    /// 等元素存在且连续两次取到的 frame 相同（出现动画结束）
+    @MainActor
+    private func waitForStableFrame(_ element: XCUIElement, timeout: TimeInterval) -> Bool {
+        let deadline = Date.now.addingTimeInterval(timeout)
+        var last: CGRect?
+        while Date.now < deadline {
+            if element.exists {
+                let frame = element.frame
+                if !frame.isEmpty, frame == last { return true }
+                last = frame
+            }
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        return false
     }
 
     @MainActor

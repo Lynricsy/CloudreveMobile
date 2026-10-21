@@ -66,26 +66,27 @@ final class ShareTasksUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(versionRows.count, 2, "版本列表少于 2 个版本")
         XCTAssertTrue(element(app, "version.current").exists, "未标记当前版本")
         capture(app, "p7-03-versions")
-        app.buttons["完成"].firstMatch.tap()
+        closeSheet(app, "版本")
 
         // 标签编辑：添加带颜色的标签并保存
         openContextMenu(app, on: element(app, "file.report.txt"), item: "标签与元数据").tap()
         let tagName = element(app, "metadata.tagName")
         XCTAssertTrue(tagName.waitForExistence(timeout: 20), "标签输入框未出现")
-        tagName.tap()
-        tagName.typeText("重要")
         let color = element(app, "metadata.tagColor.1")
         if color.waitForExistence(timeout: 3) { color.tap() }
-        element(app, "metadata.addTag").tap()
+        tagName.tap()
+        // 输入框的回车键（“完成”）即添加标签并收起键盘
+        tagName.typeText("重要\n")
         XCTAssertTrue(element(app, "metadata.tag.重要").waitForExistence(timeout: 10), "新标签未出现在列表中")
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5), "添加标签后键盘未收起")
         capture(app, "p7-04-tag-edit")
         let saveTags = element(app, "metadata.saveTags")
         XCTAssertTrue(saveTags.waitForExistence(timeout: 5), "没有“保存标签”按钮")
         saveTags.tap()
-        let saved = NSPredicate(format: "exists == false OR enabled == false")
+        let saved = NSPredicate(format: "exists == false")
         expectation(for: saved, evaluatedWith: saveTags)
         waitForExpectations(timeout: 20)
-        app.buttons["完成"].firstMatch.tap()
+        closeSheet(app, "标签与元数据")
 
         // 压缩任务
         openContextMenu(app, on: element(app, "file.bundle-src"), item: "压缩").tap()
@@ -145,6 +146,16 @@ final class ShareTasksUITests: XCTestCase {
         }
         XCTFail("上下文菜单未出现")
         return item
+    }
+
+    /// 点导航栏上的“完成”关闭 sheet，并等它消失。
+    /// 不能用 `app.buttons["完成"]`：键盘回车键（`.submitLabel(.done)`）也叫“完成”
+    @MainActor
+    private func closeSheet(_ app: XCUIApplication, _ title: String) {
+        let bar = app.navigationBars[title]
+        XCTAssertTrue(bar.waitForExistence(timeout: 10), "没有“\(title)”页面")
+        bar.buttons["完成"].tap()
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 10), "“\(title)”未关闭")
     }
 
     /// 未登录时走服务器地址 → 登录；已登录则直接进入主界面
