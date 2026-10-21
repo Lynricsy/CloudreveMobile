@@ -127,24 +127,17 @@ final class SettingsAdminUITests: XCTestCase {
     private func signIn(_ app: XCUIApplication, email: String, password: String) {
         let urlField = app.textFields["server.url"]
         XCTAssertTrue(urlField.waitForExistence(timeout: 30), "服务器地址页未出现")
-        // 地址栏可能预填了 “https://”：点在右端让光标落在末尾，再删掉已有内容
-        urlField.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-        if let current = urlField.value as? String, !current.isEmpty, current != urlField.placeholderValue {
-            urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 2))
-        }
-        urlField.typeText(serverURL)
+        urlField.replaceText(serverURL)
         app.buttons["server.continue"].tap()
 
         let emailField = app.textFields["login.email"]
         XCTAssertTrue(emailField.waitForExistence(timeout: 30), "登录页未出现")
-        emailField.tap()
-        emailField.typeText(email)
+        emailField.replaceText(email)
         app.buttons["login.continue"].tap()
 
         let passwordField = app.secureTextFields["login.password"]
         XCTAssertTrue(passwordField.waitForExistence(timeout: 30), "密码阶段未出现")
-        passwordField.tap()
-        passwordField.typeText(password)
+        passwordField.replaceText(password)
         app.buttons["login.submit"].tap()
     }
 

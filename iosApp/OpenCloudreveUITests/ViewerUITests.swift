@@ -132,21 +132,15 @@ final class ViewerUITests: XCTestCase {
             Thread.sleep(forTimeInterval: 0.5)
         }
         if urlField.exists {
-            urlField.tap()
-            if let existing = urlField.value as? String, !existing.isEmpty, existing != urlField.placeholderValue {
-                urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: existing.count))
-            }
-            urlField.typeText(serverURL)
+            urlField.replaceText(serverURL)
             app.buttons["server.continue"].tap()
             let emailField = app.textFields["login.email"]
             XCTAssertTrue(emailField.waitForExistence(timeout: 30), "登录页未出现")
-            emailField.tap()
-            emailField.typeText(email)
+            emailField.replaceText(email)
             app.buttons["login.continue"].tap()
             let passwordField = app.secureTextFields["login.password"]
             XCTAssertTrue(passwordField.waitForExistence(timeout: 30), "密码阶段未出现")
-            passwordField.tap()
-            passwordField.typeText(password)
+            passwordField.replaceText(password)
             app.buttons["login.submit"].tap()
         }
         XCTAssertTrue(filesTab.waitForExistence(timeout: 30), "未进入主界面")
@@ -170,11 +164,7 @@ final class ViewerUITests: XCTestCase {
         XCTAssertNotNil(meTab, "找不到“我的” Tab")
         meTab?.tap()
         let signOutButton = app.buttons["me.signOut"]
-        var attempts = 0
-        while !(signOutButton.exists && signOutButton.isHittable) && attempts < 6 {
-            app.swipeUp()
-            attempts += 1
-        }
+        app.scrollUntilHittable(signOutButton)
         XCTAssertTrue(signOutButton.waitForExistence(timeout: 10), "找不到退出登录按钮")
         signOutButton.tap()
         let confirm = app.sheets.buttons["退出登录"]

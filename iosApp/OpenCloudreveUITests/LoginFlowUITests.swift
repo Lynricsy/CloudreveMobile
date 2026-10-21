@@ -20,22 +20,19 @@ final class LoginFlowUITests: XCTestCase {
         let urlField = app.textFields["server.url"]
         XCTAssertTrue(urlField.waitForExistence(timeout: 30), "服务器地址页未出现")
         capture(app, "01-server")
-        urlField.tap()
-        urlField.typeText(serverURL)
+        urlField.replaceText(serverURL)
         app.buttons["server.continue"].tap()
 
         let emailField = app.textFields["login.email"]
         XCTAssertTrue(emailField.waitForExistence(timeout: 30), "登录页未出现")
         XCTAssertTrue(app.buttons["login.webLogin"].waitForExistence(timeout: 10), "4.19.11 站点应显示网页登录按钮")
         capture(app, "02-login-email")
-        emailField.tap()
-        emailField.typeText(email)
+        emailField.replaceText(email)
         app.buttons["login.continue"].tap()
 
         let passwordField = app.secureTextFields["login.password"]
         XCTAssertTrue(passwordField.waitForExistence(timeout: 30), "密码阶段未出现")
-        passwordField.tap()
-        passwordField.typeText(password)
+        passwordField.replaceText(password)
         capture(app, "03-login-password")
         app.buttons["login.submit"].tap()
 

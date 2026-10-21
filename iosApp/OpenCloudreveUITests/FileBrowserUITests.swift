@@ -65,9 +65,7 @@ final class FileBrowserUITests: XCTestCase {
         renameItem.tap()
         let field = app.alerts.firstMatch.textFields.firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 10), "重命名输入框未出现")
-        field.tap()
-        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 24))
-        field.typeText("已重命名.txt")
+        field.replaceText("已重命名.txt")
         app.alerts.firstMatch.buttons["确定"].firstMatch.tap()
         XCTAssertTrue(element(app, "file.已重命名.txt").waitForExistence(timeout: 20), "重命名后列表未更新")
         capture(app, "files-07-renamed")
@@ -94,8 +92,9 @@ final class FileBrowserUITests: XCTestCase {
         openSearchTab(app)
         let searchField = app.searchFields.firstMatch
         XCTAssertTrue(searchField.waitForExistence(timeout: 15), "搜索框未出现")
-        searchField.tap()
-        searchField.typeText("note-00\n")
+        // 先核对输入框中的文字（模拟器键盘偶尔丢字），再回车提交
+        searchField.replaceText("note-00")
+        searchField.typeText("\n")
         XCTAssertTrue(element(app, "file.note-001.txt").waitForExistence(timeout: 30), "搜索没有结果")
         capture(app, "files-09-search")
     }
@@ -112,24 +111,15 @@ final class FileBrowserUITests: XCTestCase {
             Thread.sleep(forTimeInterval: 0.5)
         }
         if urlField.exists {
-            // 先点元素本身获得键盘焦点；地址框可能已预填（如 https://），再点右端让光标落到末尾后逐字删除
-            XCTAssertTrue(urlField.wait(for: \.isHittable, toEqual: true, timeout: 10), "服务器地址框不可点按")
-            urlField.tap()
-            urlField.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-            if let existing = urlField.value as? String, !existing.isEmpty, existing != urlField.placeholderValue {
-                urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: existing.count + 2))
-            }
-            urlField.typeText(serverURL)
+            urlField.replaceText(serverURL)
             app.buttons["server.continue"].tap()
             let emailField = app.textFields["login.email"]
             XCTAssertTrue(emailField.waitForExistence(timeout: 30), "登录页未出现")
-            emailField.tap()
-            emailField.typeText(email)
+            emailField.replaceText(email)
             app.buttons["login.continue"].tap()
             let passwordField = app.secureTextFields["login.password"]
             XCTAssertTrue(passwordField.waitForExistence(timeout: 30), "密码阶段未出现")
-            passwordField.tap()
-            passwordField.typeText(password)
+            passwordField.replaceText(password)
             app.buttons["login.submit"].tap()
         }
         XCTAssertTrue(filesTab.waitForExistence(timeout: 30), "未进入主界面")
@@ -170,11 +160,7 @@ final class FileBrowserUITests: XCTestCase {
     private static func signOut(_ app: XCUIApplication) {
         openMeTab(app)
         let signOutButton = app.buttons["me.signOut"]
-        var attempts = 0
-        while !(signOutButton.exists && signOutButton.isHittable) && attempts < 6 {
-            app.swipeUp()
-            attempts += 1
-        }
+        app.scrollUntilHittable(signOutButton)
         XCTAssertTrue(signOutButton.waitForExistence(timeout: 10), "找不到退出登录按钮")
         signOutButton.tap()
         let confirm = app.sheets.buttons["退出登录"]
