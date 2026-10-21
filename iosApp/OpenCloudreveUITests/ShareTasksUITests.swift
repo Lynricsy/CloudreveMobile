@@ -108,21 +108,22 @@ final class ShareTasksUITests: XCTestCase {
         let backgroundSegment = app.segmentedControls.buttons["后台任务"].firstMatch
         XCTAssertTrue(backgroundSegment.waitForExistence(timeout: 10), "任务 Tab 没有“后台任务”分段")
         backgroundSegment.tap()
-        let task = element(app, "workflow.task")
-        XCTAssertTrue(task.waitForExistence(timeout: 30), "后台任务列表为空")
-        // 行是 Button，子 Text 合并进 label
-        let done = app.buttons.matching(NSPredicate(format: "identifier == %@ AND label CONTAINS %@", "workflow.task", "已完成")).firstMatch
-        let taskDeadline = Date.now.addingTimeInterval(240)
-        while Date.now < taskDeadline && !done.exists {
-            Thread.sleep(forTimeInterval: 5)
-            task.swipeDown()
-        }
-        XCTAssertTrue(done.exists, "压缩任务未在 4 分钟内完成")
-        capture(app, "p7-07-workflow-list")
-        done.tap()
-        XCTAssertTrue(element(app, "workflow.detail.status").waitForExistence(timeout: 20), "任务详情未出现")
-        capture(app, "p7-08-workflow-detail")
-        app.navigationBars.buttons.firstMatch.tap()
+        // 行是 Button，子 Text（名称、类型、状态、目标）合并进 label；按目标压缩包名找本次的压缩任务
+        let taskRows = app.buttons.matching(NSPredicate(format: "identifier == %@ AND label CONTAINS %@", "workflow.task", "bundle-src.zip"))
+        let task = taskRows.firstMatch
+        XCTAssertTrue(task.waitForExistence(timeout: 30), "后台任务列表中没有压缩任务")
+        // 打开详情：详情页自行轮询任务状态，结束时同步更新列表行（“常规”分类的列表本身不轮询）
+        task.tap()
+        let status = element(app, "workflow.detail.status")
+        XCTAssertTrue(status.waitForExistence(timeout: 20), "任务详情未出现")
+        let completed = NSPredicate(format: "label CONTAINS %@", "已完成")
+        expectation(for: completed, evaluatedWith: status)
+        waitForExpectations(timeout: 240)
+        capture(app, "p7-07-workflow-detail")
+        app.navigationBars.buttons["BackButton"].firstMatch.tap()
+        let done = taskRows.matching(NSPredicate(format: "label CONTAINS %@", "已完成")).firstMatch
+        XCTAssertTrue(done.waitForExistence(timeout: 10), "返回列表后任务未显示“已完成”")
+        capture(app, "p7-08-workflow-list")
 
         Self.signOut(app)
     }
