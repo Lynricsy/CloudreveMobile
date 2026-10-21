@@ -31,11 +31,17 @@ final class TransferUITests: XCTestCase {
         capture(app, "transfers-01-mini-bar")
 
         // 点按迷你栏进入任务 Tab：上传进行中。迷你栏在底部附件里随出现动画与进度刷新不断重建，
-        // `isHittable` 可能报“激活点无效”，所以等布局稳定后按元素中心坐标点按
-        XCTAssertTrue(waitForStableFrame(miniBar, timeout: 10), "迷你栏位置未稳定")
-        miniBar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-        let tasksSelected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "selected == true"), object: app.tabBars.buttons["任务"])
-        XCTAssertEqual(XCTWaiter.wait(for: [tasksSelected], timeout: 10), .completed, "点按迷你栏未切到任务 Tab")
+        // 按元素点按时会在点按瞬间重新解析元素，可能取到无效 frame（“激活点无效”“point.x != INFINITY”），
+        // 所以取一次有效且稳定的 frame，按屏幕绝对坐标点按；没切到任务 Tab 就重新取位置再点
+        let tasksTab = app.tabBars.buttons["任务"]
+        var switched = false
+        for _ in 0..<3 where !switched {
+            guard let frame = stableFrame(of: miniBar, in: app, timeout: 10) else { break }
+            app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: frame.midX, dy: frame.midY)).tap()
+            let selected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "selected == true"), object: tasksTab)
+            switched = XCTWaiter.wait(for: [selected], timeout: 5) == .completed
+        }
+        XCTAssertTrue(switched, "点按迷你栏未切到任务 Tab")
         XCTAssertTrue(element(app, "transfer." + uploadName).waitForExistence(timeout: 20), "传输列表中没有上传项")
         capture(app, "transfers-02-uploading")
 
@@ -155,20 +161,23 @@ final class TransferUITests: XCTestCase {
         XCTFail("找不到“\(title)” Tab")
     }
 
-    /// 等元素存在且连续两次取到的 frame 相同（出现动画结束）
+    /// 等元素存在、frame 有效（有限且在窗口内）且连续两次相同（出现动画结束），返回该 frame
     @MainActor
-    private func waitForStableFrame(_ element: XCUIElement, timeout: TimeInterval) -> Bool {
+    private func stableFrame(of element: XCUIElement, in app: XCUIApplication, timeout: TimeInterval) -> CGRect? {
         let deadline = Date.now.addingTimeInterval(timeout)
+        let window = app.windows.firstMatch.frame
         var last: CGRect?
         while Date.now < deadline {
             if element.exists {
                 let frame = element.frame
-                if !frame.isEmpty, frame == last { return true }
-                last = frame
+                let valid = frame.minX.isFinite && frame.minY.isFinite && !frame.isEmpty
+                    && window.contains(CGPoint(x: frame.midX, y: frame.midY))
+                if valid, frame == last { return frame }
+                last = valid ? frame : nil
             }
             Thread.sleep(forTimeInterval: 0.5)
         }
-        return false
+        return nil
     }
 
     @MainActor
