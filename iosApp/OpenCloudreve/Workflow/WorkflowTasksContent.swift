@@ -38,6 +38,8 @@ struct WorkflowTasksContent: View {
                         } label: {
                             WorkflowTaskRowView(row: row)
                         }
+                        // 与文件/分享列表一致用 plain：默认样式会把整行文字染成强调色
+                        .buttonStyle(.plain)
                         .accessibilityIdentifier("workflow.task")
                     }
                     if state.hasMore {

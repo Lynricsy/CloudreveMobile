@@ -32,8 +32,11 @@ struct WorkflowTaskRowView: View {
                     ProgressView(value: progress)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .foregroundStyle(.primary)
+        // 整行可点（行按钮为 plain 样式，只有内容形状响应点按）
+        .contentShape(.rect)
     }
 
     /// 类型 · 状态 · 下载量/速度 · 失败数 · 多个源
