@@ -15,12 +15,9 @@ struct MainTabView: View {
                 }
             }
             Tab("分享", systemImage: "square.and.arrow.up", value: MainTab.shares) {
-                TabPlaceholder(
-                    title: "分享",
-                    systemImage: "square.and.arrow.up",
-                    message: "你创建的分享链接会显示在这里。",
-                    identifier: "tab.shares"
-                )
+                if let account = session.activeAccount {
+                    SharesTab(account: account)
+                }
             }
             Tab("任务", systemImage: "arrow.up.arrow.down.circle", value: MainTab.tasks) {
                 if let account = session.activeAccount {

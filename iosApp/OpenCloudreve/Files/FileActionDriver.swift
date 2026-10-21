@@ -80,7 +80,7 @@ final class FileActionDriver {
         case .info:
             sheet = .info(id: UUID(), file: first)
         case .directLink:
-            context.actions.run(FileOperationCreateSourceLinks(uris: uris))
+            sheet = .hook(id: UUID(), content: AnyView(DirectLinksSheet(accountId: context.accountId, uris: uris)))
         case .resetThumbnail:
             context.actions.run(FileOperationSetThumbnailDisabled(uris: targets.filter(\.thumbDisabled).map(\.path), disabled: false))
         case .disableThumbnail:

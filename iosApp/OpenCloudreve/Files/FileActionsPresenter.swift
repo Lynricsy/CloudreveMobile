@@ -99,9 +99,6 @@ struct FileActionsPresenter: ViewModifier {
                     case let .succeeded(success):
                         onChanged(success.operation, success.outcome)
                         FileProviderSignal.workingSetChanged(accountId: context.accountId)
-                        if case let .sourceLinks(result) = onEnum(of: success.outcome) {
-                            driver.sheet = .sourceLinks(id: UUID(), links: result.links, failures: result.failures)
-                        }
                     case let .failed(failure):
                         // 部分失败由专门的弹窗列出明细
                         if actions.state.partialFailures.isEmpty {
@@ -130,8 +127,6 @@ struct FileActionsPresenter: ViewModifier {
             }
         case let .info(_, file):
             FileInfoSheet(accountId: context.accountId, file: file)
-        case let .sourceLinks(_, links, failures):
-            SourceLinksSheet(links: links, failures: failures)
         case let .shareVisit(_, link):
             ShareVisitSheet(accountId: context.accountId, link: link)
         case let .hook(_, view):

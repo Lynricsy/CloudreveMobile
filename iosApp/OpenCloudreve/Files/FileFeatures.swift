@@ -36,7 +36,14 @@ struct FileFeatures {
         uploadFiles: TransferHooks.uploadFiles,
         uploadMedia: TransferHooks.uploadMedia,
         uploadCamera: TransferHooks.uploadCamera,
-        preview: ViewerHooks.preview
+        preview: ViewerHooks.preview,
+        share: ShareHooks.share,
+        versions: FileDetailHooks.versions,
+        metadata: FileDetailHooks.metadata,
+        createArchive: WorkflowHooks.createArchive,
+        extractArchive: WorkflowHooks.extractArchive,
+        remoteDownload: WorkflowHooks.remoteDownload,
+        relocate: WorkflowHooks.relocate
     )
 
     /// 动作对应的入口；不是后续阶段动作时为 nil

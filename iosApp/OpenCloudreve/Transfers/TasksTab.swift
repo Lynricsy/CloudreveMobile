@@ -47,7 +47,7 @@ struct TasksFeatures {
     /// P7：后台任务（工作流）列表，参数为账户 id；视图不自带导航栈
     var backgroundTasks: (@MainActor (String) -> AnyView)?
 
-    @MainActor static let installed = TasksFeatures()
+    @MainActor static let installed = TasksFeatures(backgroundTasks: WorkflowHooks.backgroundTasks)
 }
 
 /// 传输列表（不自带导航栈）
