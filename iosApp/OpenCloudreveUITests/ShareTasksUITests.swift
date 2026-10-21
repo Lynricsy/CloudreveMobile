@@ -74,9 +74,9 @@ final class ShareTasksUITests: XCTestCase {
         XCTAssertTrue(tagName.waitForExistence(timeout: 20), "标签输入框未出现")
         let color = element(app, "metadata.tagColor.1")
         if color.waitForExistence(timeout: 3) { color.tap() }
-        tagName.tap()
+        tagName.replaceText("重要")
         // 输入框的回车键（“完成”）即添加标签并收起键盘
-        tagName.typeText("重要\n")
+        tagName.typeText("\n")
         XCTAssertTrue(element(app, "metadata.tag.重要").waitForExistence(timeout: 10), "新标签未出现在列表中")
         XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5), "添加标签后键盘未收起")
         capture(app, "p7-04-tag-edit")
@@ -169,21 +169,15 @@ final class ShareTasksUITests: XCTestCase {
             Thread.sleep(forTimeInterval: 0.5)
         }
         if urlField.exists {
-            urlField.tap()
-            if let existing = urlField.value as? String, !existing.isEmpty, existing != urlField.placeholderValue {
-                urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: existing.count))
-            }
-            urlField.typeText(serverURL)
+            urlField.replaceText(serverURL)
             app.buttons["server.continue"].tap()
             let emailField = app.textFields["login.email"]
             XCTAssertTrue(emailField.waitForExistence(timeout: 30), "登录页未出现")
-            emailField.tap()
-            emailField.typeText(email)
+            emailField.replaceText(email)
             app.buttons["login.continue"].tap()
             let passwordField = app.secureTextFields["login.password"]
             XCTAssertTrue(passwordField.waitForExistence(timeout: 30), "密码阶段未出现")
-            passwordField.tap()
-            passwordField.typeText(password)
+            passwordField.replaceText(password)
             app.buttons["login.submit"].tap()
         }
         XCTAssertTrue(filesTab.waitForExistence(timeout: 30), "未进入主界面")
@@ -197,11 +191,7 @@ final class ShareTasksUITests: XCTestCase {
             let meTab = [app.tabBars.buttons["我的"], app.buttons["我的"].firstMatch].first { $0.waitForExistence(timeout: 5) }
             meTab?.tap()
             let signOutButton = app.buttons["me.signOut"]
-            var attempts = 0
-            while !(signOutButton.exists && signOutButton.isHittable) && attempts < 6 {
-                app.swipeUp()
-                attempts += 1
-            }
+            app.scrollUntilHittable(signOutButton)
             guard signOutButton.waitForExistence(timeout: 10) else { break }
             signOutButton.tap()
             let confirm = app.sheets.buttons["退出登录"]
