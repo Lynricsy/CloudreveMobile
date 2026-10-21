@@ -79,6 +79,9 @@ jobs:
         run: |
           command -v ffmpeg >/dev/null || brew install ffmpeg
           python3 scripts/ci/seed-viewer-media.py
+      - name: 预置分享与后台任务测试数据
+        # 「归档/分享任务」目录：report.txt（2 个版本）、bundle-src/（压缩素材）、share-me.md，供 ShareTasksUITests 使用
+        run: python3 scripts/ci/seed-share-tasks.py
       - name: 构建 KMP XCFramework
         run: ./scripts/build-ios-framework.sh debug
       - name: 生成 Xcode 工程
