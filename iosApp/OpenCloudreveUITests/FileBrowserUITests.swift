@@ -82,8 +82,13 @@ final class FileBrowserUITests: XCTestCase {
 
         // 回收站
         goBack(app)
-        XCTAssertTrue(element(app, "files.location.trash").waitForExistence(timeout: 10))
-        element(app, "files.location.trash").tap()
+        let trashLocation = element(app, "files.location.trash")
+        XCTAssertTrue(trashLocation.waitForExistence(timeout: 10))
+        // 返回动画未结束时的点按偶尔不触发导航（CI 上停在“文件”根页）：确认离开根页，否则再点
+        for _ in 0..<3 where app.navigationBars["文件"].exists {
+            trashLocation.tap()
+            _ = waitForDisappearance(app.navigationBars["文件"], timeout: 5)
+        }
         XCTAssertTrue(element(app, "file.待删除.txt").waitForExistence(timeout: 30), "回收站中没有刚删除的文件")
         capture(app, "files-08-trash")
         goBack(app)

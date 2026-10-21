@@ -126,6 +126,9 @@ jobs:
           print(pick['udid'], pick['name'], file=sys.stderr)
           print(pick['udid'])
           ")
+          # 先启动 iPad 模拟器并等开机完成再跑用例：否则模拟器随用例冷启动，开机期间的后台任务偶发拖住首个用例（登录后 App 数分钟无响应）
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
           cd iosApp
           xcodebuild -project OpenCloudreve.xcodeproj -scheme OpenCloudreve \
             -destination "platform=iOS Simulator,id=$UDID" \

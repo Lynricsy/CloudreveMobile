@@ -4,7 +4,7 @@ import XCTest
 /// Phase 11 收尾的端到端检查：
 /// - 深链：未登录时收到 `opencloudreve://open?url=` 登录后打开分享；`cloudreve://<id>:<pw>@share` 直接打开；OAuth 回调深链被忽略；
 /// - 实时刷新：停在目录中，测试代码以另一个 `X-Cr-Client-Id` 建文件，列表在 10 秒内出现；进入后台超过 10 秒再回来也能补上；
-/// - iPad：横屏分栏布局各主要页面截图 + 键盘快捷键（⌘N / ⌘R / ⌘F / Delete）；只在 iPad 目标上运行；
+/// - iPad：横屏分栏布局各主要页面截图 + 键盘快捷键（⌘N / ⌘R / ⌘F；⌘⌫ 只能真机验证）与多选删除确认；只在 iPad 目标上运行；
 /// - 外观：英文界面、深色模式、辅助功能大字号下截登录页与主要页面。
 /// 每个用例结束时退出全部账户（其它 UI 测试从服务器地址页开始）。
 final class UIPolishUITests: XCTestCase {
@@ -109,22 +109,22 @@ final class UIPolishUITests: XCTestCase {
     @MainActor
     func testIPadLayoutAndKeyboardShortcuts() throws {
         try XCTSkipUnless(isPad, "只在 iPad 目标上运行")
-        XCUIDevice.shared.orientation = .landscapeLeft
         let app = launch(language: "zh-Hans")
         addTeardownBlock { @MainActor in
             UIPolishUITests.bestEffortSignOut(XCUIApplication())
             XCUIDevice.shared.orientation = .portrait
         }
         ensureSignedIn(app)
+        // 进入主界面后再转横屏：在刚启动的 iPad 模拟器上、App 启动前转屏偶发超时（“Failed to set device orientation”）
+        XCUIDevice.shared.orientation = .landscapeLeft
 
         // 文件：分栏（侧栏位置 + 默认选中我的文件）
         XCTAssertTrue(element(app, "file.文档").waitForExistence(timeout: 30), "iPad 分栏未默认显示我的文件")
         capture(app, "iPad-01-files-split")
 
         // ⌘N 新建文件夹（系统 alert 中的输入框不带自定义标识）
-        app.typeKey("n", modifierFlags: .command)
         let newFolderAlert = app.alerts.firstMatch
-        XCTAssertTrue(newFolderAlert.waitForExistence(timeout: 10), "⌘N 未弹出新建文件夹")
+        XCTAssertTrue(pressUntilAppears(app, "n", .command, newFolderAlert), "⌘N 未弹出新建文件夹")
         XCTAssertTrue(newFolderAlert.textFields.firstMatch.exists, "新建文件夹弹窗没有输入框")
         capture(app, "iPad-02-cmd-n")
         newFolderAlert.buttons["取消"].tap()
@@ -133,66 +133,85 @@ final class UIPolishUITests: XCTestCase {
         app.typeKey("r", modifierFlags: .command)
         XCTAssertTrue(element(app, "file.文档").waitForExistence(timeout: 15), "⌘R 刷新后列表消失")
 
-        // 多选 + Delete 删除所选（只到确认框，取消）
+        // 推入子目录后 ⌘N 仍可用（命令目标随可见列表切换）
         element(app, "file.文档").tap()
         XCTAssertTrue(element(app, "file.note-001.txt").waitForExistence(timeout: 30), "文档目录未列出文件")
         capture(app, "iPad-03-folder")
+        XCTAssertTrue(pressUntilAppears(app, "n", .command, app.alerts.firstMatch), "子目录中 ⌘N 未弹出新建文件夹")
+        app.alerts.firstMatch.buttons["取消"].tap()
+
+        // 多选 + 底栏“删除”的确认弹层（iPad 上为 popover；只到确认框，取消）。
+        // ⌘⌫ 只能真机验证（docs/manual-qa-ios.md）：XCUITest 在 iPad 模拟器上合成的 Delete 键（⌘⌫/⌫，\u{7F} 或 \u{8}）
+        // 不会作为按键命令送达 App——诊断时同一响应者上注册的 ⌘K 能触发删除，⌘⌫ 各种写法都不能
         openMoreMenu(app)
         app.buttons["files.select"].firstMatch.tap()
         XCTAssertTrue(app.buttons["files.selectDone"].waitForExistence(timeout: 10), "未进入多选模式")
         element(app, "file.note-001.txt").tap()
         element(app, "file.note-002.txt").tap()
-        app.typeKey(XCUIKeyboardKey.delete.rawValue, modifierFlags: [])
-        let trash = app.buttons["files.delete.trash"].firstMatch
-        XCTAssertTrue(trash.waitForExistence(timeout: 10), "Delete 未弹出删除确认")
-        capture(app, "iPad-04-delete-key")
+        XCTAssertTrue(labelled(app, "已选择 2 项").waitForExistence(timeout: 10), "未选中两项")
+        app.buttons["files.selection.delete"].firstMatch.tap()
+        XCTAssertTrue(app.buttons["files.delete.trash"].firstMatch.waitForExistence(timeout: 10), "多选删除未弹出确认")
+        capture(app, "iPad-04-delete-confirm")
         dismissPopover(app)
         app.buttons["files.selectDone"].firstMatch.tap()
 
-        // 预览器（图片）
+        // ⌘F 切到搜索
         goBack(app, from: "文档")
+        XCTAssertTrue(pressUntilAppears(app, "f", .command, app.searchFields.firstMatch), "⌘F 未切到搜索")
+        capture(app, "iPad-05-cmd-f-search")
+        openTab(app, ["文件"])
+
+        // 预览器（图片）
         let previewFolder = element(app, "file.预览")
         if previewFolder.waitForExistence(timeout: 15) {
             previewFolder.tap()
             let photo = element(app, "file.photo.jpg")
             XCTAssertTrue(photo.waitForExistence(timeout: 30), "「预览」目录未列出 photo.jpg")
             photo.tap()
-            XCTAssertTrue(element(app, "image.view").waitForExistence(timeout: 30), "图片预览未显示")
-            capture(app, "iPad-05-viewer", settle: 2)
+            // 本机没有记住打开方式时（iPad 模拟器上首次打开）先出现打开方式选择
+            let image = element(app, "image.view")
+            let chooser = element(app, "viewer.option.image")
+            let deadline = Date.now.addingTimeInterval(30)
+            while Date.now < deadline && !image.exists && !chooser.exists {
+                Thread.sleep(forTimeInterval: 0.5)
+            }
+            if chooser.exists {
+                capture(app, "iPad-06-viewer-chooser")
+                chooser.tap()
+            }
+            XCTAssertTrue(image.waitForExistence(timeout: 30), "图片预览未显示")
+            capture(app, "iPad-07-viewer", settle: 2)
             app.buttons["viewer.close"].firstMatch.tap()
+            // 关闭全屏预览后键盘命令仍作用于目录列表
+            XCTAssertTrue(pressUntilAppears(app, "n", .command, app.alerts.firstMatch), "关闭预览后 ⌘N 未弹出新建文件夹")
+            app.alerts.firstMatch.buttons["取消"].tap()
             goBack(app, from: "预览")
         }
 
-        // ⌘F 切到搜索
-        app.typeKey("f", modifierFlags: .command)
-        Thread.sleep(forTimeInterval: 1)
-        capture(app, "iPad-06-cmd-f-search")
-        XCTAssertTrue(app.searchFields.firstMatch.waitForExistence(timeout: 10), "⌘F 未切到搜索")
-
         // 其它 Tab
         openTab(app, ["分享"])
-        capture(app, "iPad-07-shares", settle: 2)
+        capture(app, "iPad-08-shares", settle: 2)
         openTab(app, ["任务"])
-        capture(app, "iPad-08-tasks", settle: 2)
+        capture(app, "iPad-09-tasks", settle: 2)
         openTab(app, ["我的"])
-        XCTAssertTrue(element(app, "me.settings").waitForExistence(timeout: 20), "“我的”页未出现")
-        capture(app, "iPad-09-me", settle: 2)
+        XCTAssertTrue(element(app, "me.accountCard").waitForExistence(timeout: 20), "“我的”页未出现")
+        capture(app, "iPad-10-me", settle: 2)
         tapWhenHittable(app, element(app, "me.settings"))
-        XCTAssertTrue(element(app, "settings.security").waitForExistence(timeout: 15), "设置页未出现")
-        capture(app, "iPad-10-settings")
+        XCTAssertTrue(element(app, "settings.language").waitForExistence(timeout: 15), "设置页未出现")
+        capture(app, "iPad-11-settings")
         goBack(app, from: "设置")
         let admin = element(app, "me.admin")
         if admin.waitForExistence(timeout: 15) {
             tapWhenHittable(app, admin)
             XCTAssertTrue(element(app, "admin.totals").waitForExistence(timeout: 30), "管理概览未出现")
-            capture(app, "iPad-11-admin", settle: 2)
+            capture(app, "iPad-12-admin", settle: 2)
             goBack(app, from: "管理")
         }
 
         // 竖屏：分栏折叠
         XCUIDevice.shared.orientation = .portrait
         openTab(app, ["文件"])
-        capture(app, "iPad-12-files-portrait", settle: 2)
+        capture(app, "iPad-13-files-portrait", settle: 2)
     }
 
     // MARK: - 外观：英文 / 深色 / 大字号
@@ -241,10 +260,12 @@ final class UIPolishUITests: XCTestCase {
         openTab(app, ["任务", "Tasks"])
         capture(app, "\(prefix)-05-tasks", settle: 2)
         openTab(app, ["我的", "Me"])
-        XCTAssertTrue(element(app, "me.settings").waitForExistence(timeout: 20), "“我的”页未出现")
+        // “我的”页是懒加载列表：大字号下设置入口在屏幕外、尚不在层级中，先确认页面出现，再滚动到设置入口
+        XCTAssertTrue(element(app, "me.accountCard").waitForExistence(timeout: 20), "“我的”页未出现")
         capture(app, "\(prefix)-06-me", settle: 2)
         tapWhenHittable(app, element(app, "me.settings"))
-        XCTAssertTrue(element(app, "settings.security").waitForExistence(timeout: 15), "设置页未出现")
+        // 等设置页顶部的条目（大字号下“安全”等行在屏幕外、不在层级中）
+        XCTAssertTrue(element(app, "settings.language").waitForExistence(timeout: 15), "设置页未出现")
         capture(app, "\(prefix)-07-settings")
     }
 
@@ -308,30 +329,17 @@ final class UIPolishUITests: XCTestCase {
     private func enterServer(_ app: XCUIApplication) {
         let urlField = app.textFields["server.url"]
         XCTAssertTrue(urlField.waitForExistence(timeout: 30), "服务器地址页未出现")
-        // 模拟器键盘偶尔丢字：输入后核对，不一致则清空重输
-        for _ in 0..<3 {
-            // 地址栏可能预填了内容：点在右端让光标落在末尾，再删掉已有内容
-            urlField.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
-            if let current = urlField.value as? String, !current.isEmpty, current != urlField.placeholderValue {
-                urlField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count + 2))
-            }
-            urlField.typeText(serverURL)
-            if (urlField.value as? String) == serverURL { break }
-        }
-        XCTAssertEqual(urlField.value as? String, serverURL, "服务器地址输入不完整")
+        urlField.replaceText(serverURL)
         app.buttons["server.continue"].tap()
     }
 
     @MainActor
     private func enterCredentials(_ app: XCUIApplication) {
-        let emailField = app.textFields["login.email"]
-        emailField.tap()
-        emailField.typeText(email)
+        app.textFields["login.email"].replaceText(email)
         app.buttons["login.continue"].tap()
         let passwordField = app.secureTextFields["login.password"]
         XCTAssertTrue(passwordField.waitForExistence(timeout: 30), "密码阶段未出现")
-        passwordField.tap()
-        passwordField.typeText(password)
+        passwordField.replaceText(password)
         app.buttons["login.submit"].tap()
     }
 
@@ -360,11 +368,7 @@ final class UIPolishUITests: XCTestCase {
             guard let me else { return }
             me.tap()
             let button = app.buttons["me.signOut"]
-            var attempts = 0
-            while !(button.exists && button.isHittable) && attempts < 6 {
-                app.swipeUp()
-                attempts += 1
-            }
+            app.scrollUntilHittable(button)
             guard button.exists else { return }
             button.tap()
             let confirm = app.buttons.matching(NSPredicate(format: "(label == %@ OR label == %@) AND identifier != %@", "退出登录", "Sign Out", "me.signOut")).firstMatch
@@ -393,12 +397,19 @@ final class UIPolishUITests: XCTestCase {
     /// 元素在 Tab 栏下方等不可点处时先上滑，再点按
     @MainActor
     private func tapWhenHittable(_ app: XCUIApplication, _ target: XCUIElement) {
-        var attempts = 0
-        while !(target.exists && target.isHittable) && attempts < 6 {
-            app.swipeUp()
-            attempts += 1
-        }
+        app.scrollUntilHittable(target)
         target.tap()
+    }
+
+    /// 按快捷键直到 `expected` 出现，最多 3 次。列表刚显示时命令目标经焦点值传到菜单系统要几秒
+    /// （CI 上进入主界面约 3 秒内按 ⌘N 无反应，5 秒后正常），所以按下后等不到就再按
+    @MainActor
+    private func pressUntilAppears(_ app: XCUIApplication, _ key: String, _ modifiers: XCUIElement.KeyModifierFlags, _ expected: XCUIElement) -> Bool {
+        for _ in 0..<3 {
+            app.typeKey(key, modifierFlags: modifiers)
+            if expected.waitForExistence(timeout: 5) { return true }
+        }
+        return false
     }
 
     @MainActor
