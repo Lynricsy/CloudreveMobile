@@ -73,6 +73,9 @@ class ShareListViewModel(
     private var nextToken: String? = null
     private var loadJob: Job? = null
 
+    /** 追加页请求；首页重载时一并取消，避免旧游标的结果追加到新列表 */
+    private var moreJob: Job? = null
+
     init {
         reload(refreshing = false)
     }
@@ -98,8 +101,10 @@ class ShareListViewModel(
 
     private fun reload(refreshing: Boolean) {
         loadJob?.cancel()
+        moreJob?.cancel()
         loadJob = scope.launch {
-            updateState { it.copy(loading = it.shares.isEmpty(), refreshing = refreshing && it.shares.isNotEmpty(), error = null) }
+            // 被取消的追加页不会再回收 loadingMore，由新的一次查询复位
+            updateState { it.copy(loading = it.shares.isEmpty(), refreshing = refreshing && it.shares.isNotEmpty(), loadingMore = false, error = null) }
             try {
                 val s = currentState
                 val page = shares.list(ShareListState.PAGE_SIZE, null, s.orderBy, s.orderDirection)
@@ -126,8 +131,8 @@ class ShareListViewModel(
     private fun loadMore() {
         val s = currentState
         val token = nextToken
-        if (!s.hasMore || s.loadingMore || s.loading || token == null) return
-        loadJob = scope.launch {
+        if (!s.hasMore || s.loadingMore || s.loading || s.refreshing || token == null) return
+        moreJob = scope.launch {
             updateState { it.copy(loadingMore = true) }
             try {
                 val page = shares.list(ShareListState.PAGE_SIZE, token, s.orderBy, s.orderDirection)

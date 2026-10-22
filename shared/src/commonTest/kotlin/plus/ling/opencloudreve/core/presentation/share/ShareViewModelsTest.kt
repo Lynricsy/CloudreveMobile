@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.CompletableDeferred
 import plus.ling.opencloudreve.core.api.apiPath
 import plus.ling.opencloudreve.core.api.bodyText
 import plus.ling.opencloudreve.core.api.json
@@ -233,5 +234,38 @@ class ShareViewModelsTest {
         assertEquals(listOf("b"), vm.state.value.shares.map { it.id })
         assertEquals("""{"ids":["a","c"]}""", env.server.requests.last().bodyText())
         vm.dispose()
+    }
+
+    @Test
+    fun shareListRefreshDuringLoadMoreKeepsPaginationUsable() = runTest {
+        // 第一次翻页永远挂起；刷新取消它后应能继续翻页
+        val firstMore = CompletableDeferred<Unit>()
+        var moreCalls = 0
+        val env = VmEnv { req ->
+            when {
+                req.apiPath == "/share" && req.method == HttpMethod.Get -> if (req.url.parameters["next_page_token"] == null) {
+                    okData("""{"shares":[{"id":"a"},{"id":"b"}],"pagination":{"is_cursor":true,"next_token":"t2"}}""")
+                } else {
+                    if (moreCalls++ == 0) firstMore.await()
+                    okData("""{"shares":[{"id":"c"}],"pagination":{"is_cursor":true}}""")
+                }
+                else -> err(404)
+            }
+        }
+        val vm = ShareListViewModel(ACCOUNT, env.shares)
+        eventually { vm.state.value.shares.size == 2 }
+        vm.on(ShareListIntent.LoadMore)
+        eventually { vm.state.value.loadingMore && moreCalls == 1 }
+        vm.on(ShareListIntent.Refresh)
+        eventually { !vm.state.value.refreshing && env.server.requests.size == 3 }
+        assertFalse(vm.state.value.loadingMore)
+        vm.on(ShareListIntent.LoadMore)
+        eventually { vm.state.value.shares.size == 3 }
+        assertEquals(listOf("a", "b", "c"), vm.state.value.shares.map { it.id })
+        assertFalse(vm.state.value.loadingMore)
+        vm.dispose()
+        // 放开被取消的旧请求并等它收尾，避免其续体在 resetMain 之后才回到主调度器
+        firstMore.complete(Unit)
+        kotlinx.coroutines.withContext(Dispatchers.Default) { kotlinx.coroutines.delay(200) }
     }
 }
