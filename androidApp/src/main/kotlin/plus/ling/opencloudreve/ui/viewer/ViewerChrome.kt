@@ -44,7 +44,18 @@ class ViewerMenu(
     val onSwitch: () -> Unit,
     val onOpenExternal: () -> Unit,
     val onInfo: () -> Unit,
-)
+) {
+    /**
+     * 会离开/替换当前预览器的项（“打开方式”“用其他应用打开”）先交给 [guard]：
+     * guard 决定立即执行还是确认后执行（编辑器有未保存修改时）。“文件信息”不离开预览器，不经过 guard。
+     */
+    fun guarded(guard: (proceed: () -> Unit) -> Unit): ViewerMenu = ViewerMenu(
+        canSwitch = canSwitch,
+        onSwitch = { guard(onSwitch) },
+        onOpenExternal = { guard(onOpenExternal) },
+        onInfo = onInfo,
+    )
+}
 
 /** 预览页顶栏：返回、标题、页面自有动作、公共溢出菜单 */
 @OptIn(ExperimentalMaterial3Api::class)

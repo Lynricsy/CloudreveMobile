@@ -57,6 +57,7 @@
     <string name="viewer_discard">放弃修改</string>
     <string name="viewer_read_only">只读</string>
     <string name="viewer_unsaved">有未保存的修改</string>
+    <string name="viewer_text_too_large">文件超过 %1$s，无法在内置编辑器中打开，请用其他应用打开。</string>
     <string name="viewer_file_name">文件名</string>
     <string name="viewer_stale_title">文件已被修改</string>
     <string name="viewer_stale_message">打开后此文件已在别处被修改。覆盖会丢弃那次修改；也可以另存为新文件。</string>

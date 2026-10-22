@@ -57,6 +57,7 @@
     <string name="viewer_discard">Discard changes</string>
     <string name="viewer_read_only">Read-only</string>
     <string name="viewer_unsaved">Unsaved changes</string>
+    <string name="viewer_text_too_large">This file is larger than %1$s and can\'t be opened in the built-in editor. Open it in another app instead.</string>
     <string name="viewer_file_name">File name</string>
     <string name="viewer_stale_title">File was modified</string>
     <string name="viewer_stale_message">This file was changed elsewhere after you opened it. Overwrite to discard that change, or save as a new file.</string>

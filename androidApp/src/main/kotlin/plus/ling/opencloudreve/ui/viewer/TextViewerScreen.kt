@@ -2,6 +2,7 @@ package plus.ling.opencloudreve.ui.viewer
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -41,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
@@ -48,6 +51,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.markdown.m3.Markdown
@@ -62,6 +66,7 @@ import plus.ling.opencloudreve.core.presentation.viewer.ViewerTextViewModel
 import plus.ling.opencloudreve.ui.common.CollectEffects
 import plus.ling.opencloudreve.ui.common.message
 import plus.ling.opencloudreve.ui.files.LockConflictDialog
+import plus.ling.opencloudreve.ui.files.bytesText
 
 /**
  * 文本 / Markdown 预览与编辑（monaco、markdown）：等宽与自动换行切换、Markdown 预览；
@@ -81,7 +86,8 @@ internal fun TextViewerScreen(
     var monospace by rememberSaveable { mutableStateOf(!state.isMarkdown) }
     // Markdown 默认预览；只读文本也直接显示
     var preview by rememberSaveable { mutableStateOf(state.isMarkdown) }
-    var confirmLeave by remember { mutableStateOf(false) }
+    // 有未保存修改时待确认的离开动作（返回、用其他应用打开、切换预览器）；null 表示没有待确认
+    var pendingLeave by remember { mutableStateOf<(() -> Unit)?>(null) }
     var saveAsName by remember { mutableStateOf<String?>(null) }
     // 放弃修改时递增，让编辑区按 VM 的内容重建
     var editorReset by remember { mutableIntStateOf(0) }
@@ -95,8 +101,10 @@ internal fun TextViewerScreen(
         }
     }
 
-    val leave = { if (state.dirty) confirmLeave = true else onClose() }
-    BackHandler(enabled = state.dirty) { confirmLeave = true }
+    val guardLeave: (() -> Unit) -> Unit = { proceed -> if (vm.state.value.dirty) pendingLeave = proceed else proceed() }
+    val leave = { guardLeave(onClose) }
+    BackHandler(enabled = state.dirty) { pendingLeave = onClose }
+    val guardedMenu = menu.guarded(guardLeave)
 
     ViewerScaffold(
         title = state.file.name,
@@ -105,7 +113,7 @@ internal fun TextViewerScreen(
             state.dirty -> stringResource(R.string.viewer_unsaved)
             else -> null
         },
-        menu = menu,
+        menu = guardedMenu,
         onClose = leave,
         snackbar = snackbar,
         actions = {
@@ -158,6 +166,19 @@ internal fun TextViewerScreen(
             val err = state.error
             when {
                 state.loading -> CenteredProgress()
+                // 超过内置预览上限：重试仍会超限，引导用其他应用打开
+                state.tooLarge -> Column(
+                    Modifier.fillMaxSize().padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        stringResource(R.string.viewer_text_too_large, bytesText(ViewerTextViewModel.MAX_PREVIEW_BYTES)),
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                    )
+                    Button(onClick = guardedMenu.onOpenExternal) { Text(stringResource(R.string.viewer_open_external)) }
+                }
                 err != null -> CenteredError(err.message(), onRetry = { vm.on(ViewerTextIntent.Reload) })
                 preview && state.isMarkdown -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
                     Markdown(
@@ -220,15 +241,15 @@ internal fun TextViewerScreen(
             onDismiss = { vm.on(ViewerTextIntent.DismissConflict) },
         )
     }
-    if (confirmLeave) {
+    pendingLeave?.let { proceed ->
         AlertDialog(
-            onDismissRequest = { confirmLeave = false },
+            onDismissRequest = { pendingLeave = null },
             title = { Text(stringResource(R.string.viewer_leave_title)) },
             text = { Text(stringResource(R.string.viewer_leave_message)) },
             confirmButton = {
-                TextButton(onClick = { confirmLeave = false; onClose() }) { Text(stringResource(R.string.viewer_discard_leave)) }
+                TextButton(onClick = { pendingLeave = null; proceed() }) { Text(stringResource(R.string.viewer_discard_leave)) }
             },
-            dismissButton = { TextButton(onClick = { confirmLeave = false }) { Text(stringResource(R.string.action_cancel)) } },
+            dismissButton = { TextButton(onClick = { pendingLeave = null }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }
