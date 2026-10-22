@@ -141,6 +141,9 @@ class FileListViewModel(
     private val crUri = CrUri.parse(uri)
     private var pager: ListingPager = files.pager(uri)
     private var loadJob: Job? = null
+
+    /** 追加页请求；重载或替换 pager（改排序）时取消 */
+    private var moreJob: Job? = null
     private var eventsJob: Job? = null
     private var backgroundJob: Job? = null
     private var debounceJob: Job? = null
@@ -194,38 +197,44 @@ class FileListViewModel(
     fun childUri(folder: FileItem): String = folder.path
 
     private fun initialLoad() {
+        val p = pager
         loadJob = scope.launch {
             updateState { it.copy(loading = true, error = null) }
             try {
-                if (pager.primeFromCache()) applySnapshot(pager.state.value)
+                if (p.primeFromCache()) applySnapshot(p, p.state.value)
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
                 // 缓存损坏忽略
             }
-            fetchFirstPage(showRefreshing = false)
+            fetchFirstPage(p, showRefreshing = false)
         }
     }
 
     private fun reload(showRefreshing: Boolean) {
         loadJob?.cancel()
-        loadJob = scope.launch { fetchFirstPage(showRefreshing) }
+        moreJob?.cancel()
+        val p = pager
+        loadJob = scope.launch { fetchFirstPage(p, showRefreshing) }
     }
 
-    private suspend fun fetchFirstPage(showRefreshing: Boolean) {
+    private suspend fun fetchFirstPage(p: ListingPager, showRefreshing: Boolean) {
         updateState {
             it.copy(
                 loading = it.files.isEmpty(),
                 refreshing = showRefreshing && it.files.isNotEmpty(),
+                // 被取消的追加页不会再回收 loadingMore
+                loadingMore = false,
                 error = null,
             )
         }
         try {
-            applySnapshot(pager.refresh())
+            applySnapshot(p, p.refresh())
             if (crUri.fs == CrUri.FS_MY && !crUri.isSearch()) refreshCapacityQuietly()
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            if (p !== pager) return
             val err = e.toUiError()
             val hasContent = currentState.files.isNotEmpty()
             updateState { it.copy(loading = false, refreshing = false, error = if (hasContent) null else err) }
@@ -236,20 +245,24 @@ class FileListViewModel(
     private fun loadMore() {
         val s = currentState
         if (!s.hasMore || s.loadingMore || s.loading) return
-        scope.launch {
+        val p = pager
+        moreJob = scope.launch {
             updateState { it.copy(loadingMore = true) }
             try {
-                applySnapshot(pager.loadMore())
+                applySnapshot(p, p.loadMore())
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                if (p !== pager) return@launch
                 updateState { it.copy(loadingMore = false) }
                 sendEffect(FileListEffect.ShowError(e.toUiError()))
             }
         }
     }
 
-    private fun applySnapshot(snapshot: ListingSnapshot) {
+    /** 应用 [source] 的快照；pager 已被替换（改排序）时丢弃旧结果 */
+    private fun applySnapshot(source: ListingPager, snapshot: ListingSnapshot) {
+        if (source !== pager) return
         // 用户本地改过视图后不再被服务端（可能尚未同步的）视图覆盖
         snapshot.view?.let { serverView = it }
         val view = if (localViewSet) null else snapshot.view

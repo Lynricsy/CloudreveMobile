@@ -64,6 +64,9 @@ class FolderPickerViewModel(
     private var pager: ListingPager = files.pager(initialUri)
     private var loadJob: Job? = null
 
+    /** 追加页请求；切换目录或重新加载时取消 */
+    private var moreJob: Job? = null
+
     init {
         load()
     }
@@ -87,14 +90,16 @@ class FolderPickerViewModel(
 
     private fun load() {
         loadJob?.cancel()
+        moreJob?.cancel()
+        val p = pager
         loadJob = scope.launch {
-            updateState { it.copy(loading = true, error = null) }
+            updateState { it.copy(loading = true, loadingMore = false, error = null) }
             try {
-                apply(pager.refresh())
+                apply(p, p.refresh())
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                updateState { it.copy(loading = false, error = e.toUiError()) }
+                if (p === pager) updateState { it.copy(loading = false, error = e.toUiError()) }
             }
         }
     }
@@ -102,19 +107,22 @@ class FolderPickerViewModel(
     private fun loadMore() {
         val s = currentState
         if (!s.hasMore || s.loading || s.loadingMore) return
-        scope.launch {
+        val p = pager
+        moreJob = scope.launch {
             updateState { it.copy(loadingMore = true) }
             try {
-                apply(pager.loadMore())
+                apply(p, p.loadMore())
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                updateState { it.copy(loadingMore = false, error = e.toUiError()) }
+                if (p === pager) updateState { it.copy(loadingMore = false, error = e.toUiError()) }
             }
         }
     }
 
-    private fun apply(snapshot: ListingSnapshot) {
+    /** 只接受当前 pager（当前目录）的结果；已被替换的旧 pager 回包直接丢弃 */
+    private fun apply(source: ListingPager, snapshot: ListingSnapshot) {
+        if (source !== pager) return
         updateState {
             it.copy(
                 folders = snapshot.files.filter { f -> f.isFolder && !f.isSymbolic },
