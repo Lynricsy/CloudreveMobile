@@ -58,6 +58,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -94,10 +95,12 @@ private enum class TasksSegment(val label: Int) {
 /**
  * “任务”Tab：顶部分段切换“传输”与“后台任务”。
  * 传输列表按上传/下载分组，支持暂停/继续/取消/重试、40004 重命名或覆盖、清除已完成、打开/分享已下载文件。
+ *
+ * @param openTransfers 外部入口（传输通知、上传结果“查看列表”）请求显示传输分段；切换后调用 [onOpenTransfersConsumed]
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TasksTab(accountId: String) {
+fun TasksTab(accountId: String, openTransfers: Boolean, onOpenTransfersConsumed: () -> Unit) {
     val context = LocalContext.current
     val vm: TransferListViewModel = koinViewModel(key = "transfers:$accountId") { parametersOf(accountId) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -106,6 +109,13 @@ fun TasksTab(accountId: String) {
     CollectEffects(vm.effects) { effect ->
         when (effect) {
             is TransferListEffect.Failed -> snackbar.showSnackbar(effect.error.message(context))
+        }
+    }
+    val consumeOpen by rememberUpdatedState(onOpenTransfersConsumed)
+    LaunchedEffect(openTransfers) {
+        if (openTransfers) {
+            segment = TasksSegment.Transfers.ordinal
+            consumeOpen()
         }
     }
 

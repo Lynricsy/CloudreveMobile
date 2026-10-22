@@ -115,11 +115,16 @@ fun MainScreen(
     }
     // 系统分享菜单转来的分享链接：在“文件”Tab 打开
     var filesShareRequest by rememberSaveable { mutableStateOf<String?>(null) }
+    // 通知/上传结果“查看列表”：“任务”Tab 切到传输分段（Tab 状态会恢复上次停留的分段，需显式请求）
+    var tasksTransfersRequest by rememberSaveable { mutableStateOf(false) }
     val externalRequest by MainRequests.pending.collectAsStateWithLifecycle()
     LaunchedEffect(externalRequest) {
         val request = externalRequest ?: return@LaunchedEffect
         when (request) {
-            MainRequest.OpenTasks -> tab = MainTab.Tasks
+            MainRequest.OpenTasks -> {
+                tasksTransfersRequest = true
+                tab = MainTab.Tasks
+            }
             is MainRequest.OpenShareLink -> {
                 filesShareRequest = request.link
                 tab = MainTab.Files
@@ -191,7 +196,13 @@ fun MainScreen(
                         key(account.id) { SharesTab(accountId = account.id, openFilesAt = openFilesAt) }
                     }
                     MainTab.Tasks -> active?.let { account ->
-                        key(account.id) { TasksTab(accountId = account.id) }
+                        key(account.id) {
+                            TasksTab(
+                                accountId = account.id,
+                                openTransfers = tasksTransfersRequest,
+                                onOpenTransfersConsumed = { tasksTransfersRequest = false },
+                            )
+                        }
                     }
                     MainTab.Me -> active?.let { account ->
                         // 切换账户时重建“我的”Tab 内的导航栈与 ViewModel

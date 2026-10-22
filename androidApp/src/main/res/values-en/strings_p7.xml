@@ -108,6 +108,7 @@
     <string name="task_files_selected">Download selection updated</string>
     <string name="task_cancel">Cancel task</string>
     <string name="task_canceled">Task canceled</string>
+    <string name="task_missing">This task no longer exists</string>
     <string name="task_created">Task created. Track it in Tasks › Background</string>
     <string name="task_not_permitted">Your group is not allowed to create this task</string>
     <string name="remote_download_new">Remote download</string>

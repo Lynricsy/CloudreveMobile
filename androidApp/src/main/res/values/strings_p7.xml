@@ -104,6 +104,7 @@
     <string name="task_files_selected">已更新要下载的文件</string>
     <string name="task_cancel">取消任务</string>
     <string name="task_canceled">任务已取消</string>
+    <string name="task_missing">任务已不存在</string>
     <string name="task_created">任务已创建，可在“任务 › 后台任务”查看进度</string>
     <string name="task_not_permitted">当前用户组无权创建此类任务</string>
     <string name="remote_download_new">离线下载</string>

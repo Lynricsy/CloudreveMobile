@@ -238,7 +238,12 @@ private fun TaskDetailSheet(detail: WorkflowDetail, busy: Boolean, onIntent: (Wo
                 Icon(taskTypeIcon(row.type), contentDescription = null)
                 Column(Modifier.weight(1f)) {
                     Text(taskTitle(row), style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.MiddleEllipsis)
-                    Text(stringResource(taskStatusLabel(row.status)), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    // 遍历全部分页仍找不到（已被删除）：不再显示处理中
+                    if (detail.missing) {
+                        Text(stringResource(R.string.task_missing), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+                    } else {
+                        Text(stringResource(taskStatusLabel(row.status)), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
                 if (detail.polling) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
             }
@@ -250,7 +255,7 @@ private fun TaskDetailSheet(detail: WorkflowDetail, busy: Boolean, onIntent: (Wo
                 val active = activeStep(task, steps)
                 steps.forEachIndexed { index, step ->
                     val done = index < active
-                    val current = index == active && row.status != TaskStatus.COMPLETED
+                    val current = index == active && row.status != TaskStatus.COMPLETED && !detail.missing
                     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         when {
                             current && row.status == TaskStatus.ERROR -> Icon(Icons.Filled.RadioButtonUnchecked, contentDescription = null, tint = MaterialTheme.colorScheme.error)
@@ -346,7 +351,7 @@ private fun TaskDetailSheet(detail: WorkflowDetail, busy: Boolean, onIntent: (Wo
                 }
             }
 
-            if (row.canCancel) {
+            if (row.canCancel && !detail.missing) {
                 HorizontalDivider(Modifier.padding(vertical = 8.dp))
                 OutlinedButton(
                     onClick = { onIntent(WorkflowListIntent.Cancel(row.id)) },
