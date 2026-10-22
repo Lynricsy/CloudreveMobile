@@ -80,6 +80,9 @@ sqldelight {
     databases {
         create("OpenCloudreveDatabase") {
             packageName.set("plus.ling.opencloudreve.core.db")
+            // 已发布 schema 的快照（<版本>.db），verifyMigrations 校验“旧快照 + 迁移 = 当前 schema”
+            schemaOutputDirectory.set(file("src/commonMain/sqldelight/databases"))
+            verifyMigrations.set(true)
         }
     }
     linkSqlite.set(true)

@@ -26,14 +26,15 @@ CREATE TABLE TransferTask (
     error_msg TEXT,
     -- iOS 下载 resumeData 等平台续传数据
     resume_blob BLOB,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    -- 以下列由迁移 1.sqm 追加（ALTER TABLE 只能加在末尾；SELECT * 按列位置映射，新建库的列顺序必须与迁移后一致）
     -- 上传：本次“创建会话”的幂等标识（服务端 ≥ 4.19.12 按它重放首次创建的会话）；会话清除时一并清除
     request_id TEXT,
     -- 上传收尾阶段：NULL 分片上传中；merging 已发出存储方合并请求（结果未知）；merged 存储方已合并、待主站回调
     upload_phase TEXT,
     -- 下载：固定的文件实体（版本）ID，续签 URL 时总是请求该实体；'' 表示文件没有实体（空文件）
-    entity_id TEXT,
-    created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL
+    entity_id TEXT
 );
 
 CREATE INDEX TransferTask_account ON TransferTask(account_id, created_at);

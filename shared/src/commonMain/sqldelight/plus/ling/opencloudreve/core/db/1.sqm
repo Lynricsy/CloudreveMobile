@@ -1,0 +1,4 @@
+-- 版本 1 → 2：上传幂等标识、上传收尾阶段、下载固定实体（见 Transfer.sq 列注释）
+ALTER TABLE TransferTask ADD COLUMN request_id TEXT;
+ALTER TABLE TransferTask ADD COLUMN upload_phase TEXT;
+ALTER TABLE TransferTask ADD COLUMN entity_id TEXT;
