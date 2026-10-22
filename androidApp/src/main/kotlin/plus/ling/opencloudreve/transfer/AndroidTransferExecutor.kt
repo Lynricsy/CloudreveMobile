@@ -41,12 +41,15 @@ internal class AndroidTransferExecutor(
 
     override fun resume(taskId: String) = enqueue(taskId)
 
-    override fun cancel(taskId: String) {
-        val operation = workManager.cancelUniqueWork(taskId)
+    /**
+     * 取消：清理参数取自调用方传入的取消前快照（[TransferManager.remove] 在本函数返回后立即删库，
+     * 异步取消完成时该行可能已不存在）。
+     */
+    override fun cancel(task: TransferItem) {
+        val operation = workManager.cancelUniqueWork(task.id)
         TransferRuntime.scope.launch {
             runCatching { operation.await() }
-            val item = repository.task(taskId) ?: return@launch
-            cleanup(appContext, item)
+            cleanup(appContext, task)
         }
     }
 
@@ -75,12 +78,12 @@ internal class AndroidTransferExecutor(
          * 任务不再需要本地临时数据时清理：下载删除未完成的目标文件；上传释放源（收件箱副本/持久授权）。
          * 已完成的下载保留文件。
          */
-        fun cleanup(context: Context, item: TransferItem) {
+        suspend fun cleanup(context: Context, item: TransferItem) {
             when (item.kind) {
                 TransferKind.DOWNLOAD -> if (item.state != TransferState.COMPLETED) {
                     item.destPath?.let { DownloadTargets.delete(context, it) }
                 }
-                TransferKind.UPLOAD -> item.sourceRef?.let { UploadSources.discard(context, it) }
+                TransferKind.UPLOAD -> UploadSources.release(context, item)
             }
         }
     }

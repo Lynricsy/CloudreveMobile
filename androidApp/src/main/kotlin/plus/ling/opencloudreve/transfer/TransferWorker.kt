@@ -78,7 +78,7 @@ class TransferWorker(context: Context, params: WorkerParameters) : CoroutineWork
         }
         repository.task(taskId)?.let { final ->
             notifications.finished(final)
-            if (final.state == TransferState.COMPLETED) final.sourceRef?.let { UploadSources.discard(applicationContext, it) }
+            if (final.state == TransferState.COMPLETED) UploadSources.release(applicationContext, final)
         }
         return result
     }

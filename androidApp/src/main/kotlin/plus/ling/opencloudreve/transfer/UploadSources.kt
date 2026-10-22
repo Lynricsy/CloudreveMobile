@@ -7,7 +7,11 @@ import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import plus.ling.opencloudreve.core.di.CoreGraph
+import plus.ling.opencloudreve.core.transfer.TransferItem
+import plus.ling.opencloudreve.core.transfer.TransferKind
 import plus.ling.opencloudreve.core.transfer.UploadSource
 import java.io.File
 import java.util.UUID
@@ -15,9 +19,9 @@ import java.util.UUID
 /**
  * 选择器/分享菜单返回的 URI → 上传源（`sourceRef`）。
  *
- * - 能拿到持久读权限（`takePersistableUriPermission`）的 URI 直接引用，进程重启后仍可续传；
+ * - 能拿到持久读权限（`takePersistableUriPermission`）的 URI 直接引用，进程重启后仍可续传；授权在最后一个引用它的任务结束后释放；
  * - 拿不到的（分享菜单的临时授权、部分相册提供方）先复制到应用私有收件箱 `files/transfer-inbox/<uuid>/`，
- *   上传完成或取消后由执行器删除副本（[discard]）。
+ *   上传完成或取消后由执行器删除副本（[release]）。
  */
 internal object UploadSources {
     private const val INBOX = "transfer-inbox"
@@ -50,33 +54,65 @@ internal object UploadSources {
         return File(dir, name)
     }
 
-    /**
-     * 上传结束（完成/取消/移除）后释放源：收件箱副本删除；持久授权的 URI 释放授权
-     * （持久授权数量有上限，不能无限累积）。
-     */
+    /** 删除收件箱里的副本（拍照结果、分享副本、系统文件集成写入的内容）；不在收件箱内的路径忽略 */
     fun discard(context: Context, sourceRef: String) {
+        if (!sourceRef.startsWith("/")) return
         try {
-            if (sourceRef.startsWith("/")) {
-                val file = File(sourceRef)
-                val inbox = inboxDir(context).canonicalFile
-                if (file.canonicalPath.startsWith(inbox.path + File.separator)) {
-                    file.delete()
-                    // 删除每个副本独占的 <uuid> 目录
-                    file.parentFile?.takeIf { it.parentFile?.canonicalFile == inbox }?.delete()
-                }
-            } else if (sourceRef.startsWith("content://")) {
-                val uri = Uri.parse(sourceRef)
-                val persisted = context.contentResolver.persistedUriPermissions.any { it.uri == uri && it.isReadPermission }
-                if (persisted) {
-                    context.contentResolver.releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
+            val file = File(sourceRef)
+            val inbox = inboxDir(context).canonicalFile
+            if (file.canonicalPath.startsWith(inbox.path + File.separator)) {
+                file.delete()
+                // 删除每个副本独占的 <uuid> 目录
+                file.parentFile?.takeIf { it.parentFile?.canonicalFile == inbox }?.delete()
             }
         } catch (_: Exception) {
-            // 释放失败不影响任务结果
+            // 删除失败不影响任务结果
         }
     }
 
-    private fun resolve(context: Context, uri: Uri, forceCopy: Boolean): UploadSource? {
+    /**
+     * 上传任务结束（完成/取消/移除）后释放源：收件箱副本删除；持久授权的 URI 只在没有其他任务仍需要时释放
+     * （持久授权数量有上限，不能无限累积；见 [SourceGrants]）。
+     */
+    suspend fun release(context: Context, task: TransferItem) {
+        val sourceRef = task.sourceRef ?: return
+        if (!sourceRef.startsWith("content://")) {
+            discard(context, sourceRef)
+            return
+        }
+        try {
+            grants(context).release(sourceRef, task.id, task.createdAt)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Release grant of $sourceRef failed", e)
+        }
+    }
+
+    @Volatile private var grants: SourceGrants? = null
+
+    private fun grants(context: Context): SourceGrants = grants ?: synchronized(this) {
+        grants ?: SourceGrants(
+            references = { ref -> sourceReferences(ref) },
+            releaseGrant = { ref ->
+                val uri = Uri.parse(ref)
+                val resolver = context.applicationContext.contentResolver
+                if (resolver.persistedUriPermissions.any { it.uri == uri && it.isReadPermission }) {
+                    resolver.releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+            },
+        ).also { grants = it }
+    }
+
+    /** 全部账户中引用 [sourceRef] 的上传任务 */
+    private suspend fun sourceReferences(sourceRef: String): List<SourceGrants.SourceReference> =
+        CoreGraph.accounts().accounts.value.flatMap { account ->
+            CoreGraph.transferRepository().observeTasks(account.id).first()
+                .filter { it.kind == TransferKind.UPLOAD && it.sourceRef == sourceRef }
+                .map { SourceGrants.SourceReference(it.id, it.state, it.createdAt) }
+        }
+
+    private suspend fun resolve(context: Context, uri: Uri, forceCopy: Boolean): UploadSource? {
         val resolver = context.contentResolver
         if (uri.scheme == "file") {
             val file = File(uri.path ?: return null)
@@ -97,8 +133,10 @@ internal object UploadSources {
         }
         val displayName = name?.takeIf { it.isNotBlank() } ?: uri.lastPathSegment?.substringAfterLast('/') ?: "file"
         val mime = resolver.getType(uri)
-        if (!forceCopy && size != null && persist(context, uri)) {
-            return UploadSource(uri.toString(), displayName, size!!, modified, mime)
+        if (!forceCopy && size != null) {
+            // 先认领再取授权：与其它任务结束时的释放判断串行，释放不会撤掉这次刚取得的授权
+            grants(context).claim(uri.toString())
+            if (persist(context, uri)) return UploadSource(uri.toString(), displayName, size!!, modified, mime)
         }
         return copyToInbox(context, uri, displayName, mime, modified)
     }
