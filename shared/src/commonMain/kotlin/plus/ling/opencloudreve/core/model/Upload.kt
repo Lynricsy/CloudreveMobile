@@ -20,6 +20,8 @@ data class CreateUploadSessionRequest(
     @SerialName("encryption_supported") val encryptionSupported: List<String>? = null,
     /** 旧版本 id，用于过期版本检测（40076） */
     val previous: String? = null,
+    /** 本次创建的幂等标识（服务端 ≥ 4.19.12）：结果未知时用同一值重试会拿回首次创建的会话；旧服务端忽略 */
+    @SerialName("request_id") val requestId: String? = null,
 ) {
     companion object {
         const val ENTITY_TYPE_VERSION = "version"
@@ -65,6 +67,19 @@ data class DeleteUploadSessionRequest(
     val id: String,
     val uri: String,
 )
+
+/** `GET /file/upload/:sessionId` 响应（服务端 ≥ 4.19.12）；会话不存在/已过期时服务端返回 40011 */
+@Serializable
+data class UploadSessionStatus(
+    /** [STATUS_UPLOADING] 或 [STATUS_COMPLETED] */
+    val status: String,
+    val uri: String? = null,
+) {
+    companion object {
+        const val STATUS_UPLOADING = "uploading"
+        const val STATUS_COMPLETED = "completed"
+    }
+}
 
 /** 七牛分片响应 */
 @Serializable

@@ -172,6 +172,7 @@ class TransferRepository(
             q.deleteChunks(id)
             q.updateSession(sessionJson, policyType, chunkSize, chunkCount.toLong(), now(), id)
             q.updateBytesDone(0, now(), id)
+            q.updateUploadPhase(null, now(), id)
             repeat(chunkCount) { q.insertChunk(id, it.toLong(), ChunkState.PENDING, null, 0, 0) }
         }
     }
@@ -196,6 +197,32 @@ class TransferRepository(
     internal suspend fun releaseRunningChunks(id: String) = io { q.releaseRunningChunks(id) }
 
     internal suspend fun setAttempts(id: String, attempts: Int) = io { q.updateAttempts(attempts.toLong(), now(), id) }
+
+    /**
+     * 仅当任务仍是活动状态（queued/preparing/running/finishing）时改为 [state]，返回是否已改。
+     * 规划器在网络请求返回后推进状态时使用，避免覆盖期间用户写入的 paused/canceled。
+     */
+    internal suspend fun transitionIfActive(id: String, state: TransferState): Boolean = io {
+        database.transactionWithResult {
+            val current = q.selectTask(id).executeAsOneOrNull()?.state?.let(TransferState::fromWire)
+            if (current?.isActive == true) {
+                q.updateState(state.wire, null, null, now(), id)
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    internal suspend fun setRequestId(id: String, requestId: String?) = io { q.updateRequestId(requestId, now(), id) }
+
+    internal suspend fun setUploadPhase(id: String, phase: String?) = io { q.updateUploadPhase(phase, now(), id) }
+
+    /** 固定下载实体（[entityId] 为 '' 表示文件没有实体），并以实体大小作为任务大小 */
+    internal suspend fun setDownloadPin(id: String, entityId: String?, size: Long) = io { q.updateDownloadPin(entityId, size, now(), id) }
+
+    /** 下载进度与 resumeData 作废：下次从 0 开始 */
+    internal suspend fun resetDownloadProgress(id: String) = io { q.resetDownloadProgress(now(), id) }
 
     /** 清零任务与全部分片的重试计数（用户手动重试/继续时） */
     internal suspend fun resetAttempts(id: String) = io {

@@ -540,4 +540,271 @@ class UploadPlannerTest {
         env.token = "fresh"
         assertEquals("Bearer fresh", env.materializer.materialize(task.id, 1).request.headers["Authorization"])
     }
+
+    // ---- ReviewSharedCore #5：最后一片已在服务端提交、响应丢失 ----
+
+    private val statusUrl = "$SITE/api/v4/file/upload/$SID"
+
+    private fun isStatus(r: Recorded) = r.method == "GET" && r.url == statusUrl
+
+    @Test
+    fun lastChunkCommittedButResponseLostIsConfirmedInsteadOfRecreated() = runTest {
+        val env = TransferEnv { r ->
+            when {
+                isCreate(r) -> ok(sessionJson(StoragePolicy.TYPE_LOCAL, 0))
+                isPing(r) -> version("4.19.12")
+                isStatus(r) -> ok("""{"status":"completed","uri":"cloudreve://my/dir/a.bin"}""")
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.upload(bytes(10))
+        env.planner.prepare(task.id)
+        // 最后一片：服务端已写入并完成会话，但响应在网络上丢失
+        env.planner.onChunkFailed(task.id, env.planner.nextRequests(task.id).single().index, "connection reset")
+        // 重传得到 40011（会话已在完成时删除）
+        val req = env.planner.nextRequests(task.id).single()
+        val outcome = env.planner.onChunkDone(task.id, req.index, ChunkResponse(200, body = """{"code":40011,"msg":""}"""))
+
+        assertEquals(TransferOutcome.Continue(true), outcome)
+        assertEquals(TransferState.COMPLETED, env.planner.finalize(task.id).state)
+        assertEquals(1, env.requests.count(::isCreate), "不再创建同路径上传（否则 40004 冲突或多出一个版本）")
+    }
+
+    @Test
+    fun completedSessionFoundOnPrepareCompletesTask() = runTest {
+        val env = TransferEnv { r ->
+            when {
+                isCreate(r) -> ok(sessionJson(StoragePolicy.TYPE_LOCAL, 0, expires = NOW_SECONDS + 60))
+                isPing(r) -> version("4.19.12")
+                isStatus(r) -> ok("""{"status":"completed"}""")
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.upload(bytes(10))
+        env.planner.prepare(task.id)
+        env.planner.nextRequests(task.id) // 最后一片在途时进程被杀，重启时会话已过期
+        env.nowMs += 120_000
+        val item = env.planner.prepare(task.id)
+        assertEquals(TransferState.COMPLETED, item.state)
+        assertEquals(1, env.requests.count(::isCreate))
+        assertTrue(env.requests.none { it.method == "DELETE" }, "已完成的会话不能当作残留删除")
+    }
+
+    @Test
+    fun oldServerKeepsRestartOnSessionExpired() = runTest {
+        val env = TransferEnv { r ->
+            when {
+                isCreate(r) -> ok(sessionJson(StoragePolicy.TYPE_LOCAL, 0))
+                isPing(r) -> version("4.19.11")
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.upload(bytes(10))
+        env.planner.prepare(task.id)
+        val req = env.planner.nextRequests(task.id).single()
+        assertEquals(TransferOutcome.Restart, env.planner.onChunkDone(task.id, req.index, ChunkResponse(200, body = """{"code":40011}""")))
+        assertTrue(env.requests.none(::isStatus), "旧服务端没有会话状态接口")
+    }
+
+    // ---- ReviewSharedCore #7：创建会话结果未知时的重试 ----
+
+    private fun Recorded.requestId(): String? = Json.parseToJsonElement(body).jsonObject["request_id"]?.jsonPrimitive?.content
+
+    @Test
+    fun createRetryAfterLostResponseReusesRequestId() = runTest {
+        var creates = 0
+        val env = TransferEnv { r ->
+            when {
+                isCreate(r) && creates++ == 0 -> throw IllegalStateException("connection reset after request was sent")
+                isCreate(r) -> ok(sessionJson(StoragePolicy.TYPE_LOCAL, 0))
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.upload(bytes(10))
+        env.planner.prepare(task.id)
+
+        val ids = env.requests.filter(::isCreate).map { it.requestId() }
+        assertEquals(2, ids.size)
+        assertTrue(!ids[0].isNullOrEmpty() && ids[0] == ids[1], "重试带同一 request_id，服务端据此返回首次创建的会话：$ids")
+    }
+
+    @Test
+    fun requestIdSurvivesFailedPrepareAndIsRenewedAfterDiscard() = runTest {
+        var reachable = false
+        val env = TransferEnv { r ->
+            when {
+                isCreate(r) && !reachable -> throw IllegalStateException("timeout")
+                isCreate(r) && "a.bin" in r.body -> envelope(ErrorCode.OBJECT_EXIST)
+                isCreate(r) -> ok(sessionJson(StoragePolicy.TYPE_LOCAL, 0))
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.upload(bytes(10))
+        assertFailsWith<TransferFailedException> { env.planner.prepare(task.id) }
+        reachable = true
+        env.manager.resume(task.id)
+        assertFailsWith<UploadConflictException> { env.planner.prepare(task.id) }
+        val first = env.requests.filter(::isCreate).map { it.requestId() }.distinct()
+        assertEquals(1, first.size, "进程重启/用户继续后仍沿用结果未知的那次创建的 request_id")
+
+        env.manager.retry(task.id, newName = "b.bin")
+        env.planner.prepare(task.id)
+        val renamed = env.requests.last(::isCreate).requestId()
+        assertTrue(renamed != null && renamed != first.single(), "改名后是新的一次创建")
+    }
+
+    // ---- ReviewSharedCore #8：存储方合并与主站回调分阶段持久化 ----
+
+    private val s3Complete = "https://s3.test/bucket/key?uploadId=u"
+    private val s3Callback = "$SITE/api/v4/callback/s3/$SID/$SECRET"
+
+    private suspend fun TransferEnv.s3AllChunksDone(): TransferItem {
+        val task = upload(bytes(4))
+        planner.prepare(task.id)
+        sendAll(task.id) { ChunkResponse(200, etag = "\"e\"") }
+        return task
+    }
+
+    @Test
+    fun callbackFailureAfterMergeRetriesOnlyCallback() = runTest {
+        var callbackUp = false
+        val env = TransferEnv { r ->
+            when {
+                isCreate(r) -> ok(sessionJson(StoragePolicy.TYPE_S3, 0, uploadUrls = listOf("https://s3.test/p1"), completeUrl = s3Complete))
+                r.url == s3Complete -> raw("<CompleteMultipartUploadResult/>", contentType = "application/xml")
+                r.url == s3Callback && !callbackUp -> envelope(50001, "db busy")
+                r.url == s3Callback -> ok()
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.s3AllChunksDone()
+        assertFailsWith<TransferFailedException> { env.planner.finalize(task.id) }
+        assertEquals(TransferState.FAILED, env.repository.task(task.id)!!.state)
+
+        callbackUp = true
+        env.manager.retry(task.id)
+        env.planner.prepare(task.id)
+        assertEquals(TransferState.COMPLETED, env.planner.finalize(task.id).state)
+        assertEquals(1, env.requests.count { it.url == s3Complete }, "已合并的 uploadId 不再发完成请求")
+        assertEquals(1, env.requests.count(::isCreate))
+    }
+
+    @Test
+    fun cosMergedSessionSurvivesCallbackFailure() = runTest {
+        var callbackUp = false
+        val complete = "https://cos.test/key?uploadId=u"
+        val env = TransferEnv { r ->
+            when {
+                isCreate(r) -> ok(sessionJson(StoragePolicy.TYPE_COS, 0, uploadUrls = listOf("https://cos.test/p1"), completeUrl = complete))
+                r.url == complete -> raw("<CompleteMultipartUploadResult/>", contentType = "application/xml")
+                r.url == "$SITE/api/v4/callback/cos/$SID/$SECRET" && !callbackUp -> envelope(50001, "db busy")
+                r.url == "$SITE/api/v4/callback/cos/$SID/$SECRET" -> ok()
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.upload(bytes(4))
+        env.planner.prepare(task.id)
+        env.sendAll(task.id) { ChunkResponse(200, etag = "\"e\"") }
+        assertFailsWith<TransferFailedException> { env.planner.finalize(task.id) }
+        assertTrue(env.requests.none { it.method == "DELETE" }, "COS 不可续传，但已合并的会话不能删除")
+
+        callbackUp = true
+        env.manager.retry(task.id)
+        env.planner.prepare(task.id)
+        assertEquals(TransferState.COMPLETED, env.planner.finalize(task.id).state)
+        assertEquals(1, env.requests.count { it.url == complete })
+    }
+
+    @Test
+    fun restartAfterMergeBeforeCallbackOnlySendsCallback() = runTest {
+        val env = TransferEnv { r ->
+            when {
+                isCreate(r) -> ok(sessionJson(StoragePolicy.TYPE_S3, 0, uploadUrls = listOf("https://s3.test/p1"), completeUrl = s3Complete))
+                r.url == s3Complete -> raw("<CompleteMultipartUploadResult/>", contentType = "application/xml")
+                r.url == s3Callback -> throw IllegalStateException("process killed while calling back")
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.s3AllChunksDone()
+        assertFailsWith<TransferFailedException> { env.planner.finalize(task.id) }
+
+        // 新进程：同一 DB，回调恢复正常
+        val restarted = TransferEnv(env.database) { r ->
+            when {
+                r.url == s3Callback -> ok()
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        restarted.manager.resume(task.id)
+        restarted.planner.prepare(task.id)
+        assertEquals(TransferState.COMPLETED, restarted.planner.finalize(task.id).state)
+        assertEquals(listOf(s3Callback), restarted.requests.map { it.url })
+    }
+
+    @Test
+    fun unknownMergeThenNoSuchUploadGoesToCallback() = runTest {
+        var completes = 0
+        val env = TransferEnv { r ->
+            when {
+                isCreate(r) -> ok(sessionJson(StoragePolicy.TYPE_S3, 0, uploadUrls = listOf("https://s3.test/p1"), completeUrl = s3Complete))
+                // 第一次合并：存储方已合并，但响应丢失（重试也拿不到）
+                r.url == s3Complete && completes++ < 4 -> throw IllegalStateException("read timeout")
+                r.url == s3Complete -> raw("<Error><Code>NoSuchUpload</Code></Error>", status = 404, contentType = "application/xml")
+                r.url == s3Callback -> ok()
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.s3AllChunksDone()
+        assertFailsWith<TransferFailedException> { env.planner.finalize(task.id) }
+        env.manager.retry(task.id)
+        env.planner.prepare(task.id)
+        assertEquals(TransferState.COMPLETED, env.planner.finalize(task.id).state, "NoSuchUpload 交给回调由服务端核对对象")
+        assertEquals(s3Callback, env.requests.last().url)
+    }
+
+    @Test
+    fun noSuchUploadWithoutPriorAttemptStillFails() = runTest {
+        val env = TransferEnv { r ->
+            when {
+                isCreate(r) -> ok(sessionJson(StoragePolicy.TYPE_S3, 0, uploadUrls = listOf("https://s3.test/p1"), completeUrl = s3Complete))
+                r.url == s3Complete -> raw("<Error><Code>NoSuchUpload</Code></Error>", status = 404, contentType = "application/xml")
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.s3AllChunksDone()
+        val e = assertFailsWith<TransferFailedException> { env.planner.finalize(task.id) }
+        assertEquals(TransferErrorCode.STORAGE_REJECTED, e.code)
+    }
+
+    @Test
+    fun callbackSessionGoneButServerConfirmsCompletion() = runTest {
+        var callbacks = 0
+        val env = TransferEnv { r ->
+            when {
+                isCreate(r) -> ok(sessionJson(StoragePolicy.TYPE_S3, 0, uploadUrls = listOf("https://s3.test/p1"), completeUrl = s3Complete))
+                r.url == s3Complete -> raw("<CompleteMultipartUploadResult/>", contentType = "application/xml")
+                // 第一次回调已在服务端完成，响应丢失；之后会话已删除
+                r.url == s3Callback && callbacks++ == 0 -> throw IllegalStateException("connection reset")
+                r.url == s3Callback -> envelope(ErrorCode.UPLOAD_SESSION_EXPIRED)
+                isPing(r) -> version("4.19.12")
+                isStatus(r) -> ok("""{"status":"completed"}""")
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.s3AllChunksDone()
+        assertEquals(TransferState.COMPLETED, env.planner.finalize(task.id).state)
+    }
+
+    // ---- 暂停/取消与网络返回的竞态 ----
+
+    @Test
+    fun finalizeOfPausedTaskStopsWithoutCompleting() = runTest {
+        val env = TransferEnv { ok(sessionJson(StoragePolicy.TYPE_LOCAL, 0)) }
+        val task = env.upload(bytes(4))
+        env.planner.prepare(task.id)
+        env.sendAll(task.id) { ChunkResponse(200, body = """{"code":0}""") }
+        env.planner.pause(task.id)
+        assertFailsWith<TransferStoppedException> { env.planner.finalize(task.id) }
+        assertEquals(TransferState.PAUSED, env.repository.task(task.id)!!.state)
+    }
 }

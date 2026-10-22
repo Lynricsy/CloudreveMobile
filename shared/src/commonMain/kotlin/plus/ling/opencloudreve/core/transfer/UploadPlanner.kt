@@ -27,6 +27,7 @@ import plus.ling.opencloudreve.core.model.QiniuFinishRequest
 import plus.ling.opencloudreve.core.model.QiniuPart
 import plus.ling.opencloudreve.core.model.StoragePolicy
 import plus.ling.opencloudreve.core.model.UploadSession
+import plus.ling.opencloudreve.core.model.UploadSessionStatus
 import kotlin.io.encoding.Base64
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -52,24 +53,37 @@ class UploadPlanner(
 ) {
     private val locksGuard = Mutex()
     private val locks = HashMap<String, Mutex>()
+    private val features = ServerFeatures(clients)
 
     /**
-     * 创建上传会话（`PUT /file/upload`）并初始化分片表；已有可续传会话时直接复用（不重新创建）。
-     * 40004 抛 [UploadConflictException]；其它失败抛 [TransferFailedException]（任务均已标记 failed）。
+     * 创建上传会话（`PUT /file/upload`）并初始化分片表；已有可续传会话（或已进入收尾阶段的会话）时直接复用。
+     * 40004 抛 [UploadConflictException]；其它失败抛 [TransferFailedException]（任务均已标记 failed）；
+     * 任务已被暂停/取消时抛 [TransferStoppedException]（不改状态）。
+     *
+     * 旧会话不可再用时，若服务端（≥ 4.19.12）确认它其实已经完成（完成响应曾丢失），任务直接 → completed，
+     * 返回的任务状态为 completed，执行器不需要再发任何请求。
+     *
+     * 创建请求带持久化的 `request_id`：响应丢失（网络错误、进程被杀）后重试会拿回首次创建的会话，
+     * 不会得到 40004 或在服务端留下无人认领的占位文件（服务端 ≥ 4.19.12；旧服务端忽略该字段）。
      */
     @Throws(Exception::class)
     suspend fun prepare(taskId: String): TransferItem = withTaskLock(taskId) {
         val row = requireUpload(taskId)
+        TransferState.fromWire(row.state).let { if (!it.isActive) throw TransferStoppedException(taskId, it) }
         val existing = row.session()
         if (existing != null) {
-            if (isResumable(row.policy_type, existing.expires)) {
+            if (canReuse(row, existing)) {
                 repository.releaseRunningChunks(taskId)
-                repository.setState(taskId, TransferState.RUNNING)
+                if (!repository.transitionIfActive(taskId, TransferState.RUNNING)) throw stopped(taskId)
                 return@withTaskLock repository.task(taskId)!!
             }
-            discardSession(row, existing)
+            when (verifyCompleted(row, existing)) {
+                Verification.COMPLETED -> return@withTaskLock completeVerified(row)
+                Verification.UNKNOWN -> fail(taskId, ErrorCode.TRANSPORT, "Cannot confirm the previous upload session")
+                Verification.NOT_COMPLETED -> discardSession(row, existing)
+            }
         }
-        repository.setState(taskId, TransferState.PREPARING)
+        if (!repository.transitionIfActive(taskId, TransferState.PREPARING)) throw stopped(taskId)
 
         val sourceRef = row.source_ref ?: fail(taskId, TransferErrorCode.SOURCE_UNAVAILABLE, "Missing upload source")
         val actualSize = try {
@@ -84,6 +98,8 @@ class UploadPlanner(
         }
 
         val api = UploadApi(client(row))
+        // 会话被丢弃时 request_id 随之清除；这里沿用的只可能是“已发出、结果未知”的那次创建
+        val requestId = repository.row(taskId)?.request_id ?: Uuid.random().toString().also { repository.setRequestId(taskId, it) }
         val request = CreateUploadSessionRequest(
             uri = row.target_uri,
             size = row.size,
@@ -91,6 +107,7 @@ class UploadPlanner(
             mimeType = row.mime_type,
             entityType = if (row.overwrite != 0L) CreateUploadSessionRequest.ENTITY_TYPE_VERSION else null,
             encryptionSupported = listOf(CreateUploadSessionRequest.CIPHER_AES_256_CTR),
+            requestId = requestId,
         )
         val session = try {
             retryPolicy.retryTransport { api.createSession(request) }
@@ -107,10 +124,12 @@ class UploadPlanner(
         val type = effectivePolicyType(session)
         if (type !in SUPPORTED_POLICIES) {
             bestEffortDelete(api, session)
+            repository.setRequestId(taskId, null)
             fail(taskId, TransferErrorCode.UNSUPPORTED_POLICY, "Unsupported storage policy: $type")
         }
         if (type == StoragePolicy.TYPE_ONEDRIVE && row.size == 0L) {
             bestEffortDelete(api, session)
+            repository.setRequestId(taskId, null)
             fail(taskId, TransferErrorCode.ONEDRIVE_EMPTY_FILE, "OneDrive does not accept empty files")
         }
         val chunkCount = if (type == StoragePolicy.TYPE_UPYUN) 1 else chunkCount(row.size, session.chunkSize)
@@ -121,7 +140,7 @@ class UploadPlanner(
             chunkSize = if (type == StoragePolicy.TYPE_UPYUN) 0 else session.chunkSize,
             chunkCount = chunkCount,
         )
-        repository.setState(taskId, TransferState.RUNNING)
+        if (!repository.transitionIfActive(taskId, TransferState.RUNNING)) throw stopped(taskId)
         repository.task(taskId)!!
     }
 
@@ -193,17 +212,65 @@ class UploadPlanner(
         retryChunk(row, session, chunk, ErrorCode.TRANSPORT, message, null)
     }
 
-    /** 全部分片完成后调用：发送完成请求与客户端回调（按策略），成功后任务 → completed */
+    /**
+     * 全部分片完成后调用：发送完成请求与客户端回调（按策略），成功后任务 → completed。
+     *
+     * 存储方合并（S3 系 / OSS / 七牛的完成请求）与主站回调是两个独立的提交，阶段持久化在任务上：
+     * 合并成功后记为 merged，之后的重试/恢复只补回调，不会再向已合并的 uploadId 发完成请求。
+     * 上次合并请求结果未知、这次存储方答复 uploadId 不存在（NoSuchUpload）时交给服务端核实：
+     * 有客户端回调的策略直接回调（服务端会核对对象大小），其余策略查询会话完成回执（服务端 ≥ 4.19.12）。
+     * 回调答复会话已不存在（40011，可能是上次回调成功但响应丢失）时同样查询完成回执。
+     * 任务已被暂停/取消时抛 [TransferStoppedException]（不改状态）。
+     */
     @Throws(Exception::class)
     suspend fun finalize(taskId: String): TransferItem = withTaskLock(taskId) {
         val row = requireUpload(taskId)
         if (row.state == TransferState.COMPLETED.wire) return@withTaskLock row.toItem()
+        TransferState.fromWire(row.state).let { if (!it.isActive) throw TransferStoppedException(taskId, it) }
         val session = row.session() ?: throw IllegalStateException("Upload session not prepared: $taskId")
         val chunks = repository.chunks(taskId)
         check(chunks.isNotEmpty() && chunks.all { it.state == ChunkState.DONE }) { "Chunks of $taskId are not all uploaded" }
         repository.setState(taskId, TransferState.FINISHING)
         val type = row.policy_type.orEmpty()
         val client = client(row)
+        try {
+            if (type in MERGE_POLICIES && row.upload_phase != PHASE_MERGED) {
+                if (merge(row, client, session, chunks, type)) return@withTaskLock completeVerified(row)
+            }
+            if (type in UploadApi.CLIENT_CALLBACK_POLICIES) {
+                try {
+                    retryPolicy.retryTransport {
+                        UploadApi(client).callback(type, session.sessionId, session.callbackSecret)
+                    }
+                } catch (e: ApiException) {
+                    if (e.code != ErrorCode.UPLOAD_SESSION_EXPIRED) throw e
+                    if (verifyCompleted(row, session) != Verification.COMPLETED) throw e
+                    return@withTaskLock completeVerified(row)
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: StorageRejectedException) {
+            failTask(latest(row), session, TransferErrorCode.STORAGE_REJECTED, e.message ?: "storage rejected")
+            throw TransferFailedException(taskId, TransferErrorCode.STORAGE_REJECTED, e.message ?: "storage rejected", e)
+        } catch (e: ApiException) {
+            failTask(latest(row), session, e.code, e.serverMsg)
+            throw TransferFailedException(taskId, e.code, e.serverMsg, e)
+        } catch (e: Exception) {
+            val code = (e as? TransportException)?.code ?: ErrorCode.TRANSPORT
+            failTask(latest(row), session, code, e.message ?: "network error")
+            throw TransferFailedException(taskId, code, e.message ?: "network error", e)
+        }
+        completeVerified(row)
+    }
+
+    /**
+     * 向存储方发送合并（完成）请求并持久化阶段。返回 true 表示服务端已确认整个上传完成（不需要再回调）。
+     * 发送前记为 merging：进程在等待响应时被杀、或响应丢失，下次重试据此知道“上次合并结果未知”。
+     */
+    private suspend fun merge(row: TransferTask, client: ApiClient, session: UploadSession, chunks: List<TransferChunk>, type: String): Boolean {
+        val previousUnknown = row.upload_phase == PHASE_MERGING
+        repository.setUploadPhase(row.id, PHASE_MERGING)
         try {
             when (type) {
                 StoragePolicy.TYPE_S3, StoragePolicy.TYPE_KS3, StoragePolicy.TYPE_OBS ->
@@ -217,29 +284,17 @@ class UploadPlanner(
                     )
                 StoragePolicy.TYPE_QINIU -> completeQiniu(client, session, chunks)
             }
-            if (type in UploadApi.CLIENT_CALLBACK_POLICIES) {
-                retryPolicy.retryTransport {
-                    UploadApi(client).callback(type, session.sessionId, session.callbackSecret)
-                }
-            }
-        } catch (e: CancellationException) {
-            throw e
         } catch (e: StorageRejectedException) {
-            failTask(row, session, TransferErrorCode.STORAGE_REJECTED, e.message ?: "storage rejected")
-            throw TransferFailedException(taskId, TransferErrorCode.STORAGE_REJECTED, e.message ?: "storage rejected", e)
-        } catch (e: ApiException) {
-            failTask(row, session, e.code, e.serverMsg)
-            throw TransferFailedException(taskId, e.code, e.serverMsg, e)
-        } catch (e: Exception) {
-            val code = (e as? TransportException)?.code ?: ErrorCode.TRANSPORT
-            failTask(row, session, code, e.message ?: "network error")
-            throw TransferFailedException(taskId, code, e.message ?: "network error", e)
+            if (!previousUnknown || !e.uploadGone) throw e
+            // 上次合并很可能已经成功：有客户端回调的策略交给回调（服务端核对对象大小），保持 merging 以便失败后再核实
+            if (type in UploadApi.CLIENT_CALLBACK_POLICIES) return false
+            return when (verifyCompleted(row, session)) {
+                Verification.COMPLETED -> true
+                else -> throw e
+            }
         }
-        repository.clearSession(taskId)
-        repository.setAttempts(taskId, 0)
-        repository.setBytesDone(taskId, row.size)
-        repository.setState(taskId, TransferState.COMPLETED)
-        repository.task(taskId)!!
+        repository.setUploadPhase(row.id, PHASE_MERGED)
+        return false
     }
 
     /** 取消：`DELETE /file/upload {id, uri}`（尽力而为），清理会话，任务 → canceled。执行器应先中止在途请求 */
@@ -484,8 +539,9 @@ class UploadPlanner(
     }
 
     private suspend fun failTask(row: TransferTask, session: UploadSession, code: Int, message: String): TransferOutcome {
-        if (!isResumable(row.policy_type, session.expires)) {
-            // 不可续传的策略失败后会话无意义：删除服务端占位并清空本地会话（与 Web `setError` 一致）
+        if (!canReuse(row, session)) {
+            // 不可续传的策略失败后会话无意义：删除服务端占位并清空本地会话（与 Web `setError` 一致）。
+            // 已进入合并阶段的会话例外：对象可能已在存储方合并完成，只差回调，删除会话会丢掉它
             bestEffortDelete(UploadApi(client(row)), session)
             repository.clearSession(row.id)
         } else {
@@ -495,8 +551,27 @@ class UploadPlanner(
         return TransferOutcome.Failed(code, message)
     }
 
+    /**
+     * 会话已失效（40011 / 存储方拒绝且会话过期）：先向服务端核实会话是否其实已经完成——最后一个分片（或回调）
+     * 已在服务端提交、只是响应丢失时，服务端会删除会话，重传只会得到 40011，重建会话又会得到 40004 冲突。
+     * 核实为已完成 → 任务 completed（`Continue(true)`）；无法核实（网络错误）→ 稍后重试；否则重建会话（`Restart`）。
+     */
     private suspend fun restartTask(row: TransferTask, session: UploadSession): TransferOutcome {
         val attempts = row.attempts.toInt() + 1
+        when (verifyCompleted(row, session)) {
+            Verification.COMPLETED -> {
+                completeVerified(row)
+                return TransferOutcome.Continue(true)
+            }
+            Verification.UNKNOWN -> {
+                val wait = retryPolicy.delayFor(attempts)
+                    ?: return failTask(row, session, ErrorCode.TRANSPORT, "Cannot confirm the upload session")
+                repository.setAttempts(row.id, attempts)
+                repository.releaseRunningChunks(row.id)
+                return TransferOutcome.RetryAfter(wait)
+            }
+            Verification.NOT_COMPLETED -> Unit
+        }
         if (retryPolicy.delayFor(attempts) == null) {
             return failTask(row, session, ErrorCode.UPLOAD_SESSION_EXPIRED, "Upload session expired repeatedly")
         }
@@ -504,6 +579,46 @@ class UploadPlanner(
         repository.setAttempts(row.id, attempts)
         repository.setState(row.id, TransferState.QUEUED)
         return TransferOutcome.Restart
+    }
+
+    private enum class Verification { COMPLETED, NOT_COMPLETED, UNKNOWN }
+
+    /**
+     * 向服务端（≥ 4.19.12）查询会话 [session] 是否已完成（`GET /file/upload/:id` 的完成回执）。
+     * 旧服务端、会话不存在（40011）或仍在上传 → NOT_COMPLETED（保持旧行为）；网络错误等无法判断 → UNKNOWN。
+     */
+    private suspend fun verifyCompleted(row: TransferTask, session: UploadSession): Verification {
+        if (!features.uploadRecovery(row.account_id)) return Verification.NOT_COMPLETED
+        return try {
+            val status = UploadApi(client(row)).sessionStatus(session.sessionId)
+            if (status.status == UploadSessionStatus.STATUS_COMPLETED) Verification.COMPLETED else Verification.NOT_COMPLETED
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: ApiException) {
+            if (e.code == ErrorCode.UPLOAD_SESSION_EXPIRED) Verification.NOT_COMPLETED else Verification.UNKNOWN
+        } catch (_: Exception) {
+            Verification.UNKNOWN
+        }
+    }
+
+    /** 上传已完成（自己完成收尾或服务端确认）：清理会话，任务 → completed */
+    private suspend fun completeVerified(row: TransferTask): TransferItem {
+        repository.clearSession(row.id)
+        repository.setAttempts(row.id, 0)
+        repository.setBytesDone(row.id, row.size)
+        repository.setState(row.id, TransferState.COMPLETED)
+        return repository.task(row.id)!!
+    }
+
+    /** 会话仍可继续使用：未过期，且策略可续传或已进入合并阶段（只差合并/回调） */
+    private fun canReuse(row: TransferTask, session: UploadSession): Boolean =
+        !sessionExpired(session) && (row.policy_type in RESUMABLE_POLICIES || row.upload_phase != null)
+
+    private suspend fun latest(row: TransferTask): TransferTask = repository.row(row.id) ?: row
+
+    private suspend fun stopped(taskId: String): TransferStoppedException {
+        val state = repository.row(taskId)?.state?.let(TransferState::fromWire) ?: TransferState.CANCELED
+        return TransferStoppedException(taskId, state)
     }
 
     /** OneDrive `fragmentOverlap`：`GET uploadUrl` 取 `nextExpectedRanges[0]` 起点，按该偏移重新划分已确认的分片 */
@@ -539,7 +654,9 @@ class UploadPlanner(
             rawRequest(client, HttpMethod.Post, url, headers, body, ContentType.Application.OctetStream)
         }
         // S3 的 CompleteMultipartUpload 可能以 200 返回 <Error>
-        if (status != 200 || text.contains("<Error>")) throw StorageRejectedException("Complete upload failed: HTTP $status ${text.take(300)}")
+        if (status != 200 || text.contains("<Error>")) {
+            throw StorageRejectedException("Complete upload failed: HTTP $status ${text.take(300)}", uploadGone = "<Code>NoSuchUpload</Code>" in text)
+        }
     }
 
     private suspend fun completeQiniu(client: ApiClient, session: UploadSession, chunks: List<TransferChunk>) {
@@ -556,7 +673,8 @@ class UploadPlanner(
                 ContentType.Application.Json,
             )
         }
-        if (status !in 200..299) throw StorageRejectedException("Qiniu complete failed: HTTP $status ${text.take(300)}")
+        // 七牛 612：上传任务不存在（已完成合并或已过期）
+        if (status !in 200..299) throw StorageRejectedException("Qiniu complete failed: HTTP $status ${text.take(300)}", uploadGone = status == 612)
     }
 
     /** 直接请求存储方（不解析 Cloudreve 信封） */
@@ -633,8 +751,8 @@ class UploadPlanner(
     private fun TransferTask.session(): UploadSession? =
         session_json?.let { runCatching { CloudreveJson.decodeFromString(UploadSession.serializer(), it) }.getOrNull() }
 
-    /** 存储方拒绝完成请求 */
-    private class StorageRejectedException(message: String) : Exception(message)
+    /** 存储方拒绝完成请求；[uploadGone] 表示存储方已不认识这个分片上传（已合并完成或已中止） */
+    private class StorageRejectedException(message: String, val uploadGone: Boolean = false) : Exception(message)
 
     companion object {
         const val HEADER_CONTENT_TYPE = "Content-Type"
@@ -646,6 +764,18 @@ class UploadPlanner(
             StoragePolicy.TYPE_LOCAL, StoragePolicy.TYPE_REMOTE, StoragePolicy.TYPE_QINIU, StoragePolicy.TYPE_OSS,
             StoragePolicy.TYPE_ONEDRIVE, StoragePolicy.TYPE_S3, StoragePolicy.TYPE_KS3,
         )
+
+        /** 需要客户端向存储方发送合并（完成）请求的策略 */
+        internal val MERGE_POLICIES = setOf(
+            StoragePolicy.TYPE_S3, StoragePolicy.TYPE_KS3, StoragePolicy.TYPE_OBS, StoragePolicy.TYPE_COS,
+            StoragePolicy.TYPE_OSS, StoragePolicy.TYPE_QINIU,
+        )
+
+        /** `upload_phase`：已发出合并请求、结果未知 */
+        internal const val PHASE_MERGING = "merging"
+
+        /** `upload_phase`：存储方已合并，待主站回调 */
+        internal const val PHASE_MERGED = "merged"
 
         val SUPPORTED_POLICIES = setOf(
             StoragePolicy.TYPE_LOCAL, StoragePolicy.TYPE_REMOTE, StoragePolicy.TYPE_ONEDRIVE, StoragePolicy.TYPE_S3,

@@ -214,6 +214,9 @@ object TransferErrorCode {
 
     /** 不支持的存储策略类型 */
     const val UNSUPPORTED_POLICY = -205
+
+    /** 任务已被暂停/取消（[TransferStoppedException]，不写入 DB） */
+    const val STOPPED = -206
 }
 
 /** 传输失败（任务已在 DB 中标记为 failed） */
@@ -227,3 +230,10 @@ open class TransferFailedException(
 /** 目标已存在（40004）：UI 提供“重命名”（`TransferManager.retry(newName=)`）或“覆盖”（`overwrite=true`） */
 class UploadConflictException(taskId: String, message: String) :
     TransferFailedException(taskId, ErrorCode.OBJECT_EXIST, message)
+
+/**
+ * 规划器在网络请求返回后发现任务已被暂停/取消/结束：没有改动任务状态，执行器应停止该任务（不要再发请求，
+ * 也不要写失败状态）。
+ */
+class TransferStoppedException(taskId: String, state: TransferState) :
+    TransferFailedException(taskId, TransferErrorCode.STOPPED, "Transfer ${state.wire}")

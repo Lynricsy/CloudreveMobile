@@ -7,6 +7,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.contentLength
@@ -153,16 +154,14 @@ class DirectTransferRunner(
 
     // ---- 下载 ----
 
-    /** 执行下载任务 [taskId]（写到任务的 `destPath`）直到完成或失败 */
+    /** 执行下载任务 [taskId]（写到任务的 `destPath`）直到完成或失败；内容是否有效由 [DownloadPlanner.onCompleted] 判定 */
     @Throws(Exception::class)
     suspend fun download(taskId: String): TransferItem {
         val accountId = requireTask(taskId).accountId
         while (true) {
             val request = downloads.prepare(taskId)
             val outcome = try {
-                val total = fetch(accountId, request)
-                downloads.onCompleted(taskId, total)
-                break
+                downloads.onCompleted(taskId, fetch(accountId, request))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: DestinationException) {
@@ -196,8 +195,8 @@ class DirectTransferRunner(
         }
     }
 
-    /** 下载到 `destPath`，返回文件总长；206 从续传点追加，200 从头重写 */
-    private suspend fun fetch(accountId: String, request: DownloadRequest): Long {
+    /** 下载到 `destPath`，返回交给规划器判定的结果；206 从续传点追加，200 从头重写 */
+    private suspend fun fetch(accountId: String, request: DownloadRequest): DownloadResult {
         val dest = request.destPath
         // 只有本地部分文件长度与规划器记录一致时才续传
         val existing = destination { fileSystem.size(dest) } ?: 0L
@@ -208,17 +207,20 @@ class DirectTransferRunner(
             request.headers.forEach { (k, v) -> if (!k.equals("Range", ignoreCase = true)) header(k, v) }
             if (offset > 0) header("Range", "bytes=$offset-")
         }.execute { response ->
-            val start = when (response.status.value) {
+            val status = response.status.value
+            val start = when (status) {
                 206 -> offset
                 200 -> {
                     if (offset > 0) destination { fileSystem.writeFile(dest, ByteArray(0)) }
                     0L
                 }
-                else -> throw HttpStatusException(response.status.value, response.status.description)
+                else -> throw HttpStatusException(status, response.status.description)
             }
             val expected = response.contentLength()?.let { start + it }
             val channel = response.bodyAsChannel()
             val buffer = ByteArray(BUFFER_SIZE)
+            // 响应体开头（用于识别以 200 返回的错误信封）；超过上限后不再保留
+            var head: ByteArray? = ByteArray(0)
             var pending = 0
             var written = start
             var lastReport = TimeSource.Monotonic.markNow()
@@ -229,6 +231,7 @@ class DirectTransferRunner(
                 if (pending == buffer.size || (n < 0 && pending > 0)) {
                     val chunk = if (pending == buffer.size) buffer.copyOf() else buffer.copyOf(pending)
                     destination { fileSystem.appendFile(dest, chunk) }
+                    head = head?.let { h -> (h + chunk).takeIf { it.size <= DownloadPlanner.SMALL_BODY_LIMIT } }
                     written += pending
                     pending = 0
                     if (lastReport.elapsedNow().inWholeMilliseconds >= PROGRESS_INTERVAL_MS) {
@@ -239,7 +242,14 @@ class DirectTransferRunner(
                 if (n < 0) break
             }
             if (expected != null && written != expected) throw IllegalStateException("Incomplete download: $written of $expected bytes")
-            written
+            DownloadResult(
+                statusCode = status,
+                contentType = response.headers[HttpHeaders.ContentType],
+                contentRange = response.headers[HttpHeaders.ContentRange],
+                resumeOffset = if (status == 206) offset else 0L,
+                totalBytes = written,
+                smallBody = head,
+            )
         }
     }
 

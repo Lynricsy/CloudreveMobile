@@ -8,6 +8,7 @@ import plus.ling.opencloudreve.core.model.CreateUploadSessionRequest
 import plus.ling.opencloudreve.core.model.DeleteUploadSessionRequest
 import plus.ling.opencloudreve.core.model.StoragePolicy
 import plus.ling.opencloudreve.core.model.UploadSession
+import plus.ling.opencloudreve.core.model.UploadSessionStatus
 
 /** 上传会话相关的 Cloudreve 主站端点 */
 class UploadApi(private val client: ApiClient) {
@@ -29,6 +30,10 @@ class UploadApi(private val client: ApiClient) {
             ),
         )
     }
+
+    /** `GET /file/upload/{id}`（服务端 ≥ 4.19.12）：会话仍在上传或已完成；不存在/已过期抛 40011 */
+    @Throws(Exception::class)
+    suspend fun sessionStatus(sessionId: String): UploadSessionStatus = client.get("/file/upload/$sessionId")
 
     /**
      * 客户端负责的上传完成回调（只靠路径中的 `callback_secret` 认证，不带 JWT）：

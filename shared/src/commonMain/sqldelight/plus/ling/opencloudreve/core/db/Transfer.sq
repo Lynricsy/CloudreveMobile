@@ -26,6 +26,12 @@ CREATE TABLE TransferTask (
     error_msg TEXT,
     -- iOS 下载 resumeData 等平台续传数据
     resume_blob BLOB,
+    -- 上传：本次“创建会话”的幂等标识（服务端 ≥ 4.19.12 按它重放首次创建的会话）；会话清除时一并清除
+    request_id TEXT,
+    -- 上传收尾阶段：NULL 分片上传中；merging 已发出存储方合并请求（结果未知）；merged 存储方已合并、待主站回调
+    upload_phase TEXT,
+    -- 下载：固定的文件实体（版本）ID，续签 URL 时总是请求该实体；'' 表示文件没有实体（空文件）
+    entity_id TEXT,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
 );
@@ -66,7 +72,19 @@ updateSession:
 UPDATE TransferTask SET session_json = ?, policy_type = ?, chunk_size = ?, chunk_count = ?, updated_at = ? WHERE id = ?;
 
 clearSession:
-UPDATE TransferTask SET session_json = NULL, policy_type = NULL, chunk_size = 0, chunk_count = 0, bytes_done = 0, resume_blob = NULL, updated_at = ? WHERE id = ?;
+UPDATE TransferTask SET session_json = NULL, policy_type = NULL, chunk_size = 0, chunk_count = 0, bytes_done = 0, resume_blob = NULL, request_id = NULL, upload_phase = NULL, updated_at = ? WHERE id = ?;
+
+updateRequestId:
+UPDATE TransferTask SET request_id = ?, updated_at = ? WHERE id = ?;
+
+updateUploadPhase:
+UPDATE TransferTask SET upload_phase = ?, updated_at = ? WHERE id = ?;
+
+updateDownloadPin:
+UPDATE TransferTask SET entity_id = ?, size = ?, updated_at = ? WHERE id = ?;
+
+resetDownloadProgress:
+UPDATE TransferTask SET bytes_done = 0, resume_blob = NULL, updated_at = ? WHERE id = ?;
 
 updateBytesDone:
 UPDATE TransferTask SET bytes_done = ?, updated_at = ? WHERE id = ?;

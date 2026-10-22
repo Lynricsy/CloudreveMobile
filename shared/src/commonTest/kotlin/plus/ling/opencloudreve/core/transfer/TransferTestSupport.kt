@@ -26,8 +26,9 @@ class FakeFileSystem : FileSystemBridge {
     val sources = HashMap<String, ByteArray>()
     val files = HashMap<String, ByteArray>()
 
+    /** 上传源或已写出的文件（下载续传时读取目标文件长度） */
     @Throws(Exception::class)
-    override suspend fun size(sourceRef: String): Long? = sources[sourceRef]?.size?.toLong()
+    override suspend fun size(sourceRef: String): Long? = (sources[sourceRef] ?: files[sourceRef])?.size?.toLong()
 
     @Throws(Exception::class)
     override suspend fun readRange(sourceRef: String, offset: Long, length: Int): ByteArray {
@@ -63,14 +64,14 @@ const val SID = "sess-1"
 const val SECRET = "cbsecret"
 const val NOW_SECONDS = 1_700_000_000L
 
-/** 一个测试环境：内存 DB + MockEngine 客户端 + 固定时钟 */
+/** 一个测试环境：内存 DB + MockEngine 客户端 + 固定时钟。传入另一环境的 [database] 可模拟进程重启后的新进程 */
 class TransferEnv(
+    val database: OpenCloudreveDatabase = OpenCloudreveDatabase(createTestDriver()),
     private val handler: suspend MockRequestHandleScope.(Recorded) -> HttpResponseData = { ok() },
 ) {
     val requests = ArrayList<Recorded>()
     var nowMs = NOW_SECONDS * 1000
     val clock: () -> Instant = { Instant.fromEpochMilliseconds(nowMs) }
-    val database = OpenCloudreveDatabase(createTestDriver())
     val repository = TransferRepository(database, clock, Dispatchers.Unconfined)
     val fs = FakeFileSystem()
     var token: String? = "tok"
@@ -117,6 +118,19 @@ fun MockRequestHandleScope.envelope(code: Int, msg: String = "err") = respond(""
 
 fun MockRequestHandleScope.raw(body: String, status: Int = 200, contentType: String = "application/json") =
     respond(body, HttpStatusCode.fromValue(status), headersOf("Content-Type", contentType))
+
+/** `GET /site/ping` 的请求 */
+fun isPing(r: Recorded) = r.method == "GET" && r.url == "$SITE/api/v4/site/ping"
+
+/** `GET /site/ping` 响应：服务端版本 */
+fun MockRequestHandleScope.version(v: String) = ok("\"$v\"")
+
+/** `GET /file/info` 的请求 */
+fun isFileInfo(r: Recorded) = r.method == "GET" && r.url.startsWith("$SITE/api/v4/file/info?")
+
+/** `GET /file/info` 响应：大小为 [size]、当前版本实体为 [entity] 的文件 */
+fun MockRequestHandleScope.fileInfo(size: Long, entity: String = "e1") =
+    ok("""{"type":0,"id":"f1","name":"a.bin","size":$size,"primary_entity":"$entity","path":"cloudreve://my/a.bin"}""")
 
 /** 构造上传会话 JSON（作为 `PUT /file/upload` 的 data） */
 fun sessionJson(
