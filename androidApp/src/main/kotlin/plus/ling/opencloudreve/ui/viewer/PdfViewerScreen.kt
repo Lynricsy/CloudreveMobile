@@ -50,8 +50,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -63,36 +61,66 @@ import plus.ling.opencloudreve.core.presentation.viewer.ViewerPdfViewModel
 import plus.ling.opencloudreve.ui.common.message
 import java.io.File
 
-/** 打开的 PDF：页面渲染串行（PdfRenderer 非线程安全），位图按页 LRU 缓存 */
+/**
+ * 打开的 PDF：PdfRenderer 非线程安全，且有页面未关闭时不能关闭——打开页面、渲染、关闭全部经 [SerialResource]
+ * 在同一线程上串行执行；页面在途时关闭（返回、旋转、签名地址刷新替换文档）会等渲染结束后再释放。位图按页 LRU 缓存。
+ */
 private class PdfDocument(file: File) : AutoCloseable {
-    private val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-    private val renderer = PdfRenderer(fd)
-    private val lock = Mutex()
+    private val renderer: SerialResource<PdfRenderer>
     private val cache = object : LruCache<Int, Bitmap>(48 * 1024 * 1024) {
         override fun sizeOf(key: Int, value: Bitmap): Int = value.byteCount
     }
 
-    val pageCount: Int = renderer.pageCount
+    val pageCount: Int
 
     /** 各页宽高比（宽/高） */
-    val ratios: List<Float> = (0 until pageCount).map { i -> renderer.openPage(i).use { it.width.toFloat() / it.height } }
+    val ratios: List<Float>
 
-    suspend fun render(index: Int, widthPx: Int): Bitmap = cache.get(index)?.takeIf { it.width >= widthPx } ?: withContext(Dispatchers.IO) {
-        lock.withLock {
-            renderer.openPage(index).use { page ->
-                val height = (widthPx.toFloat() * page.height / page.width).toInt().coerceAtLeast(1)
-                val bitmap = Bitmap.createBitmap(widthPx, height, Bitmap.Config.ARGB_8888)
-                bitmap.eraseColor(AndroidColor.WHITE)
-                page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                cache.put(index, bitmap)
-                bitmap
+    init {
+        val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+        val pdf = try {
+            PdfRenderer(fd)
+        } catch (e: Exception) {
+            fd.close()
+            throw e
+        }
+        try {
+            pageCount = pdf.pageCount
+            ratios = (0 until pageCount).map { i -> pdf.openPage(i).use { it.width.toFloat() / it.height } }
+        } catch (e: Exception) {
+            pdf.close()
+            fd.close()
+            throw e
+        }
+        renderer = SerialResource(pdf) {
+            it.close()
+            fd.close()
+        }
+    }
+
+    /** 渲染一页；文档已关闭或该页渲染失败时返回 null */
+    suspend fun render(index: Int, widthPx: Int): Bitmap? {
+        cache.get(index)?.takeIf { it.width >= widthPx }?.let { return it }
+        return try {
+            renderer.use { pdf ->
+                pdf.openPage(index).use { page ->
+                    val height = (widthPx.toFloat() * page.height / page.width).toInt().coerceAtLeast(1)
+                    val bitmap = Bitmap.createBitmap(widthPx, height, Bitmap.Config.ARGB_8888)
+                    bitmap.eraseColor(AndroidColor.WHITE)
+                    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                    cache.put(index, bitmap)
+                    bitmap
+                }
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            null
         }
     }
 
     override fun close() {
         renderer.close()
-        fd.close()
     }
 }
 
@@ -116,15 +144,21 @@ internal fun PdfViewerScreen(
     var attempt by remember { mutableIntStateOf(0) }
     val load by produceState<PdfLoad>(PdfLoad.Downloading(-1f), url, attempt) {
         if (url == null) return@produceState
+        // 已打开但尚未交给界面的文档：本协程在交接处被取消时由 finally 释放
+        var opened: PdfDocument? = null
         try {
             val dest = ViewerFiles.cacheFile(context, params.file, params.version)
             ViewerFiles.download(url, dest) { done, total -> value = PdfLoad.Downloading(if (total > 0) done.toFloat() / total else -1f) }
-            value = PdfLoad.Ready(withContext(Dispatchers.IO) { PdfDocument(dest) })
+            val document = withContext(Dispatchers.IO) { PdfDocument(dest).also { opened = it } }
+            value = PdfLoad.Ready(document)
+            opened = null
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             ViewerFiles.cacheFile(context, params.file, params.version).delete()
             value = PdfLoad.Failed(e.toUiError().message(context))
+        } finally {
+            opened?.close()
         }
     }
     val document = (load as? PdfLoad.Ready)?.document
