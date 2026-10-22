@@ -30,6 +30,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,11 +48,17 @@ import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import plus.ling.opencloudreve.R
+import plus.ling.opencloudreve.core.auth.AccountRepository
+import plus.ling.opencloudreve.core.di.DataRepositories
+import plus.ling.opencloudreve.core.model.CrUri
 import plus.ling.opencloudreve.core.presentation.viewer.SubtitleOption
 import plus.ling.opencloudreve.core.presentation.viewer.VideoChapter
 import plus.ling.opencloudreve.core.presentation.viewer.ViewerParams
@@ -68,7 +76,7 @@ private fun subtitleMime(format: String): String? = when (format) {
     else -> null
 }
 
-/** 视频预览：ExoPlayer（含 HLS）、同目录外挂字幕、章节跳转；签名地址刷新时保持进度 */
+/** 视频预览：ExoPlayer（含 HLS）、同目录外挂字幕、章节跳转；签名地址刷新、旋转重建时保持进度与播放/暂停 */
 @OptIn(UnstableApi::class)
 @Composable
 internal fun VideoViewerScreen(
@@ -76,10 +84,28 @@ internal fun VideoViewerScreen(
     menu: ViewerMenu,
     onClose: () -> Unit,
     vm: ViewerVideoViewModel = koinViewModel(key = "video:${params.file.path}:${params.version}") { parametersOf(params) },
+    repositories: DataRepositories = koinInject(),
+    accounts: AccountRepository = koinInject(),
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val player = remember { ExoPlayer.Builder(context).build().apply { playWhenReady = true } }
+    // m3u8：入口与其中的相对分片/子播放列表都走掩码地址，加载时逐个签名（见 HlsMask）
+    val linked = remember(params.file) { CrUri.parseOrNull(params.file.linkedUri) }
+    val hlsEntry = remember(linked) { linked?.takeIf { state.isHls }?.let(HlsMask::entry) }
+    // 旋转等配置变更重建页面时恢复的进度与播放/暂停（按文件 + 版本区分）
+    val resume = rememberSaveable(params.file.path, params.version, saver = PlaybackResume.Saver) { PlaybackResume() }
+    val player = remember {
+        val dataSource = if (linked != null) {
+            HlsDataSourceFactory(context, HlsSigner(params.accountId, linked, params.version, repositories, accounts))
+        } else {
+            DefaultDataSource.Factory(context)
+        }
+        ExoPlayer.Builder(context)
+            .setMediaSourceFactory(DefaultMediaSourceFactory(dataSource))
+            .build()
+            .apply { playWhenReady = resume.playWhenReady }
+            .also { resume.player = it }
+    }
     val onError by rememberUpdatedState { vm.on(ViewerVideoIntent.Retry) }
     DisposableEffect(player) {
         val listener = object : Player.Listener {
@@ -91,19 +117,24 @@ internal fun VideoViewerScreen(
         player.addListener(listener)
         onDispose {
             player.removeListener(listener)
+            resume.capture()
+            resume.player = null
             player.release()
         }
     }
 
     val videoUrl = state.url?.url
+    // HLS 的签名由数据源逐个完成，签名地址刷新不必重新装载
+    val sourceUri = videoUrl?.let { hlsEntry ?: it }
     val subtitle = state.selectedSubtitle
     val subtitleUrl = state.subtitleUrl?.url
-    LaunchedEffect(videoUrl, subtitle?.file?.path, subtitleUrl) {
-        if (videoUrl == null) return@LaunchedEffect
+    LaunchedEffect(sourceUri, subtitle?.file?.path, subtitleUrl) {
+        if (sourceUri == null) return@LaunchedEffect
         // 选了字幕但地址未到：等字幕就绪再一次性设置，避免重复缓冲
         if (subtitle != null && subtitleUrl == null && state.subtitleLoading) return@LaunchedEffect
-        val position = player.currentPosition
-        val builder = MediaItem.Builder().setUri(videoUrl)
+        // 首次装载用恢复的进度；之后（换地址/字幕）保持当前进度
+        val position = if (player.currentMediaItem == null) resume.positionMs else player.currentPosition
+        val builder = MediaItem.Builder().setUri(sourceUri)
         if (state.isHls) builder.setMimeType(MimeTypes.APPLICATION_M3U8)
         val mime = subtitle?.let { subtitleMime(it.format) }
         if (subtitleUrl != null && mime != null) {
@@ -163,6 +194,27 @@ internal fun VideoViewerScreen(
                 )
             }
         }
+    }
+}
+
+/**
+ * 页面重建（旋转等配置变更）后要恢复的播放进度与播放/暂停。保存时从仍存活的 [player] 读取当前值；
+ * 页面销毁前 [capture] 一次，供导航返回栈恢复时使用。
+ */
+private class PlaybackResume(var positionMs: Long = 0L, var playWhenReady: Boolean = true) {
+    var player: Player? = null
+
+    fun capture() {
+        val p = player ?: return
+        positionMs = p.currentPosition
+        playWhenReady = p.playWhenReady
+    }
+
+    companion object {
+        val Saver = Saver<PlaybackResume, List<Any>>(
+            save = { it.capture(); listOf(it.positionMs, it.playWhenReady) },
+            restore = { PlaybackResume(it[0] as Long, it[1] as Boolean) },
+        )
     }
 }
 
