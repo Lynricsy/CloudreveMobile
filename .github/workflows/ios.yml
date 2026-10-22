@@ -9,7 +9,7 @@ concurrency:
 
 env:
   # UI 测试登录用的服务端版本与账号（与 iosApp/OpenCloudreveUITests 中一致）
-  OCR_SERVER_REF: "4.19.11"
+  OCR_SERVER_REF: "4.19.12"
   OCR_TEST_EMAIL: user@example.com
   OCR_TEST_PASSWORD: User@12345
   # 普通用户（非管理员），用于确认管理入口对普通用户不可见
