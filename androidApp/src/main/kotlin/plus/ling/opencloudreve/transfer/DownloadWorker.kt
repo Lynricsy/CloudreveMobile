@@ -18,6 +18,7 @@ import plus.ling.opencloudreve.core.api.ErrorCode
 import plus.ling.opencloudreve.core.di.CoreGraph
 import plus.ling.opencloudreve.core.transfer.DownloadPlanner
 import plus.ling.opencloudreve.core.transfer.DownloadRequest
+import plus.ling.opencloudreve.core.transfer.DownloadResult
 import plus.ling.opencloudreve.core.transfer.TransferErrorCode
 import plus.ling.opencloudreve.core.transfer.TransferFailedException
 import plus.ling.opencloudreve.core.transfer.TransferItem
@@ -25,6 +26,7 @@ import plus.ling.opencloudreve.core.transfer.TransferKind
 import plus.ling.opencloudreve.core.transfer.TransferOutcome
 import plus.ling.opencloudreve.core.transfer.TransferRepository
 import plus.ling.opencloudreve.core.transfer.TransferState
+import plus.ling.opencloudreve.core.transfer.TransferStoppedException
 import java.io.FileOutputStream
 import java.io.IOException
 
@@ -59,21 +61,34 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
         }
     }
 
-    private suspend fun run(item: TransferItem): Result {
-        val taskId = item.id
+    private suspend fun run(initial: TransferItem): Result {
+        val taskId = initial.id
         while (true) {
             val request = try {
                 downloads.prepare(taskId)
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: TransferStoppedException) {
+                // 已被暂停/取消：状态由 TransferManager 写入，这里直接结束
+                return Result.success()
             } catch (e: TransferFailedException) {
                 if (e.code == ErrorCode.TRANSPORT && TransferRuntime.isOffline(applicationContext)) return waitForNetwork(taskId)
                 return finish(taskId)
             }
+            // prepare 固定实体时会把任务大小更新为实体大小
+            val item = repository.task(taskId) ?: return Result.success()
             val outcome = try {
-                download(item, request)
-                downloads.onCompleted(taskId, lastWritten)
-                return finish(taskId)
+                val result = download(item, request)
+                val verdict = downloads.onCompleted(taskId, result)
+                if (verdict is TransferOutcome.Continue && verdict.allChunksDone) {
+                    // 规划器确认内容就是固定的实体后才交付给用户
+                    try {
+                        DownloadTargets.publish(applicationContext, request.destPath)
+                    } catch (e: Exception) {
+                        throw DestinationException(e)
+                    }
+                }
+                verdict
             } catch (e: CancellationException) {
                 throw e
             } catch (e: HttpStatusException) {
@@ -86,16 +101,15 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
                 downloads.onFailed(taskId, null, e.message ?: e.javaClass.simpleName)
             }
             when (outcome) {
+                // 内容无效（如以 200 返回的签名失效信封）时规划器已清零进度，下次 prepare 从 0 截断重下
                 is TransferOutcome.RetryAfter -> delay(outcome.delayMillis)
                 else -> return finish(taskId)
             }
         }
     }
 
-    /** 最近一次下载写到的绝对偏移（完成时即文件总长） */
-    private var lastWritten = 0L
-
-    private suspend fun download(item: TransferItem, request: DownloadRequest) = withContext(Dispatchers.IO) {
+    /** 写入目标并返回交给规划器判定的结果（不发布：判定完成后才发布） */
+    private suspend fun download(item: TransferItem, request: DownloadRequest): DownloadResult = withContext(Dispatchers.IO) {
         val pfd = try {
             DownloadTargets.open(applicationContext, request.destPath)
         } catch (e: Exception) {
@@ -103,7 +117,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
         }
         pfd.use { fd ->
             FileOutputStream(fd.fileDescriptor).use { out ->
-                // 规划器从 0 开始（首次或 416 后）时清空；否则以实际文件长度续传
+                // 规划器从 0 开始（首次、416 或内容无效后）时清空；否则以实际文件长度续传
                 val offset = if (request.resumeOffset <= 0) 0L else fd.statSize.coerceAtLeast(0)
                 if (offset == 0L) out.channel.truncate(0)
                 val builder = Request.Builder().url(request.url).get()
@@ -125,15 +139,13 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
                 }
             }
         }
-        try {
-            DownloadTargets.publish(applicationContext, request.destPath)
-        } catch (e: Exception) {
-            throw DestinationException(e)
-        }
     }
 
-    /** 校验状态码并把响应体写到 [out]（206 从 [resumeOffset] 续写；200 从头重写） */
-    private suspend fun writeBody(item: TransferItem, response: Response, out: FileOutputStream, resumeOffset: Long) {
+    /**
+     * 校验状态码并把响应体写到 [out]（206 从 [resumeOffset] 续写；200 从头重写）。
+     * 返回的 [DownloadResult.resumeOffset] 是本次实际写入的起点（200 为 0）。
+     */
+    private suspend fun writeBody(item: TransferItem, response: Response, out: FileOutputStream, resumeOffset: Long): DownloadResult {
         val channel = out.channel
         val offset = when (response.code) {
             206 -> resumeOffset
@@ -147,8 +159,9 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
         channel.position(offset)
         val expected = response.body.contentLength().takeIf { it >= 0 }?.let { offset + it }
         var written = offset
-        lastWritten = written
         report(item, written, force = true)
+        // 小响应体留一份给规划器识别以 200 返回的 Cloudreve 错误信封
+        var head: ByteArray? = ByteArray(0)
         val buffer = ByteArray(BUFFER_SIZE)
         response.body.byteStream().use { input ->
             while (true) {
@@ -160,8 +173,8 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
                 } catch (e: IOException) {
                     throw DestinationException(e)
                 }
+                head = head?.let { h -> (h + buffer.copyOf(n)).takeIf { it.size <= DownloadPlanner.SMALL_BODY_LIMIT } }
                 written += n
-                lastWritten = written
                 report(item, written)
             }
         }
@@ -171,6 +184,14 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
         } catch (_: Exception) {
             // 部分文件系统（FUSE）不支持 sync，数据仍已写入
         }
+        return DownloadResult(
+            statusCode = response.code,
+            contentType = response.header("Content-Type"),
+            contentRange = response.header("Content-Range"),
+            resumeOffset = offset,
+            totalBytes = written,
+            smallBody = head,
+        )
     }
 
     /** 节流上报进度（写库 + 更新通知） */
