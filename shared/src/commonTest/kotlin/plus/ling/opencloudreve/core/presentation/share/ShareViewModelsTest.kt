@@ -177,7 +177,8 @@ class ShareViewModelsTest {
             when {
                 req.apiPath == "/share/info/E1" -> okData(
                     """{"id":"E1","name":"a.txt","unlocked":true,"source_type":0,"is_private":true,"password":"abc","remain_downloads":3,""" +
-                        """"expires":"2026-10-22T00:00:00Z","source_uri":"cloudreve://my/a.txt","owner":$ownerJson}""",
+                        // 单文件分享的 source_uri 是文件所在目录（服务端 share/visit.go 取分享根）
+                        """"expires":"2026-10-22T00:00:00Z","source_uri":"cloudreve://my","owner":$ownerJson}""",
                 )
                 req.apiPath == "/share/E1" && req.method == HttpMethod.Post -> okData("\"https://cloud.example.com/s/E1/abc\"")
                 else -> err(404)
@@ -205,6 +206,27 @@ class ShareViewModelsTest {
 
         vm.on(ShareEditIntent.SetPassword("bad pw!"))
         assertFalse(vm.state.value.canSubmit)
+        vm.dispose()
+    }
+
+    @Test
+    fun openSourceResolvesSingleFileShareToFileUri() = runTest {
+        val env = VmEnv { req ->
+            when (req.apiPath) {
+                "/share" -> okData("""{"shares":[{"id":"F1","name":"a b.txt","source_type":0},{"id":"D1","name":"docs","source_type":1}],"pagination":{"is_cursor":true}}""")
+                "/share/info/F1" -> okData("""{"id":"F1","name":"a b.txt","unlocked":true,"source_type":0,"source_uri":"cloudreve://my/docs","owner":$ownerJson}""")
+                "/share/info/D1" -> okData("""{"id":"D1","name":"docs","unlocked":true,"source_type":1,"source_uri":"cloudreve://my/docs","owner":$ownerJson}""")
+                else -> err(404)
+            }
+        }
+        val vm = ShareListViewModel(ACCOUNT, env.shares)
+        eventually { vm.state.value.shares.size == 2 }
+        vm.effects.test {
+            vm.on(ShareListIntent.OpenSource("F1"))
+            assertEquals(ShareListEffect.OpenSource("F1", "cloudreve://my/docs/a%20b.txt"), awaitItem())
+            vm.on(ShareListIntent.OpenSource("D1"))
+            assertEquals(ShareListEffect.OpenSource("D1", "cloudreve://my/docs"), awaitItem())
+        }
         vm.dispose()
     }
 

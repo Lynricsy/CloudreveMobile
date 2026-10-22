@@ -186,7 +186,7 @@ class ShareListViewModel(
                 // 带密码的分享解析 source_uri 时服务端会校验密码（列表中所有者可见密码）
                 val password = currentState.shares.firstOrNull { it.id == id }?.password?.ifEmpty { null }
                 val info = shares.info(id, password = password, ownerExtended = true)
-                val uri = info.sourceUri
+                val uri = info.sourceFileUri()
                 if (uri.isNullOrEmpty()) {
                     sendEffect(ShareListEffect.Failed(UiError(ErrorKind.NotFound)))
                 } else {

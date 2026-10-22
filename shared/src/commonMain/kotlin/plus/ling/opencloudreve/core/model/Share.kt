@@ -33,13 +33,24 @@ data class Share(
     @SerialName("is_private") val isPrivate: Boolean = false,
     val password: String? = null,
     @SerialName("share_view") val shareView: Boolean = false,
-    /** 仅 `owner_extended=true` 且为所有者 */
+    /** 仅 `owner_extended=true` 且为所有者：分享根（目录分享为该目录；单文件分享为文件所在目录） */
     @SerialName("source_uri") val sourceUri: String? = null,
 ) {
     val isFolder: Boolean get() = sourceType == FileType.FOLDER
 
     /** 浏览该分享的根 URI（带已知密码） */
     fun rootUri(password: String? = this.password): CrUri = CrUri.share(id, password)
+
+    /**
+     * 被分享的文件/目录本身的 URI。单文件分享的 [sourceUri] 是所在目录，需拼上文件名
+     * （网页端 `assets/src/redux/thunks/share.ts` 同样处理）；无 [sourceUri] 时返回 null。
+     */
+    fun sourceFileUri(): String? {
+        val root = sourceUri ?: return null
+        if (isFolder) return root
+        val fileName = name?.takeIf { it.isNotEmpty() } ?: return null
+        return CrUri.parseOrNull(root)?.join(fileName)?.toString()
+    }
 }
 
 /**

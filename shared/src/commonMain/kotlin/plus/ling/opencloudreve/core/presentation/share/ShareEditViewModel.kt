@@ -25,7 +25,7 @@ data class ShareEditResult(
 )
 
 data class ShareEditState(
-    /** 源文件 URI（编辑时从 `source_uri` 取得） */
+    /** 源文件 URI（编辑时由 `source_uri` 得到，见 [Share.sourceFileUri]） */
     val fileUri: String?,
     /** 编辑的分享 id；新建为 null */
     val shareId: String?,
@@ -165,9 +165,10 @@ class ShareEditViewModel(
         val now = clock()
         val expires = share.expires
         val remaining = expires?.let { (it - now).inWholeSeconds }
+        val sourceFile = share.sourceFileUri()
         updateState {
             it.copy(
-                fileUri = share.sourceUri ?: it.fileUri,
+                fileUri = sourceFile ?: it.fileUri,
                 name = share.name ?: it.name,
                 isFolder = share.isFolder,
                 loading = false,
@@ -178,7 +179,7 @@ class ShareEditViewModel(
                 originalExpires = expires,
                 shareView = share.shareView,
                 showReadme = share.showReadme,
-                loadError = if (share.sourceUri == null && it.fileUri == null) UiError(ErrorKind.NotFound) else null,
+                loadError = if (sourceFile == null && it.fileUri == null) UiError(ErrorKind.NotFound) else null,
             )
         }
     }
