@@ -35,6 +35,8 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
         var attached: [String: URLSession] = [:]
         /// 各任务的运行代次（暂停/取消作废准备中的启动）
         var control = TransferRunControl()
+        /// 下载：本进程启动的下载是否用 resumeData 续传（完成判定时决定是否核对续传起点）
+        var downloadStarts: [String: Bool] = [:]
     }
 
     /// 取消前的任务快照中清理需要的字段
@@ -236,10 +238,18 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
 
     private func prepareUpload(_ taskId: String, token: UInt64) async {
         ownership.claim(taskId, session: owner, handedOff: false)
+        let prepared: TransferItem
         do {
-            _ = try await CoreGraph.shared.uploadPlanner().prepare(taskId: taskId)
+            prepared = try await CoreGraph.shared.uploadPlanner().prepare(taskId: taskId)
         } catch {
             await failIfActive(taskId, error, token: token)
+            return
+        }
+        if prepared.state == .completed {
+            // 服务端确认上次结果未知的上传其实已完成：不再发送或收尾
+            clearProgress(taskId)
+            ownership.release(taskId)
+            if let source = prepared.sourceRef { TransferInbox.discard(sourceRef: source) }
             return
         }
         // 准备期间被暂停/取消：不再发送
@@ -439,6 +449,7 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
             task.cancel()
             return
         }
+        state.withLock { $0.downloadStarts[taskId] = request.resumeData != nil }
         ownership.claim(taskId, session: owner, handedOff: true)
         task.resume()
     }
@@ -447,28 +458,57 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
         let repository = CoreGraph.shared.transferRepository()
         let planner = CoreGraph.shared.downloadPlanner()
         let staged = stagedURL(taskId)
+        let fileManager = FileManager.default
+        // 进程重启后接管的下载不知道是否续传：按续传处理（不核对起点）
+        let resumedFromData = state.withLock { $0.downloadStarts.removeValue(forKey: taskId) } ?? true
         clearProgress(taskId)
         if let resumeData = response.resumeData {
             _ = try? await repository.setResumeBlob(id: taskId, blob: KotlinValues.bytes(resumeData))
         }
         if response.cancelled { return }
         if response.failure == nil, let status = response.status, (200..<300).contains(status),
-           FileManager.default.fileExists(atPath: staged.path(percentEncoded: false)) {
+           fileManager.fileExists(atPath: staged.path(percentEncoded: false)) {
+            // 2xx 不等于拿到了文件（签名失效以 HTTP 200 返回错误信封）：由规划器按实体大小等判定后才交付
+            let outcome: TransferOutcome
             do {
-                guard let item = try await repository.task(id: taskId), let destPath = item.destPath else { return }
-                let destination = DownloadDestination.resolve(destPath)
-                let fileManager = FileManager.default
-                try fileManager.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
-                if fileManager.fileExists(atPath: destination.path(percentEncoded: false)) {
-                    try fileManager.removeItem(at: destination)
-                }
-                try fileManager.moveItem(at: staged, to: destination)
-                let size = (try? fileManager.attributesOfItem(atPath: destination.path(percentEncoded: false))[.size] as? NSNumber)?
-                    .int64Value ?? item.size
-                _ = try await planner.onCompleted(taskId: taskId, totalBytes: size)
-                ownership.release(taskId)
+                let size = (try? fileManager.attributesOfItem(atPath: staged.path(percentEncoded: false))[.size] as? NSNumber)?
+                    .int64Value ?? 0
+                let smallBody = size <= Int64(DownloadPlanner.companion.SMALL_BODY_LIMIT)
+                    ? (try? Data(contentsOf: staged)).map(KotlinValues.bytes)
+                    : nil
+                let result = DownloadResult(
+                    statusCode: Int32(status),
+                    contentType: response.contentType,
+                    contentRange: response.contentRange,
+                    // 没有 resumeData 时不发 Range，从 0 开始
+                    resumeOffset: resumedFromData ? nil : KotlinLong(longLong: 0),
+                    totalBytes: size,
+                    smallBody: smallBody
+                )
+                outcome = try await planner.onCompleted(taskId: taskId, result: result)
             } catch {
-                await markFailed(taskId, code: TransferErrorCode.shared.SOURCE_UNAVAILABLE, message: KotlinValues.message(error), token: token)
+                try? fileManager.removeItem(at: staged)
+                if let token { await failIfActive(taskId, error, token: token) }
+                return
+            }
+            switch onEnum(of: outcome) {
+            case let .continue(next):
+                if next.allChunksDone {
+                    await deliverDownload(taskId, from: staged)
+                } else {
+                    // 已被暂停/取消
+                    try? fileManager.removeItem(at: staged)
+                }
+            case let .retryAfter(retry):
+                // 内容无效（如签名失效的错误信封）：规划器已丢弃地址与进度，等待后重新开始
+                try? fileManager.removeItem(at: staged)
+                try? await Task.sleep(for: .milliseconds(retry.delayMillis))
+                if let token { await start(taskId, token: token) }
+            case .failed:
+                try? fileManager.removeItem(at: staged)
+                ownership.release(taskId)
+            case .restart:
+                try? fileManager.removeItem(at: staged)
             }
             return
         }
@@ -493,6 +533,30 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
             ownership.release(taskId)
         case .continue, .restart:
             break
+        }
+    }
+
+    /// 规划器确认完成后把暂存文件移到任务目标路径；移动失败时任务改为失败
+    private func deliverDownload(_ taskId: String, from staged: URL) async {
+        let repository = CoreGraph.shared.transferRepository()
+        ownership.release(taskId)
+        do {
+            guard let item = try await repository.task(id: taskId), let destPath = item.destPath else { return }
+            let destination = DownloadDestination.resolve(destPath)
+            let fileManager = FileManager.default
+            try fileManager.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
+            if fileManager.fileExists(atPath: destination.path(percentEncoded: false)) {
+                try fileManager.removeItem(at: destination)
+            }
+            try fileManager.moveItem(at: staged, to: destination)
+        } catch {
+            try? FileManager.default.removeItem(at: staged)
+            _ = try? await repository.setState(
+                id: taskId,
+                state: .failed,
+                errorCode: KotlinInt(int: TransferErrorCode.shared.SOURCE_UNAVAILABLE),
+                errorMessage: KotlinValues.message(error)
+            )
         }
     }
 
@@ -670,6 +734,8 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
 private struct ChunkCompletion: Sendable {
     let status: Int?
     let etag: String?
+    let contentType: String?
+    let contentRange: String?
     let body: Data?
     let failure: String?
     let cancelled: Bool
@@ -732,6 +798,8 @@ extension BackgroundTransferExecutor: URLSessionDataDelegate, URLSessionDownload
         let completion = ChunkCompletion(
             status: http?.statusCode,
             etag: http?.value(forHTTPHeaderField: "ETag"),
+            contentType: http?.value(forHTTPHeaderField: "Content-Type"),
+            contentRange: http?.value(forHTTPHeaderField: "Content-Range"),
             body: body,
             failure: error.map(KotlinValues.message),
             cancelled: nsError?.domain == NSURLErrorDomain && nsError?.code == NSURLErrorCancelled,
