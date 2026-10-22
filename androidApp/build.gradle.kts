@@ -13,15 +13,30 @@ android {
         applicationId = "plus.ling.opencloudreve"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        // 发布流水线按 tag 传入 -PappVersionName / -PappVersionCode；本地构建用默认值
+        versionCode = providers.gradleProperty("appVersionCode").map(String::toInt).getOrElse(1)
+        versionName = providers.gradleProperty("appVersionName").getOrElse("0.1.0")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // 发布签名：从环境变量读取（CI 由仓库 secrets 注入）；未提供时 release 构建不签名
+    val releaseKeystore = providers.environmentVariable("ANDROID_KEYSTORE_FILE").orNull
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = providers.environmentVariable("ANDROID_KEYSTORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("ANDROID_KEY_ALIAS").get()
+                keyPassword = providers.environmentVariable("ANDROID_KEYSTORE_PASSWORD").get()
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (releaseKeystore != null) signingConfig = signingConfigs.getByName("release")
         }
     }
 

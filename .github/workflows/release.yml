@@ -1,0 +1,186 @@
+name: Release
+
+# 推送 v* tag：构建签名 APK 与 IPA 并发布 GitHub Release。
+# 手动触发：只构建并上传产物，不发布（用于发版前试跑）。
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      name: ${{ steps.v.outputs.name }}
+      code: ${{ steps.v.outputs.code }}
+    steps:
+      - id: v
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            NAME="${GITHUB_REF_NAME#v}"
+          else
+            NAME="0.0.0"
+          fi
+          # 只接受 X.Y.Z 或 X.Y.Z-后缀；版本号 = X*10000 + Y*100 + Z（Android versionCode / iOS CFBundleVersion）
+          if [[ ! "$NAME" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "tag 不是语义化版本：$GITHUB_REF_NAME" >&2; exit 1
+          fi
+          CODE=$(( BASH_REMATCH[1] * 10000 + BASH_REMATCH[2] * 100 + BASH_REMATCH[3] ))
+          if (( CODE == 0 )); then CODE=1; fi
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "版本 $NAME ($CODE)"
+
+  android:
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v5
+      - name: 安装 Android 平台 37
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" > /dev/null
+      - name: 还原发布签名
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$KEYSTORE_BASE64" || { echo "缺少 ANDROID_KEYSTORE_BASE64 secret" >&2; exit 1; }
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+      - name: 测试并构建 Release APK
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: >
+          ./gradlew :shared:testAndroidHostTest :androidApp:testDebugUnitTest :androidApp:assembleRelease
+          -PappVersionName=${{ needs.version.outputs.name }}
+          -PappVersionCode=${{ needs.version.outputs.code }}
+          --stacktrace
+      - name: 校验签名并命名
+        run: |
+          set -euo pipefail
+          BT="$ANDROID_HOME/build-tools/36.0.0"
+          SRC=androidApp/build/outputs/apk/release/androidApp-release.apk
+          "$BT/apksigner" verify --print-certs "$SRC" | grep -E "DN|SHA-256"
+          "$BT/aapt2" dump badging "$SRC" | head -1
+          mkdir -p dist
+          cp "$SRC" "dist/OpenCloudreve-${{ needs.version.outputs.name }}.apk"
+          rm -f "$RUNNER_TEMP/release.jks"
+      - uses: actions/upload-artifact@v5
+        with:
+          name: release-android
+          path: dist/*.apk
+          if-no-files-found: error
+
+  ios:
+    needs: version
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v5
+      - name: Xcode 信息
+        run: xcodebuild -version
+      - name: 构建 KMP XCFramework（Release）
+        run: ./scripts/build-ios-framework.sh release
+      - name: 生成 Xcode 工程
+        run: |
+          brew install xcodegen
+          cd iosApp && xcodegen generate
+      - name: Archive（不签名）
+        run: |
+          set -o pipefail
+          cd iosApp
+          xcodebuild -project OpenCloudreve.xcodeproj -scheme OpenCloudreve \
+            -configuration Release \
+            -destination generic/platform=iOS \
+            -archivePath build/OpenCloudreve.xcarchive \
+            -skipPackagePluginValidation -skipMacroValidation \
+            MARKETING_VERSION=${{ needs.version.outputs.name }} \
+            CURRENT_PROJECT_VERSION=${{ needs.version.outputs.code }} \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= DEVELOPMENT_TEAM= \
+            archive
+      - name: ad-hoc 签名并打包 IPA
+        # 仓库没有 Apple 开发者证书：只做 ad-hoc 签名以嵌入 entitlements，安装前由 Sideloadly/AltStore 等重签（或用 TrollStore）
+        run: |
+          set -euo pipefail
+          cd iosApp
+          APP=build/OpenCloudreve.xcarchive/Products/Applications/OpenCloudreve.app
+          ENT="$RUNNER_TEMP/ent"
+          mkdir -p "$ENT"
+          # XcodeGen 生成的 entitlements 含 $(AppIdentifierPrefix)，无团队时去掉前缀；重签工具会换成自己的团队前缀
+          for name in OpenCloudreve ShareExtension FileProviderExtension; do
+            sed 's/\$(AppIdentifierPrefix)//g' "$name/$name.entitlements" > "$ENT/$name.plist"
+            plutil -lint "$ENT/$name.plist"
+          done
+          # 由内向外签名：嵌入框架 -> 扩展 -> 主 App
+          find "$APP" -name '*.framework' -type d -prune -print0 | xargs -0 -I{} codesign --force --sign - --timestamp=none {}
+          codesign --force --sign - --timestamp=none --entitlements "$ENT/ShareExtension.plist" "$APP/PlugIns/ShareExtension.appex"
+          codesign --force --sign - --timestamp=none --entitlements "$ENT/FileProviderExtension.plist" "$APP/PlugIns/FileProviderExtension.appex"
+          codesign --force --sign - --timestamp=none --entitlements "$ENT/OpenCloudreve.plist" "$APP"
+          codesign --verify --deep --strict "$APP"
+          /usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' -c 'Print CFBundleVersion' "$APP/Info.plist"
+          lipo -info "$APP/OpenCloudreve"
+          ls "$APP/PlugIns" "$APP/Frameworks"
+          codesign -d --entitlements - --xml "$APP" | plutil -p -
+          mkdir -p "$GITHUB_WORKSPACE/dist" build/ipa/Payload
+          cp -R "$APP" build/ipa/Payload/
+          (cd build/ipa && zip -qry "$GITHUB_WORKSPACE/dist/OpenCloudreve-${{ needs.version.outputs.name }}-unsigned.ipa" Payload)
+          unzip -l "$GITHUB_WORKSPACE/dist/"*.ipa | tail -1
+      - uses: actions/upload-artifact@v5
+        with:
+          name: release-ios
+          path: dist/*.ipa
+          if-no-files-found: error
+
+  publish:
+    needs: [version, android, ios]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+      - name: 发布 GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.version.outputs.name }}
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum *.apk *.ipa > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          NOTES="$RUNNER_TEMP/notes.md"
+          # 优先用 docs/release-notes/<tag>.md 作为说明正文，再追加安装说明
+          if [ -f "../docs/release-notes/$GITHUB_REF_NAME.md" ]; then cat "../docs/release-notes/$GITHUB_REF_NAME.md" > "$NOTES"; else : > "$NOTES"; fi
+          cat >> "$NOTES" <<EOF
+
+          ## 安装
+
+          - **Android**：下载 \`OpenCloudreve-$VERSION.apk\` 直接安装（Android 9 及以上）。
+          - **iOS / iPadOS**：\`OpenCloudreve-$VERSION-unsigned.ipa\` 未经 Apple 开发者证书签名（iOS 26 及以上），需用 Sideloadly、AltStore 等工具以自己的 Apple ID 重签后安装，或使用 TrollStore。
+          - 需要 OpenCloudreve 服务端 4.19.11 及以上；文件校验值见 \`SHA256SUMS.txt\`。
+          EOF
+          PRERELEASE=""
+          if [[ "$VERSION" == *-* ]]; then PRERELEASE="--prerelease"; fi
+          gh release create "$GITHUB_REF_NAME" *.apk *.ipa SHA256SUMS.txt \
+            --title "OpenCloudreve $VERSION" --notes-file "$NOTES" $PRERELEASE --verify-tag

@@ -47,3 +47,9 @@ iOS 工程文件不入库，只提交 `iosApp/project.yml`；`iosApp/Frameworks/
 
 - `android.yml`（ubuntu）：共享层单测、Android 单测、lint、调试 APK（产物 `opencloudreve-debug-apk`）
 - `ios.yml`（macos-26）：构建 XCFramework → xcodegen → 模拟器构建与 XCTest，上传 `.xcresult` 与截图（不签名）
+- `release.yml`：推送 `v*` tag（如 `git tag v0.1.0 && git push origin v0.1.0`）时构建发布签名 APK 与 ad-hoc 签名 IPA，发布 GitHub Release（附 `SHA256SUMS.txt`）；说明正文取 `docs/release-notes/<tag>.md`。手动触发只构建产物、不发布。版本号取自 tag：`X.Y.Z` → versionCode / CFBundleVersion = `X*10000+Y*100+Z`
+
+## 发布签名
+
+- **Android**：发布 keystore 存在仓库 secrets（`ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASSWORD`、`ANDROID_KEY_ALIAS`），本地构建通过环境变量 `ANDROID_KEYSTORE_FILE` 等同名变量注入；未提供时 `assembleRelease` 产出未签名包。证书 SHA-256：`86:BD:E9:72:85:42:30:8A:69:79:A8:8B:82:1F:42:07:36:ED:51:3B:A7:FE:88:B7:59:C2:07:BA:AD:7F:E9:07`。要让发布版使用 Passkey，需在服务端设置项 `mobile_android_sha256_fingerprints` 中加入这个指纹（用于 `assetlinks.json`）。
+- **iOS**：没有 Apple 开发者证书，Release 中的 IPA 只做 ad-hoc 签名（嵌入 entitlements），安装前需用 Sideloadly / AltStore 等重签，或使用 TrollStore。重签后 App Group 由重签工具改写，分享扩展与文件提供程序能否与主 App 共享数据取决于该工具。
