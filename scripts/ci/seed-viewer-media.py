@@ -7,7 +7,8 @@
 - song-a.mp3、song-b.mp3：两首带 ID3 标签的正弦音（播放列表）；
 - manual.pdf：两页 PDF；
 - notes.md：Markdown（编辑与保存）；
-- bundle.zip：多级目录的压缩包（含中文文件名）。
+- bundle.zip：多级目录的压缩包（含中文文件名）；
+- large.txt：约 6 MiB 文本（超过内置文本预览 5 MiB 上限，应引导用其他应用打开）。
 
 上传辅助函数复用 seed-files.py；环境变量同 seed-files.py。
 """
@@ -185,6 +186,7 @@ def main():
             ("manual.pdf", pdf(["OpenCloudreve PDF page 1", "Second page"]), "application/pdf"),
             ("notes.md", MARKDOWN.encode(), "text/markdown"),
             ("bundle.zip", zip_bundle(), "application/zip"),
+            ("large.txt", "".join(f"OpenCloudreve 大文本 第 {i:07d} 行\n" for i in range(200_000)).encode(), "text/plain"),
         ] + [(name, open(path, "rb").read(), "audio/mpeg") for name, path in songs]
 
         for name, content, mime in files:

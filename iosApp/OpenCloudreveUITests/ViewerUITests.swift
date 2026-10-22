@@ -1,9 +1,9 @@
 import XCTest
 
 /// 端到端：预览器。依赖 CI 预置素材（`scripts/ci/seed-viewer-media.py`）：
-/// 「预览」目录下有 photo.jpg（EXIF）、clip.mp4 + clip.srt、song-a/b.mp3、manual.pdf、notes.md、bundle.zip。
+/// 「预览」目录下有 photo.jpg（EXIF）、clip.mp4 + clip.srt、song-a/b.mp3、manual.pdf、notes.md、large.txt（> 5 MB）、bundle.zip。
 /// 覆盖：打开方式选择、图片 + EXIF 面板（核对预置的相机型号）、视频外挂字幕、音乐播放与底部“正在播放”、PDF、
-/// Markdown 预览/编辑/保存（未保存时“用其他应用打开”“打开方式”都要先确认放弃）、压缩包目录树。
+/// Markdown 预览/编辑/保存（未保存时“用其他应用打开”“打开方式”都要先确认放弃）、超大文本引导外部打开、压缩包目录树。
 /// 结束时退出登录。
 final class ViewerUITests: XCTestCase {
     private let serverURL = "http://127.0.0.1:5212"
@@ -101,6 +101,28 @@ final class ViewerUITests: XCTestCase {
         XCTAssertTrue(element(app, "text.saved").waitForExistence(timeout: 20), "未提示保存成功")
         // “已保存”提示几秒后消失：出现后立即截图
         capture(app, "viewer-10-markdown-saved", delay: 0)
+        closeViewer(app)
+
+        // 超过 5 MB 的文本：不在应用内加载，引导用其他应用打开
+        open(app, "large.txt")
+        let openExternally = app.buttons["text.tooLarge.openExternally"].firstMatch
+        let textOption = element(app, "viewer.option.monaco")
+        let deadline = Date.now.addingTimeInterval(30)
+        while Date.now < deadline && !openExternally.exists && !textOption.exists {
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        // 有多个候选时先选内置文本预览器
+        if textOption.exists { textOption.tap() }
+        XCTAssertTrue(openExternally.waitForExistence(timeout: 30), "超大文本没有提示用其他应用打开")
+        capture(app, "viewer-10b-text-too-large")
+        openExternally.tap()
+        let quickLook = element(app, "external.quickLook")
+        let share = element(app, "external.share")
+        let opened = Date.now.addingTimeInterval(60)
+        while Date.now < opened && !quickLook.exists && !share.exists {
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        XCTAssertTrue(quickLook.exists || share.exists, "超大文本未转到用其他应用打开")
         closeViewer(app)
 
         // 压缩包：目录树

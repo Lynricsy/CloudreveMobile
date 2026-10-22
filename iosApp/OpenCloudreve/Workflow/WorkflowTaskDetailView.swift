@@ -53,6 +53,15 @@ struct WorkflowTaskDetailView: View {
         let task = row.task
         let steps = WorkflowTaskStep.steps(for: task)
         return List {
+            if detail.missing {
+                Section {
+                    Label("任务已不存在", systemImage: "questionmark.folder")
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("workflow.detail.missing")
+                } footer: {
+                    Text("它可能已被删除或清理，以下是最后一次获取到的信息。")
+                }
+            }
             Section {
                 LabeledContent("状态") {
                     Text(WorkflowText.statusLabel(row.status))
@@ -175,7 +184,7 @@ struct WorkflowTaskDetailView: View {
                 }
             }
 
-            if row.canCancel {
+            if row.canCancel && !detail.missing {
                 Section {
                     Button("取消任务", role: .destructive) {
                         isCancelConfirming = true

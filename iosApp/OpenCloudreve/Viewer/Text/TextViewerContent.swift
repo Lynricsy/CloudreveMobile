@@ -20,7 +20,18 @@ struct TextViewerContent: View {
         let state = host.state
         let currentMode = mode ?? (state.isMarkdown ? .preview : .edit)
         Group {
-            if let error = state.error {
+            if state.tooLarge {
+                // 超过内置预览/编辑上限：引导用其他应用打开（会下载到本机）
+                ContentUnavailableView {
+                    Label("文件太大，无法在应用内查看", systemImage: "doc.text.magnifyingglass")
+                } description: {
+                    Text("超过 \(FileFormat.bytes(ViewerTextViewModel.companion.MAX_PREVIEW_BYTES)) 的文本请用其他应用打开。")
+                } actions: {
+                    Button("用其他应用打开", systemImage: "square.and.arrow.up") { chrome.openExternally() }
+                        .buttonStyle(.glassProminent)
+                        .accessibilityIdentifier("text.tooLarge.openExternally")
+                }
+            } else if let error = state.error {
                 ViewerStatusView(status: .failed(ErrorText.message(error))) {
                     host.send(ViewerTextIntentReload.shared)
                 }
