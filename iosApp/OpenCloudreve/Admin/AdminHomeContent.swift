@@ -54,9 +54,7 @@ struct AdminHomeContent: View {
         }
         .refreshable {
             host.send(AdminSummaryIntentRefresh.shared)
-            while host.state.refreshing {
-                try? await Task.sleep(for: .milliseconds(100))
-            }
+            await RefreshWait.whileBusy { host.state.refreshing }
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

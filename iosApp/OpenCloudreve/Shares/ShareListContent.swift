@@ -149,12 +149,9 @@ struct ShareListContent: View {
             : String(localized: "\(count) 项", comment: "目录条目数")
     }
 
-    /// 下拉刷新：等到列表结束刷新（最多 15 秒）
+    /// 下拉刷新：等到列表结束刷新（最多 15 秒；离开页面时立即结束）
     private func waitWhileRefreshing() async {
-        let deadline = ContinuousClock.now + .seconds(15)
-        while (host.state.refreshing || host.state.loading) && ContinuousClock.now < deadline {
-            try? await Task.sleep(for: .milliseconds(100))
-        }
+        await RefreshWait.whileBusy { host.state.refreshing || host.state.loading }
     }
 
     private var isConfirmingDelete: Binding<Bool> {

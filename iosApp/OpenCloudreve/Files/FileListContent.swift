@@ -104,12 +104,9 @@ struct FileListContent: View {
             : String(localized: "\(count) 项", comment: "目录条目数")
     }
 
-    /// 下拉刷新：等到列表结束刷新（最多 15 秒）
+    /// 下拉刷新：等到列表结束刷新（最多 15 秒；离开页面时立即结束）
     private func waitWhileRefreshing() async {
-        let deadline = ContinuousClock.now + .seconds(15)
-        while (list.state.refreshing || list.state.loading) && ContinuousClock.now < deadline {
-            try? await Task.sleep(for: .milliseconds(100))
-        }
+        await RefreshWait.whileBusy { list.state.refreshing || list.state.loading }
     }
 
     /// 操作成功后更新列表：移出当前目录的先本地移除（随后自动刷新），其余直接刷新

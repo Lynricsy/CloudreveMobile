@@ -60,9 +60,7 @@ struct AdminEntityList<T: AnyObject, Row: View, Destination: View, Header: View,
         .environment(\.editMode, $editMode)
         .refreshable {
             host.send(AdminListIntentRefresh.shared)
-            while host.state.refreshing {
-                try? await Task.sleep(for: .milliseconds(100))
-            }
+            await RefreshWait.whileBusy { host.state.refreshing }
         }
         .searchable(text: $query, prompt: searchPrompt)
         .searchScopes($searchKey, activation: .onSearchPresentation) {
