@@ -1,5 +1,6 @@
 package plus.ling.opencloudreve.core.presentation.viewer
 
+import kotlinx.coroutines.Job
 import plus.ling.opencloudreve.core.model.ArchivedFile
 import plus.ling.opencloudreve.core.model.FileItem
 import plus.ling.opencloudreve.core.model.GroupPermission
@@ -72,6 +73,10 @@ class ViewerArchiveViewModel(
     private val env: ViewerEnvironment,
 ) : CoreViewModel<ViewerArchiveState, ViewerArchiveIntent, ViewerArchiveEffect>(ViewerArchiveState(params.file)) {
 
+    /** 当前目录树请求；换编码/刷新时取消，旧请求的结果与错误一律丢弃 */
+    private var loadJob: Job? = null
+    private var loadGeneration = 0
+
     init {
         load()
         launchCatching(onError = {}) {
@@ -108,11 +113,13 @@ class ViewerArchiveViewModel(
     }
 
     private fun load() {
+        loadJob?.cancel()
+        val generation = ++loadGeneration
         val encoding = currentState.encoding
         updateState { it.copy(loading = true, error = null, entries = emptyList(), currentPath = "", selection = emptySet()) }
-        launchCatching(onError = { e -> updateState { it.copy(loading = false, error = e) } }) {
+        loadJob = launchCatching(onError = { e -> if (generation == loadGeneration) updateState { it.copy(loading = false, error = e) } }) {
             val res = env.files.archiveList(params.file.linkedUri, params.version, encoding)
-            updateState { it.copy(loading = false, entries = buildTree(res.files)) }
+            if (generation == loadGeneration) updateState { it.copy(loading = false, entries = buildTree(res.files)) }
         }
     }
 

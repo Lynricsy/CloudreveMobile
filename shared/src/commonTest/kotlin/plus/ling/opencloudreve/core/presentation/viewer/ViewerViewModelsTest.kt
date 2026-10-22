@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeout
 import plus.ling.opencloudreve.core.api.apiPath
 import plus.ling.opencloudreve.core.api.bodyText
@@ -208,6 +209,39 @@ class ViewerViewModelsTest {
         assertEquals(ErrorKind.FileTooLarge, effects.filterIsInstance<ViewerTextEffect.Failed>().single().error.kind)
         assertFalse(vm.state.value.saving)
         assertTrue(vm.state.value.dirty)
+        vm.dispose()
+    }
+
+    @Test
+    fun archiveEncodingSwitchIgnoresOlderResponse() = runTest {
+        Dispatchers.setMain(Dispatchers.Unconfined)
+        val defaultGate = CompletableDeferred<Unit>()
+        val env = DataEnv { req ->
+            when {
+                req.apiPath == "/file/archive" -> when (req.url.parameters["text_encoding"]) {
+                    null -> {
+                        defaultGate.await()
+                        okData("""{"files":[{"name":"ÄÏ.txt","size":1}]}""")
+                    }
+                    "gbk" -> okData("""{"files":[{"name":"中文.txt","size":1}]}""")
+                    else -> err(404)
+                }
+                else -> err(404)
+            }
+        }
+        val user = UserSettingsRepository(ACCOUNT, env.clients) { _, _ -> }
+        val viewerEnv = ViewerEnvironment(env.files, env.site, user, env.clients, env.clock)
+        val vm = ViewerArchiveViewModel(ViewerParams(ACCOUNT, file("a.zip")), viewerEnv)
+        eventually { env.server.requests.any { it.apiPath == "/file/archive" } }
+        vm.on(ViewerArchiveIntent.SetEncoding("gbk"))
+        eventually { vm.state.value.entries.isNotEmpty() }
+        assertEquals(listOf("中文.txt"), vm.state.value.entries.map { it.path })
+        // 默认编码的旧请求最后才返回：不能覆盖 gbk 的目录树
+        defaultGate.complete(Unit)
+        withContext(Dispatchers.Default) { delay(300) }
+        assertEquals("gbk", vm.state.value.encoding)
+        assertEquals(listOf("中文.txt"), vm.state.value.entries.map { it.path })
+        assertFalse(vm.state.value.loading)
         vm.dispose()
     }
 }
