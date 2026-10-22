@@ -65,11 +65,11 @@ internal object DocumentRows {
         return flags
     }
 
-    fun addFile(cursor: MatrixCursor, id: DocumentId, file: FileItem, dirCapability: BoolSet?) {
+    fun addFile(cursor: MatrixCursor, documentId: String, file: FileItem, dirCapability: BoolSet?) {
         cursor.newRow().apply {
-            add(Document.COLUMN_DOCUMENT_ID, id.encoded)
+            add(Document.COLUMN_DOCUMENT_ID, documentId)
             add(Document.COLUMN_MIME_TYPE, mimeOf(file))
-            add(Document.COLUMN_DISPLAY_NAME, file.name.ifEmpty { id.name })
+            add(Document.COLUMN_DISPLAY_NAME, file.name.ifEmpty { file.uri()?.name().orEmpty() })
             add(Document.COLUMN_LAST_MODIFIED, file.updatedAt?.toEpochMilliseconds())
             add(Document.COLUMN_FLAGS, flagsOf(file, dirCapability))
             // 目录大小未知（列表中目录为 0）
@@ -78,11 +78,11 @@ internal object DocumentRows {
     }
 
     /** 账户根目录（`cloudreve://my`）；[capability] 来自根目录列表的 `props.capability`，未知时按可写处理 */
-    fun addRoot(cursor: MatrixCursor, id: DocumentId, title: String, capability: BoolSet?) {
+    fun addRoot(cursor: MatrixCursor, documentId: String, title: String, capability: BoolSet?) {
         val canCreate = capability == null ||
             capability.has(NavigatorCapability.CREATE_FILE) || capability.has(NavigatorCapability.UPLOAD_FILE)
         cursor.newRow().apply {
-            add(Document.COLUMN_DOCUMENT_ID, id.encoded)
+            add(Document.COLUMN_DOCUMENT_ID, documentId)
             add(Document.COLUMN_MIME_TYPE, Document.MIME_TYPE_DIR)
             add(Document.COLUMN_DISPLAY_NAME, title)
             add(Document.COLUMN_LAST_MODIFIED, null)

@@ -128,17 +128,21 @@ internal class RemoteFileReader(
     /**
      * 整个文件下载到缓存并返回（调用方负责删除）。
      * 供无法读取代理描述符的场景使用：系统 mediaextractor 没有使用 appfuse 描述符的 SELinux 权限。
+     * 调用方取消（[cancel]）或超过 [timeoutMs] 时中断请求并删除部分缓存，抛 [java.io.InterruptedIOException]。
      */
-    fun downloadWhole(): File {
+    fun downloadWhole(timeoutMs: Long, cancel: CancellableHttp.CancelHook?): File {
         var refreshed = false
         while (true) {
-            http.newCall(Request.Builder().url(currentUrl(force = refreshed)).build()).execute().use { response ->
+            val request = Request.Builder().url(currentUrl(force = refreshed)).build()
+            val result = CancellableHttp.execute(http, request, timeoutMs, cancel) { response ->
                 when {
-                    response.isSuccessful -> return writeCache(response)
-                    !refreshed && response.code in REFRESHABLE_CODES -> refreshed = true
+                    response.isSuccessful -> writeCache(response)
+                    !refreshed && response.code in REFRESHABLE_CODES -> null
                     else -> throw IOException("HTTP ${response.code}")
                 }
             }
+            if (result != null) return result
+            refreshed = true
         }
     }
 
@@ -153,15 +157,9 @@ internal class RemoteFileReader(
     }
 
     private fun writeCache(response: Response): File {
-        val body = response.body ?: throw IOException("empty body")
         val dir = File(cacheDir, CACHE_DIR).apply { mkdirs() }
         val target = File(dir, UUID.randomUUID().toString())
-        try {
-            body.byteStream().use { input -> target.outputStream().use { input.copyTo(it, 1 shl 16) } }
-        } catch (e: IOException) {
-            target.delete()
-            throw e
-        }
+        CancellableHttp.writeBody(response, target)
         return target
     }
 
