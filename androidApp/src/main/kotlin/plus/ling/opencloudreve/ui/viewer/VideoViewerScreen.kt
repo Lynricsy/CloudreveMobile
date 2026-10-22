@@ -206,8 +206,9 @@ private class PlaybackResume(var positionMs: Long = 0L, var playWhenReady: Boole
 
     fun capture() {
         val p = player ?: return
-        positionMs = p.currentPosition
         playWhenReady = p.playWhenReady
+        // 尚未装载（重建后的页面在设置播放源前又被保存/销毁）：保留待恢复的进度，不用新播放器的 0 覆盖
+        if (p.currentMediaItem != null) positionMs = p.currentPosition
     }
 
     companion object {
