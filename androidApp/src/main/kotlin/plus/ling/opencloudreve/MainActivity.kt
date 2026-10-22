@@ -1,5 +1,6 @@
 package plus.ling.opencloudreve
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,10 +12,16 @@ import org.koin.compose.koinInject
 import plus.ling.opencloudreve.ui.main.MainRequest
 import plus.ling.opencloudreve.ui.main.MainRequests
 import plus.ling.opencloudreve.ui.navigation.AppNavHost
+import plus.ling.opencloudreve.ui.settings.AppLanguage
 import plus.ling.opencloudreve.ui.theme.OpenCloudreveTheme
 import plus.ling.opencloudreve.ui.theme.ThemePreferences
 
 class MainActivity : ComponentActivity() {
+    // Android 13 以下的应用内语言（13+ 由系统 LocaleManager 处理）
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguage.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)

@@ -123,7 +123,7 @@ fun SettingsScreen(
             val appLanguage = remember(state.language) { AppLanguage.current(context) }
             SettingRow(
                 title = stringResource(R.string.settings_language),
-                subtitle = languageLabel(if (AppLanguage.supported) appLanguage else state.language),
+                subtitle = languageLabel(appLanguage),
                 icon = Icons.Outlined.Language,
                 busy = state.saving == SettingsField.Language,
                 onClick = { dialog = "language" },
@@ -212,7 +212,7 @@ fun SettingsScreen(
 
     when (dialog) {
         "language" -> {
-            val current = if (AppLanguage.supported) AppLanguage.current(context) else state.language
+            val current = AppLanguage.current(context)
             ChoiceDialog(
                 title = stringResource(R.string.settings_language),
                 options = listOf<String?>(null, "zh-CN", "en-US").map { it to languageLabel(it) },

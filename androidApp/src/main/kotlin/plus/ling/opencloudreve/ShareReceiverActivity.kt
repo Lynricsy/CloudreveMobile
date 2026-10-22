@@ -1,5 +1,6 @@
 package plus.ling.opencloudreve
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,6 +13,7 @@ import androidx.core.content.IntentCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import plus.ling.opencloudreve.core.presentation.share.ShareLinkParser
+import plus.ling.opencloudreve.ui.settings.AppLanguage
 import plus.ling.opencloudreve.ui.theme.OpenCloudreveTheme
 import plus.ling.opencloudreve.ui.theme.ThemePreferences
 import plus.ling.opencloudreve.ui.transfer.ShareReceiverScreen
@@ -22,6 +24,11 @@ import plus.ling.opencloudreve.ui.transfer.ShareReceiverScreen
  * - 纯文本且是分享链接（`https://…/s/<id>`、`cloudreve://…@share`）：交给主界面的“打开分享链接”。
  */
 class ShareReceiverActivity : ComponentActivity() {
+    // Android 13 以下的应用内语言（13+ 由系统 LocaleManager 处理）
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguage.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
