@@ -95,7 +95,7 @@ class ViewerVideoViewModel(
         if (option == null) return
         launchCatching(onError = { updateState { s -> if (s.selectedSubtitle == option) s.copy(subtitleLoading = false) else s } }) {
             val url = env.url(option.file, null, params.contextHint)
-            val text = env.download(params.accountId, url.url).let(TextCodec::decode).text
+            val text = env.download(params.accountId, url.url, MAX_SUBTITLE_BYTES).let(TextCodec::decode).text
             updateState { s -> if (s.selectedSubtitle == option) s.copy(subtitleUrl = url, subtitleText = text, subtitleLoading = false) else s }
         }
     }
@@ -103,6 +103,9 @@ class ViewerVideoViewModel(
     companion object {
         /** 字幕扩展名（前端为 ass/srt/vrr，另支持 ssa 与 vtt） */
         val SUBTITLE_EXTS = listOf("srt", "ass", "ssa", "vtt", "vrr")
+
+        /** 字幕一次读入内存的上限（字节）；超出时与其它字幕加载失败一样不显示 */
+        const val MAX_SUBTITLE_BYTES: Long = ViewerTextViewModel.MAX_PREVIEW_BYTES
 
         /**
          * 同目录字幕：扩展名在 [SUBTITLE_EXTS] 内；以 `<视频名去扩展名>.` 开头（或同名）的排在前面，其余保持原顺序。

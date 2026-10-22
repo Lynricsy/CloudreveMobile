@@ -5,6 +5,7 @@ import plus.ling.opencloudreve.core.api.ErrorCode
 import plus.ling.opencloudreve.core.api.LockConflictException
 import plus.ling.opencloudreve.core.api.SessionExpiredException
 import plus.ling.opencloudreve.core.api.TransportException
+import plus.ling.opencloudreve.core.presentation.viewer.PreviewTooLargeException
 
 /** 界面层错误分类；文案由平台按 [ErrorKind] 与 [UiError.code] 本地化 */
 enum class ErrorKind {
@@ -42,7 +43,7 @@ enum class ErrorKind {
     /** 容量不足（40051） */
     QuotaExceeded,
 
-    /** 文件过大（40049） */
+    /** 文件过大（40049；或内容超出内置预览上限，见 `PreviewTooLargeException`） */
     FileTooLarge,
 
     /** 批量操作部分失败（40081） */
@@ -77,6 +78,7 @@ fun Throwable.toUiError(): UiError = when (this) {
     is TransportException ->
         UiError(if (httpStatus != null) ErrorKind.BadResponse else ErrorKind.Network, code, message)
     is SessionExpiredException -> UiError(ErrorKind.SessionExpired)
+    is PreviewTooLargeException -> UiError(ErrorKind.FileTooLarge, null, message)
     else -> UiError(ErrorKind.Unknown, null, message)
 }
 

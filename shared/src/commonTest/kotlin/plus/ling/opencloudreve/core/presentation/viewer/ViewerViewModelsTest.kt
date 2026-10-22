@@ -244,4 +244,59 @@ class ViewerViewModelsTest {
         assertFalse(vm.state.value.loading)
         vm.dispose()
     }
+
+    /** 文本预览测试环境：`/file/url` 返回站内签名地址，[body] 为内容响应 */
+    private fun textEnv(body: suspend io.ktor.client.engine.mock.MockRequestHandleScope.() -> io.ktor.client.request.HttpResponseData): Pair<DataEnv, ViewerEnvironment> {
+        val env = DataEnv { req ->
+            when {
+                req.apiPath == "/file/url" -> okData("""{"urls":[{"url":"/api/v4/file/content/abc/0/a.txt?sign=x"}],"expires":"2099-01-01T00:00:00Z"}""")
+                req.apiPath.startsWith("/file/content/abc") -> body()
+                else -> err(404)
+            }
+        }
+        val user = UserSettingsRepository(ACCOUNT, env.clients) { _, _ -> }
+        return env to ViewerEnvironment(env.files, env.site, user, env.clients, env.clock)
+    }
+
+    @Test
+    fun textPreviewRejectsOversizedFileBeforeDownloading() = runTest {
+        Dispatchers.setMain(Dispatchers.Unconfined)
+        val (env, viewerEnv) = textEnv { respond("hello", HttpStatusCode.OK) }
+        // 5 MiB + 1 字节：元数据已超出内置文本预览上限
+        val doc = FileItem(id = "f1", name = "a.txt", path = "cloudreve://my/docs/a.txt", owned = true, size = 5L * 1024 * 1024 + 1)
+        val vm = ViewerTextViewModel(ViewerParams(ACCOUNT, doc), viewerEnv)
+        eventually { !vm.state.value.loading }
+        assertEquals(ErrorKind.FileTooLarge, vm.state.value.error?.kind)
+        assertTrue(vm.state.value.tooLarge)
+        assertNull(vm.state.value.original)
+        assertTrue(env.server.requests.none { it.apiPath.startsWith("/file/content/abc") })
+        vm.dispose()
+    }
+
+    @Test
+    fun textPreviewStopsReadingBodyBeyondLimitDespiteSmallMetadata() = runTest {
+        Dispatchers.setMain(Dispatchers.Unconfined)
+        // 元数据声称 10 字节，实际正文 5 MiB + 1 字节（不可信的大小）
+        val (_, viewerEnv) = textEnv { respond(ByteArray(5 * 1024 * 1024 + 1) { 'a'.code.toByte() }, HttpStatusCode.OK) }
+        val doc = FileItem(id = "f1", name = "a.txt", path = "cloudreve://my/docs/a.txt", owned = true, size = 10)
+        val vm = ViewerTextViewModel(ViewerParams(ACCOUNT, doc), viewerEnv)
+        eventually { !vm.state.value.loading }
+        assertEquals(ErrorKind.FileTooLarge, vm.state.value.error?.kind)
+        assertTrue(vm.state.value.tooLarge)
+        assertNull(vm.state.value.original)
+        vm.dispose()
+    }
+
+    @Test
+    fun textPreviewAcceptsBodyAtLimit() = runTest {
+        Dispatchers.setMain(Dispatchers.Unconfined)
+        val (_, viewerEnv) = textEnv { respond(ByteArray(5 * 1024 * 1024) { 'a'.code.toByte() }, HttpStatusCode.OK) }
+        val doc = FileItem(id = "f1", name = "a.txt", path = "cloudreve://my/docs/a.txt", owned = true, size = 5L * 1024 * 1024)
+        val vm = ViewerTextViewModel(ViewerParams(ACCOUNT, doc), viewerEnv)
+        eventually { !vm.state.value.loading }
+        assertNull(vm.state.value.error)
+        assertFalse(vm.state.value.tooLarge)
+        assertEquals(5 * 1024 * 1024, vm.state.value.original?.length)
+        vm.dispose()
+    }
 }

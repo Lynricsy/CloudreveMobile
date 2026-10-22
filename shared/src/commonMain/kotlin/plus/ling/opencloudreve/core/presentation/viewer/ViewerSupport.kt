@@ -1,7 +1,12 @@
 package plus.ling.opencloudreve.core.presentation.viewer
 
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsBytes
+import io.ktor.client.request.prepareGet
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.contentLength
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.readAvailable
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -10,6 +15,7 @@ import kotlinx.coroutines.launch
 import plus.ling.opencloudreve.core.api.ApiClientProvider
 import plus.ling.opencloudreve.core.api.ApiException
 import plus.ling.opencloudreve.core.api.ErrorCode
+import plus.ling.opencloudreve.core.api.CloudreveException
 import plus.ling.opencloudreve.core.api.TransportException
 import plus.ling.opencloudreve.core.files.FileRepository
 import plus.ling.opencloudreve.core.files.ViewerResolver
@@ -104,18 +110,39 @@ class ViewerEnvironment internal constructor(
         }
     }
 
-    /** 下载文本/字幕等小文件内容（签名地址无需鉴权；站内相对地址补全为绝对地址） */
-    internal suspend fun download(accountId: String, url: String): ByteArray {
+    /**
+     * 下载文本/字幕等小文件内容（签名地址无需鉴权；站内相对地址补全为绝对地址）。
+     * 边读边累计，超过 [maxBytes] 立即中止并抛 [PreviewTooLargeException]（不信任 Content-Length，也不先整体读入）。
+     */
+    internal suspend fun download(accountId: String, url: String, maxBytes: Long): ByteArray {
         val client = clients.client(accountId)
-        val response = try {
-            client.http.get(absolute(accountId, url))
+        val statement = client.http.prepareGet(absolute(accountId, url))
+        return try {
+            statement.execute { response ->
+                if (response.status.value !in 200..299) throw TransportException("HTTP ${response.status.value}", response.status.value)
+                response.contentLength()?.let { if (it > maxBytes) throw PreviewTooLargeException(maxBytes) }
+                readBounded(response.bodyAsChannel(), maxBytes)
+            }
         } catch (e: CancellationException) {
+            throw e
+        } catch (e: CloudreveException) {
             throw e
         } catch (e: Exception) {
             throw TransportException(e.message ?: "Download failed", cause = e)
         }
-        if (response.status.value !in 200..299) throw TransportException("HTTP ${response.status.value}", response.status.value)
-        return response.bodyAsBytes()
+    }
+
+    /** 读取全部正文，累计超过 [maxBytes] 即抛出 */
+    private suspend fun readBounded(channel: ByteReadChannel, maxBytes: Long): ByteArray {
+        val out = Buffer()
+        val chunk = ByteArray(DOWNLOAD_CHUNK)
+        while (true) {
+            val n = channel.readAvailable(chunk, 0, chunk.size)
+            if (n < 0) break
+            if (out.size + n > maxBytes) throw PreviewTooLargeException(maxBytes)
+            out.write(chunk, 0, n)
+        }
+        return out.readByteArray()
     }
 
     /** 站内相对地址（以 `/` 开头）补全为账户站点的绝对地址 */
@@ -126,8 +153,13 @@ class ViewerEnvironment internal constructor(
         /** 签名地址在过期前多久刷新 */
         val URL_REFRESH_MARGIN: Duration = 60.seconds
         const val MAX_SIBLING_PAGES = 10
+        private const val DOWNLOAD_CHUNK = 64 * 1024
     }
 }
+
+/** 内容超出内存型预览（文本、字幕、README）的大小上限 */
+class PreviewTooLargeException(val limitBytes: Long) :
+    CloudreveException("Content exceeds preview limit of $limitBytes bytes")
 
 /** 文件元数据中某前缀的条目（如 `exif:`、`music:`、`stream:`），按键排序 */
 fun metadataWithPrefix(file: FileItem, prefix: String): List<MetadataEntry> =

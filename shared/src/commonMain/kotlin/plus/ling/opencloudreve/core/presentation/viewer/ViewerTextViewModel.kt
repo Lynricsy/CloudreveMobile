@@ -1,5 +1,7 @@
 package plus.ling.opencloudreve.core.presentation.viewer
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import plus.ling.opencloudreve.core.api.ApiException
 import plus.ling.opencloudreve.core.api.ErrorCode
 import plus.ling.opencloudreve.core.api.LockConflict
@@ -78,6 +80,8 @@ data class ViewerTextState(
     val loading: Boolean = true,
     /** 加载失败 */
     val error: UiError? = null,
+    /** 内容超出内置文本预览上限（[ViewerTextViewModel.MAX_PREVIEW_BYTES]）：此时 [error] 为 FileTooLarge，平台引导用其他应用打开或下载 */
+    val tooLarge: Boolean = false,
     val saving: Boolean = false,
     /** 40076：文件已被他人修改。平台询问“覆盖”（[ViewerTextIntent.Overwrite]）或“另存为”（[ViewerTextIntent.SaveAs]） */
     val staleVersion: Boolean = false,
@@ -175,10 +179,14 @@ class ViewerTextViewModel(
     private fun saveTarget(): String = currentState.file.linkedUri
 
     private fun load() {
-        updateState { it.copy(loading = true, error = null) }
-        launchCatching(onError = { e -> updateState { it.copy(loading = false, error = e) } }) {
+        updateState { it.copy(loading = true, error = null, tooLarge = false) }
+        launchCatching(onError = { e -> updateState { it.copy(loading = false, error = e, tooLarge = e.kind == ErrorKind.FileTooLarge) } }) {
+            // 元数据大小只代表当前版本；查看历史版本时交给读取时的累计上限
+            val currentVersion = params.version == null || params.version == params.file.primaryEntity
+            if (currentVersion && params.file.size > MAX_PREVIEW_BYTES) throw PreviewTooLargeException(MAX_PREVIEW_BYTES)
             val url = env.url(params.file, params.version, params.contextHint)
-            val decoded = TextCodec.decode(env.download(params.accountId, url.url))
+            val bytes = env.download(params.accountId, url.url, MAX_PREVIEW_BYTES)
+            val decoded = withContext(Dispatchers.Default) { TextCodec.decode(bytes) }
             updateState { it.copy(loading = false, original = decoded.text, draft = decoded.text, encoding = decoded.encoding) }
         }
     }
@@ -230,6 +238,9 @@ class ViewerTextViewModel(
     }
 
     companion object {
+        /** 内置文本预览/编辑一次读入内存的上限（字节）；超出时报 FileTooLarge 并置 [ViewerTextState.tooLarge] */
+        const val MAX_PREVIEW_BYTES: Long = 5L * 1024 * 1024
+
         /** 只读判定：查看历史版本、不是自己的文件、或位于分享/回收站/与我共享中 */
         fun isReadOnly(params: ViewerParams): Boolean {
             val file = params.file

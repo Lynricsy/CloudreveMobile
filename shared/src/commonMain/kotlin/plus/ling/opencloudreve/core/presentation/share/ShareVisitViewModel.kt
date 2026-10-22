@@ -339,7 +339,7 @@ class ShareVisitViewModel(
         if (found.size > README_MAX_BYTES) return
         val text = try {
             val url = viewer.url(found, null, currentState.contextHint)
-            viewer.download(accountId, url.url).takeIf { it.size <= README_MAX_BYTES }?.let { TextCodec.decode(it).text }
+            TextCodec.decode(viewer.download(accountId, url.url, README_MAX_BYTES)).text
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
