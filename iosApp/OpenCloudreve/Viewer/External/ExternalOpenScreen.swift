@@ -10,6 +10,8 @@ struct ExternalOpenScreen: View {
 
     @State private var phase: Phase = .preparing
     @State private var progress: Progress?
+    /// 重试时递增：下载在随视图取消的 `.task(id:)` 里执行
+    @State private var attempt = 0
 
     private enum Phase {
         case preparing
@@ -55,7 +57,7 @@ struct ExternalOpenScreen: View {
                 }
             case let .failed(message):
                 ViewerStatusView(status: .failed(message)) {
-                    Task { await run() }
+                    attempt += 1
                 }
             }
         }
@@ -67,7 +69,7 @@ struct ExternalOpenScreen: View {
                 }
             }
         }
-        .task { await run() }
+        .task(id: attempt) { await run() }
     }
 
     private func run() async {
@@ -81,38 +83,19 @@ struct ExternalOpenScreen: View {
             phase = .failed(failure.message)
         case let .success(address):
             phase = .downloading
+            var destination: URL?
             do {
-                let destination = try RemoteFile.cacheURL(fileName: file.name)
-                try await download(from: address, to: destination)
-                phase = .ready(destination)
+                let target = try RemoteFile.cacheURL(fileName: file.name)
+                destination = target
+                try await ExternalDownload.download(from: address, to: target) { progress = $0 }
+                phase = .ready(target)
             } catch {
-                phase = .failed(String(localized: "下载失败，请检查网络后重试"))
-            }
-        }
-    }
-
-    /// 下载并显示进度（`URLSessionDownloadTask.progress`）
-    private func download(from url: URL, to destination: URL) async throws {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
-            let task = URLSession.shared.downloadTask(with: url) { temporary, response, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                let status = (response as? HTTPURLResponse)?.statusCode ?? 200
-                guard let temporary, (200..<300).contains(status) else {
-                    continuation.resume(throwing: URLError(.badServerResponse))
-                    return
-                }
-                do {
-                    try FileManager.default.moveItem(at: temporary, to: destination)
-                    continuation.resume()
-                } catch {
-                    continuation.resume(throwing: error)
+                // 本次新建的缓存目录（失败或关闭预览时不留下文件）
+                if let destination { try? FileManager.default.removeItem(at: destination.deletingLastPathComponent()) }
+                if !Task.isCancelled {
+                    phase = .failed(String(localized: "下载失败，请检查网络后重试"))
                 }
             }
-            progress = task.progress
-            task.resume()
         }
     }
 
