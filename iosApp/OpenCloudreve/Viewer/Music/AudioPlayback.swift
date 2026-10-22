@@ -23,18 +23,15 @@ final class AudioPlayback {
     var isActive: Bool { state != nil }
 
     @ObservationIgnored private var viewModel: ViewerAudioViewModel?
+    /// 当前播放列表所属的账户与版本
+    @ObservationIgnored private var identity: AudioQueuePolicy.Identity?
     @ObservationIgnored private var stateTask: Task<Void, Never>?
     @ObservationIgnored private let player = AVQueuePlayer()
     /// 已排队的播放项 → 曲目路径与地址
-    @ObservationIgnored private var queued: [ObjectIdentifier: QueuedTrack] = [:]
+    @ObservationIgnored private var queued: [ObjectIdentifier: AudioQueuePolicy.Track] = [:]
     @ObservationIgnored private var artworkPath: String?
     @ObservationIgnored private var timeObserver: Any?
     @ObservationIgnored private var endObserver: (any NSObjectProtocol)?
-
-    private struct QueuedTrack {
-        let path: String
-        let url: String
-    }
 
     private init() {
         timeObserver = player.addPeriodicTimeObserver(
@@ -58,13 +55,20 @@ final class AudioPlayback {
 
     // MARK: - 播放列表
 
-    /// 从预览页打开：同一播放列表内的曲目直接切换，否则以该文件所在目录新建播放列表
+    /// 从预览页打开：同一账户、同一版本的播放列表内的曲目直接切换，否则以该文件所在目录新建播放列表
     func open(params: ViewerParams, path: String) {
-        if let state, let index = state.tracks.firstIndex(where: { $0.file.path == path }) {
+        let requested = AudioQueuePolicy.Identity(accountId: params.accountId, version: params.version)
+        if let state, let index = AudioQueuePolicy.reusableIndex(
+            current: identity,
+            requested: requested,
+            trackPaths: state.tracks.map(\.file.path),
+            path: path
+        ) {
             if state.current?.file.path != path { send(ViewerAudioIntentPlay(index: Int32(index))) }
             return
         }
         stop()
+        identity = requested
         let viewModel = CoreGraph.shared.viewerAudioViewModel(params: params)
         self.viewModel = viewModel
         stateTask = Task { [weak self, viewModel] in
@@ -137,6 +141,7 @@ final class AudioPlayback {
         stateTask = nil
         viewModel?.dispose()
         viewModel = nil
+        identity = nil
         state = nil
         player.pause()
         player.removeAllItems()
@@ -158,28 +163,41 @@ final class AudioPlayback {
         apply(viewModel.state.value)
     }
 
-    private var playingPath: String? {
-        player.currentItem.flatMap { queued[ObjectIdentifier($0)]?.path }
+    private var playingTrack: AudioQueuePolicy.Track? {
+        player.currentItem.flatMap { queued[ObjectIdentifier($0)] }
     }
 
     private func apply(_ next: ViewerAudioState) {
         state = next
         guard let current = next.current else { return }
         let path = current.file.path
-        if playingPath != path {
-            guard let url = current.url?.url, let address = URL(string: url) else {
-                // 地址还在获取：等下一次状态
-                player.pause()
-                return
-            }
+        let address = current.url.flatMap { resolved in URL(string: resolved.url).map { (resolved.url, $0) } }
+        switch AudioQueuePolicy.currentItemAction(playing: playingTrack, path: path, url: address?.0) {
+        case .keep:
+            break
+        case .waitForAddress:
+            player.pause()
+            return
+        case .start:
+            guard case let (url, location)? = address else { return }
             player.removeAllItems()
             queued.removeAll()
-            enqueue(path: path, url: url, address: address)
+            enqueue(path: path, url: url, address: location)
             elapsed = 0
             duration = 0
             activateSession()
             player.play()
             isPlaying = true
+        case .replace:
+            // VM 在旧地址过期前刷新了当前曲目：换成新地址的播放项，接着原进度，保持播放/暂停
+            guard case let (url, location)? = address else { return }
+            let position = player.currentTime()
+            let wasPlaying = player.timeControlStatus != .paused
+            player.removeAllItems()
+            queued.removeAll()
+            enqueue(path: path, url: url, address: location)
+            player.seek(to: position, toleranceBefore: .zero, toleranceAfter: .zero)
+            if wasPlaying { player.play() }
         }
         queueNext(of: next)
         loadArtwork(path: path, cover: current.coverUrl)
@@ -204,7 +222,7 @@ final class AudioPlayback {
 
     private func enqueue(path: String, url: String, address: URL) {
         let item = AVPlayerItem(url: address)
-        queued[ObjectIdentifier(item)] = QueuedTrack(path: path, url: url)
+        queued[ObjectIdentifier(item)] = AudioQueuePolicy.Track(path: path, url: url)
         player.insert(item, after: nil)
     }
 
