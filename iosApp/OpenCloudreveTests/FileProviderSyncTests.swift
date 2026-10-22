@@ -6,6 +6,7 @@ import Testing
 
 /// 主 App 操作后系统“文件”的刷新：先更新受影响目录的缓存再发信号；工作集同一目录只取最新缓存
 struct FileProviderSyncTests {
+    @MainActor
     @Test(.timeLimit(.minutes(1)))
     func signalIsSentOnlyAfterSlowListingRefreshFinishes() async {
         let events = Mutex<[String]>([])

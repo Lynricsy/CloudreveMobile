@@ -17,6 +17,7 @@ enum FileProviderSync {
     }
 
     /// 依次刷新 [directories] 的缓存，全部结束后（成功与否）发信号
+    @MainActor
     static func refreshThenSignal(
         directories: [String],
         refresh: (String) async -> Void,
