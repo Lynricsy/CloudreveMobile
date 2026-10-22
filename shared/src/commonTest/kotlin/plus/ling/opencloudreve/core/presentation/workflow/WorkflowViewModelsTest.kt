@@ -2,6 +2,7 @@ package plus.ling.opencloudreve.core.presentation.workflow
 
 import app.cash.turbine.test
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.resetMain
@@ -131,6 +132,96 @@ class WorkflowViewModelsTest {
         val calls = progressCalls
         realDelay(100)
         assertEquals(calls, progressCalls)
+        vm.dispose()
+    }
+
+    private fun generalTask(id: String, status: String = "processing") =
+        """{"id":"$id","type":"create_archive","status":"$status"}"""
+
+    @Test
+    fun refreshDuringLoadMoreKeepsPaginationUsable() = runTest {
+        val hang = CompletableDeferred<Unit>()
+        var moreCalls = 0
+        val env = VmEnv { req ->
+            when {
+                req.apiPath != "/workflow" -> err(404)
+                req.url.parameters["next_page_token"] == null ->
+                    okData("""{"tasks":[${generalTask("g1")}],"pagination":{"is_cursor":true,"next_token":"p2"}}""")
+                else -> {
+                    if (moreCalls++ == 0) hang.await()
+                    okData("""{"tasks":[${generalTask("g2")}],"pagination":{"is_cursor":true}}""")
+                }
+            }
+        }
+        val vm = WorkflowListViewModel(ACCOUNT, TaskCategory.GENERAL, env.workflows, pollInterval = 20.milliseconds)
+        eventually { vm.state.value.rows.size == 1 }
+        vm.on(WorkflowListIntent.LoadMore)
+        eventually { vm.state.value.loadingMore && moreCalls == 1 }
+        vm.on(WorkflowListIntent.Refresh)
+        eventually { !vm.state.value.refreshing && env.server.requests.size == 3 }
+        assertFalse(vm.state.value.loadingMore)
+        vm.on(WorkflowListIntent.LoadMore)
+        eventually { vm.state.value.rows.map { it.id } == listOf("g1", "g2") }
+        assertFalse(vm.state.value.loadingMore)
+        vm.dispose()
+        // 放开被取消的旧请求并等它收尾，避免其续体在 resetMain 之后才回到主调度器
+        hang.complete(Unit)
+        realDelay(200)
+    }
+
+    @Test
+    fun detailFindsTaskOnLaterPageWhenItFinishes() = runTest {
+        // 目标任务 g51 位于第二页；进度为空后需沿游标找到它并识别为已完成
+        var finished = false
+        val env = VmEnv { req ->
+            when {
+                req.apiPath == "/workflow/progress/g51" -> {
+                    finished = true
+                    okData("{}")
+                }
+                req.apiPath != "/workflow" -> err(404)
+                req.url.parameters["next_page_token"] == null ->
+                    okData("""{"tasks":[${generalTask("g99")}],"pagination":{"is_cursor":true,"next_token":"p2"}}""")
+                else -> okData(
+                    """{"tasks":[${generalTask("g51", if (finished) "completed" else "processing")}],"pagination":{"is_cursor":true}}""",
+                )
+            }
+        }
+        val vm = WorkflowListViewModel(ACCOUNT, TaskCategory.GENERAL, env.workflows, pollInterval = 20.milliseconds)
+        eventually { vm.state.value.rows.size == 1 }
+        vm.on(WorkflowListIntent.LoadMore)
+        eventually { vm.state.value.rows.size == 2 }
+        vm.on(WorkflowListIntent.OpenDetail("g51"))
+        eventually { vm.state.value.detail?.row?.status == "completed" && vm.state.value.detail?.polling == false }
+        assertEquals("completed", vm.state.value.rows.single { it.id == "g51" }.status)
+        assertFalse(vm.state.value.detail!!.missing)
+        vm.dispose()
+    }
+
+    @Test
+    fun detailStopsPollingWhenTaskNoLongerExists() = runTest {
+        var listed = true
+        val env = VmEnv { req ->
+            when {
+                req.apiPath == "/workflow/progress/g1" -> okData("{}")
+                req.apiPath != "/workflow" -> err(404)
+                req.url.parameters["next_page_token"] == null -> if (listed) {
+                    okData("""{"tasks":[${generalTask("g1")}],"pagination":{"is_cursor":true,"next_token":"p2"}}""")
+                } else {
+                    okData("""{"tasks":[${generalTask("g9")}],"pagination":{"is_cursor":true,"next_token":"p2"}}""")
+                }
+                else -> okData("""{"tasks":[${generalTask("g0")}],"pagination":{"is_cursor":true}}""")
+            }
+        }
+        val vm = WorkflowListViewModel(ACCOUNT, TaskCategory.GENERAL, env.workflows, pollInterval = 20.milliseconds)
+        eventually { vm.state.value.rows.size == 1 }
+        // 打开详情前任务已被删除：所有分页都找不到
+        listed = false
+        vm.on(WorkflowListIntent.OpenDetail("g1"))
+        eventually { vm.state.value.detail?.missing == true && vm.state.value.detail?.polling == false }
+        val progressCalls = env.server.requests.count { it.apiPath == "/workflow/progress/g1" }
+        realDelay(100)
+        assertEquals(progressCalls, env.server.requests.count { it.apiPath == "/workflow/progress/g1" })
         vm.dispose()
     }
 

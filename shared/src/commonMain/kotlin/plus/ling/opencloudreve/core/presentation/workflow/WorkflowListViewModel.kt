@@ -74,6 +74,8 @@ data class WorkflowDetail(
     val progress: Map<String, TaskProgress> = emptyMap(),
     /** 正在轮询进度 */
     val polling: Boolean = false,
+    /** 任务已不存在（遍历全部分页都找不到，通常已被删除）；此时停止轮询 */
+    val missing: Boolean = false,
 )
 
 data class WorkflowListState(
@@ -138,7 +140,15 @@ class WorkflowListViewModel(
 ) {
     private var nextToken: String? = null
     private var loadJob: Job? = null
+
+    /** 追加页请求；重载、切换分类、进入后台时取消 */
+    private var moreJob: Job? = null
     private var detailJob: Job? = null
+
+    /** 详情任务上次被找到的那一页的游标（按 ID 倒序游标分页，任务之后仍在该游标之后） */
+    private var detailCursor: DetailCursor? = null
+
+    private data class DetailCursor(val id: String, val category: String, val token: String?)
 
     init {
         load(refreshing = false)
@@ -174,15 +184,18 @@ class WorkflowListViewModel(
             currentState.detail?.let { if (it.row.isActive) pollDetail(it.row.id) }
         } else {
             loadJob?.cancel()
+            moreJob?.cancel()
             detailJob?.cancel()
-            updateState { s -> s.copy(polling = false, refreshing = false, detail = s.detail?.copy(polling = false)) }
+            updateState { s -> s.copy(polling = false, refreshing = false, loadingMore = false, detail = s.detail?.copy(polling = false)) }
         }
     }
 
     private fun load(refreshing: Boolean) {
         loadJob?.cancel()
+        moreJob?.cancel()
         val category = currentState.category
-        updateState { it.copy(loading = it.rows.isEmpty(), refreshing = refreshing && it.rows.isNotEmpty(), error = null) }
+        // 被取消的追加页不会再回收 loadingMore，由新的一次查询复位
+        updateState { it.copy(loading = it.rows.isEmpty(), refreshing = refreshing && it.rows.isNotEmpty(), loadingMore = false, error = null) }
         loadJob = if (category == TaskCategory.DOWNLOADING) startDownloadingPoll() else scope.launch {
             try {
                 val page = workflows.list(category, WorkflowListState.PAGE_SIZE)
@@ -240,8 +253,8 @@ class WorkflowListViewModel(
     private fun loadMore() {
         val s = currentState
         val token = nextToken
-        if (!s.hasMore || s.loadingMore || s.loading || token == null || s.category == TaskCategory.DOWNLOADING) return
-        loadJob = scope.launch {
+        if (!s.hasMore || s.loadingMore || s.loading || s.refreshing || token == null || s.category == TaskCategory.DOWNLOADING) return
+        moreJob = scope.launch {
             updateState { it.copy(loadingMore = true) }
             try {
                 val page = workflows.list(s.category, WorkflowListState.PAGE_SIZE, token)
@@ -284,8 +297,8 @@ class WorkflowListViewModel(
                     }
                     if (progress != null) updateState { s -> s.copy(detail = s.detail?.copy(progress = progress)) }
                     if (progress.isNullOrEmpty()) refreshTask(id)
-                    val row = currentState.detail?.row ?: break
-                    if (!row.isActive) break
+                    val detail = currentState.detail ?: break
+                    if (detail.missing || !detail.row.isActive) break
                     delay(pollInterval)
                 }
             } catch (e: CancellationException) {
@@ -297,24 +310,49 @@ class WorkflowListViewModel(
         }
     }
 
-    /** 重新拉取任务所在分类的第一页更新该任务；远程下载离开“下载中”后到“已完成”里找 */
+    /**
+     * 刷新详情任务的状态：在其所在分类中沿游标分页查找（远程下载离开“下载中”后到“已完成”里找）；
+     * 全部分页都找不到说明任务已被删除，标记 [WorkflowDetail.missing]。
+     */
     private suspend fun refreshTask(id: String) {
         val row = currentState.detail?.row ?: return
         val primary = categoryOf(row)
-        val found = workflows.list(primary, WorkflowListState.PAGE_SIZE).tasks.firstOrNull { it.id == id }
-            ?: if (primary == TaskCategory.DOWNLOADING) {
-                workflows.list(TaskCategory.DOWNLOADED, WorkflowListState.PAGE_SIZE).tasks.firstOrNull { it.id == id }
-            } else {
-                null
-            }
-        if (found == null) return
+        val categories = if (primary == TaskCategory.DOWNLOADING) listOf(primary, TaskCategory.DOWNLOADED) else listOf(primary)
+        val found = categories.firstNotNullOfOrNull { findTask(it, id) }
+        if (found == null) {
+            updateState { s -> s.copy(detail = s.detail?.let { d -> if (d.row.id == id) d.copy(missing = true) else d }) }
+            return
+        }
         val updated = WorkflowTaskRow(found)
         updateState { s ->
             s.copy(
-                detail = s.detail?.copy(row = updated),
+                detail = s.detail?.let { d -> if (d.row.id == id) d.copy(row = updated) else d },
                 rows = s.rows.map { if (it.id == id) updated else it },
             )
         }
+    }
+
+    /** 先从上次找到该任务的那一页开始找，找不到再从第一页遍历 */
+    private suspend fun findTask(category: String, id: String): WorkflowTask? {
+        val cached = detailCursor?.takeIf { it.id == id && it.category == category }
+        if (cached?.token != null) scanTasks(category, id, cached.token)?.let { return it }
+        return scanTasks(category, id, null)
+    }
+
+    /** 从游标 [start] 起逐页查找；找到时记住所在页的游标 */
+    private suspend fun scanTasks(category: String, id: String, start: String?): WorkflowTask? {
+        var token = start
+        val visited = HashSet<String?>()
+        while (visited.add(token)) {
+            val page = workflows.list(category, WorkflowListState.PAGE_SIZE, token)
+            page.tasks.firstOrNull { it.id == id }?.let {
+                detailCursor = DetailCursor(id, category, token)
+                return it
+            }
+            if (!page.pagination.hasMore) return null
+            token = page.pagination.nextToken ?: return null
+        }
+        return null
     }
 
     private fun categoryOf(row: WorkflowTaskRow): String = when {
