@@ -40,6 +40,21 @@ struct TransferLogicTests {
         #expect(FileNaming.sanitize("", fallback: "") == "file")
     }
 
+    /// 服务端返回的名称（File Provider 下载/上传暂存）不能借 `..`、`/` 写出暂存目录
+    @Test(arguments: ["../../opencloudreve.db", "a/../../b.txt", "..", "/etc/passwd", "dir/../../x"])
+    func containedNameStaysInsideDirectory(_ name: String) throws {
+        let directory = URL(filePath: "/private/var/group/tmp/FileProvider/1234/", directoryHint: .isDirectory)
+        let url = try FileNaming.contained(name, in: directory)
+        #expect(url.deletingLastPathComponent().path(percentEncoded: false).hasPrefix("/private/var/group/tmp/FileProvider/1234"))
+        #expect(!url.lastPathComponent.contains("/"))
+        #expect(url.lastPathComponent != "..")
+    }
+
+    @Test func containedNameKeepsOrdinaryNames() throws {
+        let directory = URL(filePath: "/tmp/staging/", directoryHint: .isDirectory)
+        #expect(try FileNaming.contained("报告 v2.pdf", in: directory).lastPathComponent == "报告 v2.pdf")
+    }
+
     @Test func uniqueURLSkipsExistingFiles() throws {
         let directory = FileManager.default.temporaryDirectory.appending(path: "naming-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)

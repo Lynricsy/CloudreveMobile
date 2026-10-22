@@ -17,6 +17,23 @@ enum FileNaming {
         return cleaned
     }
 
+    /// [directory] 下以服务端/外部给出的 [name] 命名的文件：先清理分隔符等非法字符，
+    /// 再确认标准化后的路径仍直接位于 [directory] 内（不允许借 `..`、`/` 写到目录之外）
+    static func contained(_ name: String, in directory: URL) throws -> URL {
+        let base = directory.standardizedFileURL
+        let url = base.appending(path: sanitize(name, fallback: "file"), directoryHint: .notDirectory).standardizedFileURL
+        guard trimmedPath(url.deletingLastPathComponent()) == trimmedPath(base) else {
+            throw CocoaError(.fileWriteInvalidFileName)
+        }
+        return url
+    }
+
+    private static func trimmedPath(_ url: URL) -> String {
+        var path = url.standardizedFileURL.path(percentEncoded: false)
+        while path.count > 1 && path.hasSuffix("/") { path.removeLast() }
+        return path
+    }
+
     /// 第 [index] 个候选名：0 为原名，之后为 `名称 (n).ext`
     static func candidate(_ name: String, index: Int) -> String {
         guard index > 0 else { return name }

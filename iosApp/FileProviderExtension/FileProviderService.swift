@@ -135,7 +135,8 @@ struct FileProviderService: Sendable {
         await index.record(id: file.id, uri: file.path)
         let parent = try await parentIdentifier(ofURI: file.path)
         let item = FileProviderItem(file: file, parent: parent, containerCapability: nil)
-        let destination = try FileProviderStaging.makeDirectory().appending(path: file.name, directoryHint: .notDirectory)
+        // 名称来自服务端：清理分隔符并确认仍在本次暂存目录内
+        let destination = try FileNaming.contained(file.name, in: FileProviderStaging.makeDirectory())
         _ = try await CoreGraph.shared.directTransferRunner().downloadFile(
             accountId: accountId,
             fileUri: files.resolveLinkedUri(file: file),
@@ -222,7 +223,7 @@ struct FileProviderService: Sendable {
     ) async throws -> FileProviderItem {
         let dir = try FileProviderStaging.makeDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
-        let staged = dir.appending(path: name, directoryHint: .notDirectory)
+        let staged = try FileNaming.contained(name, in: dir)
         try FileManager.default.copyItem(at: contents, to: staged)
         let values = try staged.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey])
         let modified = values.contentModificationDate.map { KotlinLong(longLong: Int64($0.timeIntervalSince1970 * 1000)) }
