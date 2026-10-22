@@ -72,9 +72,12 @@ struct FileProviderService: Sendable {
         )
     }
 
-    /// 工作集：最近缓存过的目录里的全部条目（去重）
+    /// 工作集：最近缓存过的目录里的全部条目（去重）。同一目录只取最新的一份缓存（主 App 操作成功后刷新受影响目录的缓存再发信号）
     func workingSet() async throws -> [FileProviderItem] {
-        let listings = try await files.recentListings(limit: Self.workingSetListings)
+        let cached = try await files.recentListings(limit: Self.workingSetListings)
+        let listings = FileProviderListings.newestPerDirectory(cached) { listing in
+            listing.parent.map { $0.path } ?? listing.files.first.flatMap { FileProviderIdentity.parentURI(of: $0.path) }
+        }
         var seen = Set<NSFileProviderItemIdentifier>()
         var items: [FileProviderItem] = []
         var entries: [(id: String, uri: String)] = []

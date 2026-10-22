@@ -98,7 +98,8 @@ struct FileActionsPresenter: ViewModifier {
                     switch onEnum(of: effect) {
                     case let .succeeded(success):
                         onChanged(success.operation, success.outcome)
-                        FileProviderSignal.workingSetChanged(accountId: context.accountId)
+                        // 先刷新受影响目录的缓存，再通知系统“文件”重新枚举工作集
+                        FileProviderSync.operationSucceeded(accountId: context.accountId, operation: success.operation)
                     case let .failed(failure):
                         // 部分失败由专门的弹窗列出明细
                         if actions.state.partialFailures.isEmpty {
