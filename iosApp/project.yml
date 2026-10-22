@@ -141,6 +141,9 @@ targets:
         CFBundleDisplayName: 上传到 OpenCloudreve
         AppGroupIdentifier: group.plus.ling.opencloudreve
         KeychainAccessGroup: $(AppIdentifierPrefix)plus.ling.opencloudreve.shared
+        # 扩展是独立进程、独立 Info.plist：与主 App 一样允许自托管 HTTP 站点（ATS 按各自 plist 生效）
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
         NSExtension:
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
@@ -181,6 +184,9 @@ targets:
         CFBundleDisplayName: OpenCloudreve
         AppGroupIdentifier: group.plus.ling.opencloudreve
         KeychainAccessGroup: $(AppIdentifierPrefix)plus.ling.opencloudreve.shared
+        # 同上：系统“文件”中浏览 HTTP 站点账户
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
         NSExtension:
           NSExtensionPointIdentifier: com.apple.fileprovider-nonui
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).FileProviderExtension
