@@ -1,5 +1,8 @@
 package plus.ling.opencloudreve.core.transfer
 
+import io.ktor.client.request.header
+import io.ktor.client.request.prepareGet
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.Serializable
 import plus.ling.opencloudreve.core.api.ApiClientProvider
@@ -127,8 +130,11 @@ class DownloadPlanner(
      * - `Failed`：重试次数用尽，任务已标记 failed；
      * - `Continue(false)`：任务已被暂停/取消，执行器直接停止，不要交付文件。
      *
-     * 判定以长度为准：长度等于实体大小的 200/206 即视为完成（合法的 JSON 文件也能下载）；
-     * 长度不符时若响应体是 Cloudreve 错误信封，按“URL 被拒”处理（错误码取信封内的）。
+     * 判定以长度为准：长度等于实体大小的 200/206 视为完成，但 200 响应体恰好是 Cloudreve 错误信封时有歧义——
+     * 服务端签名失败也以 HTTP 200 返回，长度可能凑巧与文件一致。此时用同一 URL 发 `Range: bytes=0-0` 探测：
+     * 签名校验先于 Range 处理，错误只会再返回 200 信封；真实内容（`/file/content` 与各存储方）返回 206。
+     * 只有探测为 206 才完成，探测失败或无法确认一律按“URL 被拒”重下，不交付可疑文件。
+     * 长度不符时若响应体是 Cloudreve 错误信封，同样按“URL 被拒”处理（错误码取信封内的）。
      */
     @Throws(Exception::class)
     suspend fun onCompleted(taskId: String, result: DownloadResult): TransferOutcome {
@@ -140,7 +146,8 @@ class DownloadPlanner(
         val expected = row.size
         val rangeStart = if (result.statusCode == 206) contentRangeStart(result.contentRange) else 0L
         val rangeOk = result.resumeOffset == null || rangeStart == null || rangeStart == result.resumeOffset
-        if (rangeOk && result.totalBytes == expected) {
+        val ambiguous = result.statusCode == 200 && errorEnvelope(result) != null
+        if (rangeOk && result.totalBytes == expected && (!ambiguous || servesRealContent(row))) {
             if (!repository.transitionIfActive(taskId, TransferState.COMPLETED)) return TransferOutcome.Continue(false)
             repository.setBytesDone(taskId, result.totalBytes)
             repository.setResumeBlob(taskId, null)
@@ -236,6 +243,23 @@ class DownloadPlanner(
         if (row.bytes_done > 0 || row.resume_blob != null) repository.resetDownloadProgress(row.id)
         repository.setDownloadPin(row.id, entity, file.size)
         return repository.row(row.id) ?: row
+    }
+
+    /**
+     * 用任务当前的签名 URL 发一个 1 字节的 Range 请求：返回 206 说明 URL 有效、响应是真实内容。
+     * 没有 URL、请求失败或返回其它状态都视为无法确认（返回 false）。
+     */
+    private suspend fun servesRealContent(row: TransferTask): Boolean {
+        val url = row.downloadSession()?.url ?: return false
+        return try {
+            clients.client(row.account_id).http.prepareGet(url) {
+                header(HttpHeaders.Range, "bytes=0-0")
+            }.execute { it.status.value == 206 }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            false
+        }
     }
 
     /**

@@ -1,5 +1,8 @@
 package plus.ling.opencloudreve.core.transfer
 
+import io.ktor.client.engine.mock.respond
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.headersOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -127,15 +130,76 @@ class DownloadPlannerTest {
         assertEquals(0, again.resumeOffset, "写入的错误正文作废，从 0 开始")
     }
 
+    /** 内容端点的 GET（不含 `POST /file/url`） */
+    private fun isContent(r: Recorded) = r.method == "GET" && r.url.startsWith("$SITE/api/v4/file/content/")
+
     @Test
-    fun jsonFileOfPinnedSizeCompletes() = runTest {
+    fun signatureErrorEnvelopeOfExactPinnedSizeIsNotCompleted() = runTest {
+        // 文件大小恰好等于错误信封长度：长度核对无法区分，必须再确认
+        val envelope = """{"code":40071,"msg":"invalid sign","correlation_id":"c"}"""
+        var n = 0
+        val env = TransferEnv { r ->
+            when {
+                isFileInfo(r) -> fileInfo(envelope.length.toLong())
+                isUrl(r) -> { n++; ok(urlResponse(n, "2030-01-01T00:00:00Z")) }
+                // 签名校验先于 Range 处理：探测也只会得到同一个 200 错误信封
+                isContent(r) -> raw(envelope, contentType = "application/json; charset=utf-8")
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.repository.createDownload(ACCOUNT, "cloudreve://my/a.json", "a.json", envelope.length.toLong(), "/dl/a.json")
+        env.downloads.prepare(task.id)
+
+        val outcome = env.downloads.onCompleted(
+            task.id,
+            result(envelope.length.toLong(), body = envelope, type = "application/json; charset=utf-8"),
+        )
+
+        assertEquals(TransferOutcome.RetryAfter(1000), outcome)
+        assertEquals(TransferState.RUNNING, env.repository.task(task.id)!!.state, "等长的错误正文也不能当作下载完成")
+        val again = env.downloads.prepare(task.id)
+        assertEquals("$SITE/api/v4/file/content/e1/0/a.bin?sign=s2", again.url, "被拒的签名 URL 已丢弃，重新获取")
+        assertEquals(0, again.resumeOffset)
+    }
+
+    @Test
+    fun jsonFileOfPinnedSizeCompletesAfterRangeProbe() = runTest {
+        // 内容恰好是 Cloudreve 错误信封形状的合法 JSON 文件：内容端点对 Range 返回 206，确认是真实内容
         val content = """{"code":40020,"msg":"just a json file"}"""
-        val env = TransferEnv { r -> if (isFileInfo(r)) fileInfo(content.length.toLong()) else ok(urlResponse(1, "2030-01-01T00:00:00Z")) }
+        val env = TransferEnv { r ->
+            when {
+                isFileInfo(r) -> fileInfo(content.length.toLong())
+                isUrl(r) -> ok(urlResponse(1, "2030-01-01T00:00:00Z"))
+                isContent(r) && r.headers["Range"] == "bytes=0-0" ->
+                    respond("{", HttpStatusCode.PartialContent, headersOf("Content-Range", "bytes 0-0/${content.length}"))
+                else -> error("unexpected ${r.method} ${r.url} ${r.headers}")
+            }
+        }
         val task = env.repository.createDownload(ACCOUNT, "cloudreve://my/a.json", "a.json", content.length.toLong(), "/dl/a.json")
         env.downloads.prepare(task.id)
         val outcome = env.downloads.onCompleted(task.id, result(content.length.toLong(), body = content, type = "application/json"))
-        assertEquals(TransferOutcome.Continue(true), outcome, "长度与实体一致的合法 JSON 文件正常完成")
+        assertEquals(TransferOutcome.Continue(true), outcome, "长度一致且 Range 探测为 206 的 JSON 文件正常完成")
         assertEquals(TransferState.COMPLETED, env.repository.task(task.id)!!.state)
+        assertEquals(1, env.requests.count(::isContent), "只在有歧义时探测一次")
+    }
+
+    @Test
+    fun ambiguousJsonIsNotDeliveredWhenProbeFails() = runTest {
+        // 探测失败（网络/5xx）时无法确认：宁可重下，不交付可能是错误正文的文件
+        val content = """{"code":40020,"msg":"maybe an error"}"""
+        val env = TransferEnv { r ->
+            when {
+                isFileInfo(r) -> fileInfo(content.length.toLong())
+                isUrl(r) -> ok(urlResponse(1, "2030-01-01T00:00:00Z"))
+                isContent(r) -> respond("busy", HttpStatusCode.ServiceUnavailable)
+                else -> error("unexpected ${r.method} ${r.url}")
+            }
+        }
+        val task = env.repository.createDownload(ACCOUNT, "cloudreve://my/a.json", "a.json", content.length.toLong(), "/dl/a.json")
+        env.downloads.prepare(task.id)
+        val outcome = env.downloads.onCompleted(task.id, result(content.length.toLong(), body = content, type = "application/json"))
+        assertEquals(TransferOutcome.RetryAfter(1000), outcome)
+        assertEquals(TransferState.RUNNING, env.repository.task(task.id)!!.state)
     }
 
     @Test
