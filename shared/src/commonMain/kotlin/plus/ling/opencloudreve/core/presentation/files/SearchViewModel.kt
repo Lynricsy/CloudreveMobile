@@ -93,6 +93,9 @@ class SearchViewModel(
 ) : CoreViewModel<SearchState, SearchIntent, Nothing>(SearchState(baseUri = CrUri.parse(baseUri).withoutSearch().toString())) {
 
     private var pager: ListingPager? = null
+
+    /** 已提交的全文搜索关键词：翻页只用它，输入框草稿改动不影响当前结果集 */
+    private var fullTextQuery: String? = null
     private var searchJob: Job? = null
 
     init {
@@ -131,6 +134,7 @@ class SearchViewModel(
             SearchIntent.Clear -> {
                 searchJob?.cancel()
                 pager = null
+                fullTextQuery = null
                 updateState {
                     SearchState(baseUri = it.baseUri, fullTextAvailable = it.fullTextAvailable, history = it.history)
                 }
@@ -169,13 +173,11 @@ class SearchViewModel(
         searchJob?.cancel()
         val query = s.query.trim()
         searchJob = scope.launch {
-            if (query.isNotEmpty()) {
-                runQuietly { files.saveSearch(query) }
-                reloadHistory()
-            }
             updateState {
                 it.copy(
                     loading = true,
+                    // 上一次查询被取消的翻页不会再回收 loadingMore
+                    loadingMore = false,
                     submitted = true,
                     error = null,
                     results = emptyList(),
@@ -183,10 +185,15 @@ class SearchViewModel(
                     hasMore = false,
                 )
             }
+            if (query.isNotEmpty()) {
+                runQuietly { files.saveSearch(query) }
+                reloadHistory()
+            }
             try {
                 if (s.fullText) {
                     val r = files.fullTextSearch(query, 0)
                     pager = null
+                    fullTextQuery = query
                     updateState {
                         it.copy(
                             loading = false,
@@ -200,6 +207,7 @@ class SearchViewModel(
                     val uri = buildSearchUri()
                     val p = files.pager(uri)
                     pager = p
+                    fullTextQuery = null
                     val snap = p.refresh()
                     updateState {
                         it.copy(
@@ -222,15 +230,17 @@ class SearchViewModel(
     private fun loadMore() {
         val s = currentState
         if (!s.hasMore || s.loading || s.loadingMore) return
+        val p = pager
+        val submittedQuery = fullTextQuery
+        if (p == null && submittedQuery == null) return
         searchJob = scope.launch {
             updateState { it.copy(loadingMore = true) }
             try {
-                val p = pager
                 if (p != null) {
                     val snap = p.loadMore()
                     updateState { it.copy(loadingMore = false, results = snap.files, hasMore = snap.hasMore) }
-                } else {
-                    val r = files.fullTextSearch(s.query.trim(), s.fullTextHits.size)
+                } else if (submittedQuery != null) {
+                    val r = files.fullTextSearch(submittedQuery, s.fullTextHits.size)
                     updateState {
                         val hits = it.fullTextHits + r.hits
                         it.copy(
