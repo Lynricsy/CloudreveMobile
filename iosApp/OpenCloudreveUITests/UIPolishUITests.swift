@@ -178,7 +178,7 @@ final class UIPolishUITests: XCTestCase {
             let chooser = element(app, "viewer.option.image")
             let deadline = Date.now.addingTimeInterval(30)
             while Date.now < deadline && !image.exists && !chooser.exists {
-                Thread.sleep(forTimeInterval: 0.5)
+                pause(0.5)
             }
             if chooser.exists {
                 capture(app, "iPad-06-viewer-chooser")
