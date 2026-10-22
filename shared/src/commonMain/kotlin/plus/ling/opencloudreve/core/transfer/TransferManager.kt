@@ -101,7 +101,7 @@ class TransferManager(
     suspend fun cancel(taskId: String) {
         val task = repository.task(taskId) ?: return
         if (task.state.isTerminal) return
-        executor?.cancel(taskId)
+        executor?.cancel(task)
         when (task.kind) {
             TransferKind.UPLOAD -> uploadPlanner.cancel(taskId)
             TransferKind.DOWNLOAD -> downloadPlanner.cancel(taskId)

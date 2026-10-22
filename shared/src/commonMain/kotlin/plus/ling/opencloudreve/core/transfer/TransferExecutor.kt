@@ -16,8 +16,11 @@ interface TransferExecutor {
     /** 等价于重新 [enqueue]；规划器会复用仍有效的会话 */
     fun resume(taskId: String)
 
-    /** 中止在途请求并清理该任务的临时文件 */
-    fun cancel(taskId: String)
+    /**
+     * 中止在途请求并清理该任务的临时文件。[task] 是取消前的任务快照（含目标路径等）：
+     * 清理只依据快照，不要在异步完成后回读 DB（`TransferManager.remove` 会紧接着删除任务记录）。
+     */
+    fun cancel(task: TransferItem)
 
     /** 进程启动时接管 `TransferRepository.unfinishedTasks()`：对齐平台在途任务后继续执行 */
     fun reattach()
