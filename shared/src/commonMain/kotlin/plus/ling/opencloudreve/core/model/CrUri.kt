@@ -33,7 +33,10 @@ class CrUri private constructor(
     /** 最后一段名称；根返回空串 */
     fun name(): String = segments.lastOrNull() ?: ""
 
-    /** 进入子路径（每个参数是一个名称，按段编码；名称内的 `/` 会被编码，不会拆段）。结果不带搜索参数 */
+    /**
+     * 进入子路径（每个参数是一个名称，按段编码）。服务端名称不含 `/`；若传入含 `/` 的名称会编码为 `%2F`，
+     * 服务端与 [parse] 都会把它当作分隔符。结果不带搜索参数
+     */
     fun join(vararg names: String): CrUri = joinAll(names.asList())
 
     /** 同 [join]，便于 Swift 传数组 */
@@ -197,12 +200,13 @@ class CrUri private constructor(
                 id = id.takeIf { it.isNotEmpty() }
             }
 
-            // 与 Go `path.Clean` 一致：去掉空段与 `.`，`..` 回退
+            // 与服务端一致（`uri.go`：url.Parse 先解码整条路径，Path() 再 `path.Clean`）：
+            // 先整体解码再按 `/` 分段，`%2F` 也是分隔符；去掉空段与 `.`，`..` 回退。
+            // 若先分段后解码，`..%2Fx` 会成为一个名称段，与服务端解释不同（可越出授权子目录）
             val segments = ArrayList<String>()
-            rawPath.split('/').forEach { raw ->
-                if (raw.isEmpty()) return@forEach
-                when (val seg = UriCodec.decodeComponent(raw)) {
-                    "." -> Unit
+            UriCodec.decodeComponent(rawPath).split('/').forEach { seg ->
+                when (seg) {
+                    "", "." -> Unit
                     ".." -> if (segments.isNotEmpty()) segments.removeAt(segments.size - 1)
                     else -> segments += seg
                 }

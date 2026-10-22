@@ -32,9 +32,10 @@ class CrUriTest {
         assertEquals(listOf("我的 文档", "a+b&c#d?e", "x/y", "-_.!~*'()"), u.segments)
         assertEquals("/我的 文档/a+b&c#d?e/x/y/-_.!~*'()", u.path)
         assertEquals("-_.!~*'()", u.name())
-        // 往返
-        assertEquals(u, CrUri.parse(u.toString()))
-        assertEquals(u.toString(), CrUri.parse(u.toString()).toString())
+        // 往返：名称里的 `/` 编码为 %2F，但服务端（Go url.Parse）解码整条路径后再分段，解析时同样拆成两段
+        val parsed = CrUri.parse(u.toString())
+        assertEquals(listOf("我的 文档", "a+b&c#d?e", "x", "y", "-_.!~*'()"), parsed.segments)
+        assertEquals("cloudreve://my/%E6%88%91%E7%9A%84%20%E6%96%87%E6%A1%A3/a%2Bb%26c%23d%3Fe/x/y/-_.!~*'()", parsed.toString())
     }
 
     @Test
@@ -54,6 +55,16 @@ class CrUriTest {
         assertEquals(CrUri.my(), u.root())
         assertFailsWith<IllegalArgumentException> { CrUri.parse("http://my/a") }
         assertNull(CrUri.parseOrNull("cloudreve://"))
+    }
+
+    @Test
+    fun encodedSeparatorsNormalizeLikeServer() {
+        // `pkg/filemanager/fs/uri.go`：url.Parse 把 %2F 解码为 `/`，Path() 再 path.Clean
+        assertEquals(listOf("secret"), CrUri.parse("cloudreve://my/allowed/..%2Fsecret").segments)
+        assertEquals(listOf("secret"), CrUri.parse("cloudreve://my/allowed/..%2fsecret").segments)
+        assertEquals(listOf("secret"), CrUri.parse("cloudreve://my/allowed/%2e%2e/secret").segments)
+        assertEquals(listOf("a", "b"), CrUri.parse("cloudreve://my/a%2Fb").segments)
+        assertEquals(emptyList(), CrUri.parse("cloudreve://my/a/%2E%2E%2F..").segments)
     }
 
     @Test
