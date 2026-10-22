@@ -21,6 +21,8 @@ import plus.ling.opencloudreve.core.db.OpenCloudreveDatabase
 import plus.ling.opencloudreve.core.model.Token
 import plus.ling.opencloudreve.core.platform.SecretStore
 import kotlin.concurrent.Volatile
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
@@ -34,7 +36,9 @@ import kotlin.time.Instant
  * - 每次刷新都保存服务端签发的新 refresh token；
  * - 刷新返回 40020 或 401、或 refresh token 已过期：清除令牌、把账户标记为失效并发出
  *   [AuthEvent.SignedOut]（`expired = true`），之后 [AuthProvider] 返回 null；
- * - 网络错误不登出，异常原样抛给发起请求的一方。
+ * - 网络错误不登出，异常原样抛给发起请求的一方；
+ * - 会话代际：[saveToken]/[clearToken] 开启新代际，刷新结果在提交前核对代际，
+ *   刷新期间重新登录或登出时丢弃旧结果（不覆盖新令牌、不注销新会话）。
  *
  * 主 App 与扩展共享安全存储：收到 401 或准备刷新前都会从存储重读，以便采用另一进程刚刷新的令牌。
  */
@@ -59,22 +63,33 @@ class SessionStore internal constructor(
         return s.cached
     }
 
-    /** 保存（覆盖）令牌 */
+    /** 保存（覆盖）令牌：开启新的会话代际，进行中的旧刷新结果随之作废 */
     fun saveToken(accountId: String, token: Token) {
-        secrets.put(key(accountId), CloudreveJson.encodeToString(Token.serializer(), token).encodeToByteArray())
-        session(accountId).apply {
-            cached = token
-            loaded = true
+        val s = session(accountId)
+        s.commit.withLock {
+            s.generation++
+            writeToken(accountId, s, token)
         }
     }
 
-    /** 删除令牌（登出） */
+    /** 删除令牌（登出）：同样开启新代际，晚到的旧刷新不会写回令牌或注销 */
     fun clearToken(accountId: String) {
-        secrets.remove(key(accountId))
-        session(accountId).apply {
-            cached = null
-            loaded = true
+        val s = session(accountId)
+        s.commit.withLock {
+            s.generation++
+            writeToken(accountId, s, null)
         }
+    }
+
+    /** 写入存储与缓存；调用方持有 [AccountSession.commit] */
+    private fun writeToken(accountId: String, s: AccountSession, token: Token?) {
+        if (token == null) {
+            secrets.remove(key(accountId))
+        } else {
+            secrets.put(key(accountId), CloudreveJson.encodeToString(Token.serializer(), token).encodeToByteArray())
+        }
+        s.cached = token
+        s.loaded = true
     }
 
     /** 账户的 [AuthProvider]（同一账户返回同一实例） */
@@ -102,39 +117,49 @@ class SessionStore internal constructor(
         sessions.getOrPut(accountId) { AccountSession() }
 
     /** 从安全存储重读（其它进程可能已经刷新） */
-    private fun reload(accountId: String): Token? {
-        val token = secrets.get(key(accountId))?.let { bytes ->
-            runCatching { CloudreveJson.decodeFromString(Token.serializer(), bytes.decodeToString()) }.getOrNull()
+    private fun reload(accountId: String): Token? = reloadWithGeneration(accountId).first
+
+    /** 重读令牌并取得与之对应的会话代际（在提交锁内读取，避免与并发登录交错） */
+    private fun reloadWithGeneration(accountId: String): Pair<Token?, Long> {
+        val s = session(accountId)
+        return s.commit.withLock {
+            val token = secrets.get(key(accountId))?.let { bytes ->
+                runCatching { CloudreveJson.decodeFromString(Token.serializer(), bytes.decodeToString()) }.getOrNull()
+            }
+            s.cached = token
+            s.loaded = true
+            token to s.generation
         }
-        session(accountId).apply {
-            cached = token
-            loaded = true
-        }
-        return token
     }
 
     /**
      * single-flight 刷新。[observed] 是调用方据以判断“需要刷新”的令牌：
      * 若存储中的 refresh token 已与之不同，说明别人刚刷新过，直接复用。
+     * 进行中的刷新只给同一会话代际复用；重新登录/登出后发起的调用不会加入旧刷新。
      */
     private suspend fun refreshShared(accountId: String, observed: Token): Token? {
         val s = session(accountId)
         val job: Deferred<Token?> = s.mutex.withLock {
-            s.inFlight?.takeIf { it.isActive }?.let { return@withLock it }
-            val latest = reload(accountId) ?: return null
+            s.inFlight?.takeIf { it.job.isActive && it.generation == s.generation }?.let { return@withLock it.job }
+            val (latest, generation) = reloadWithGeneration(accountId)
+            if (latest == null) return null
             if (latest.refreshToken != observed.refreshToken && isFresh(latest)) {
                 return@withLock CompletableDeferred(latest)
             }
             if (latest.refreshExpires <= clock()) {
-                expire(accountId)
-                return null
+                return if (expire(accountId, generation)) null else s.cached
             }
-            scope.async { performRefresh(accountId, latest) }.also { s.inFlight = it }
+            scope.async { performRefresh(accountId, latest, generation) }.also { s.inFlight = InFlight(generation, it) }
         }
         return job.await()
     }
 
-    private suspend fun performRefresh(accountId: String, current: Token): Token? {
+    /**
+     * 刷新 [current]（属于会话代际 [generation]）。提交结果前在提交锁内核对代际：
+     * 期间重新登录或登出则丢弃本次结果（不写回、不注销），返回当前保存的令牌。
+     */
+    private suspend fun performRefresh(accountId: String, current: Token, generation: Long): Token? {
+        val s = session(accountId)
         val siteUrl = database.accountQueries.selectById(accountId).executeAsOneOrNull()?.server_url
             ?: return null // 账户已删除
         return try {
@@ -148,23 +173,32 @@ class SessionStore internal constructor(
                 ),
                 noAuth = true,
             )
-            saveToken(accountId, renewed)
-            renewed
+            s.commit.withLock {
+                if (s.generation != generation) return@withLock s.cached
+                writeToken(accountId, s, renewed)
+                renewed
+            }
         } catch (e: ApiException) {
             if (e.code == ErrorCode.CREDENTIAL_INVALID || e.code == ErrorCode.LOGIN_REQUIRED) {
-                expire(accountId)
-                null
+                if (expire(accountId, generation)) null else s.cached
             } else {
                 throw e
             }
         }
     }
 
-    /** 会话失效：清令牌、标记账户、发事件 */
-    private fun expire(accountId: String) {
-        clearToken(accountId)
-        database.accountQueries.markSessionExpired(accountId)
-        emit(AuthEvent.SignedOut(accountId, expired = true))
+    /** 会话失效：仍是代际 [generation] 时清令牌、标记账户、发事件；已被新登录/登出取代则不动并返回 false */
+    private fun expire(accountId: String, generation: Long): Boolean {
+        val s = session(accountId)
+        val expired = s.commit.withLock {
+            if (s.generation != generation) return@withLock false
+            s.generation++
+            writeToken(accountId, s, null)
+            database.accountQueries.markSessionExpired(accountId)
+            true
+        }
+        if (expired) emit(AuthEvent.SignedOut(accountId, expired = true))
+        return expired
     }
 
     private inner class AccountAuthProvider(private val accountId: String) : AuthProvider {
@@ -180,6 +214,13 @@ class SessionStore internal constructor(
     private class AccountSession {
         val mutex = Mutex()
 
+        /** 提交锁：令牌写入与代际变更的同步边界（非挂起，登录/登出可在任意线程调用） */
+        val commit = CommitLock()
+
+        /** 会话代际：每次登录写入、登出或失效时递增（受 [commit] 保护） */
+        @Volatile
+        var generation = 0L
+
         @Volatile
         var cached: Token? = null
 
@@ -187,7 +228,26 @@ class SessionStore internal constructor(
         var loaded = false
 
         /** 进行中的刷新（受 [mutex] 保护） */
-        var inFlight: Deferred<Token?>? = null
+        var inFlight: InFlight? = null
+    }
+
+    private class InFlight(val generation: Long, val job: Deferred<Token?>)
+
+    /** 极短临界区（写安全存储/标记账户）用的自旋锁；只在登录与刷新提交恰好同时发生时才会竞争 */
+    @OptIn(ExperimentalAtomicApi::class)
+    private class CommitLock {
+        private val held = AtomicInt(0)
+
+        fun <T> withLock(block: () -> T): T {
+            while (!held.compareAndSet(0, 1)) {
+                // 自旋等待对方完成写入
+            }
+            try {
+                return block()
+            } finally {
+                held.store(0)
+            }
+        }
     }
 
     companion object {

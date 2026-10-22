@@ -1,9 +1,12 @@
 package plus.ling.opencloudreve.core.auth
 
 import app.cash.turbine.test
+import io.ktor.client.engine.mock.MockRequestHandleScope
 import io.ktor.client.request.HttpRequestData
+import io.ktor.client.request.HttpResponseData
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -19,6 +22,7 @@ import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.hours
@@ -140,5 +144,71 @@ class SessionStoreTest {
         assertNull(h.sessions.validAccessToken(acc.id))
         assertEquals(0, refreshCalls.load())
         assertTrue(h.accounts.account(acc.id)!!.sessionExpired)
+    }
+
+    /** 刷新挂在闸门上：[respond] 决定闸门放开后刷新请求的结果 */
+    private class GatedRefresh {
+        val started = CompletableDeferred<Unit>()
+        val gate = CompletableDeferred<Unit>()
+    }
+
+    private fun gatedHarness(g: GatedRefresh, respond: suspend MockRequestHandleScope.(AuthHarness) -> HttpResponseData): AuthHarness {
+        lateinit var h: AuthHarness
+        h = AuthHarness { req ->
+            if (req.isRefresh()) {
+                g.started.complete(Unit)
+                g.gate.await()
+                respond(h)
+            } else {
+                envelope(404)
+            }
+        }
+        return h
+    }
+
+    @Test
+    fun lateRefreshSuccessDoesNotOverwriteNewLogin() = runTest {
+        val g = GatedRefresh()
+        val h = gatedHarness(g) { envelope(0, tokenJson(token("stale", 1.hours, it.clock.now))) }
+        val acc = h.accounts.addOrUpdate(SITE, user, token("old", 5.minutes, h.clock.now))
+        val pending = async { h.sessions.validAccessToken(acc.id) }
+        g.started.await()
+        // 刷新在途时同一账户重新登录
+        h.accounts.addOrUpdate(SITE, user, token("relogin", 1.hours, h.clock.now))
+        g.gate.complete(Unit)
+        assertEquals("access-relogin", pending.await())
+        assertEquals("access-relogin", h.sessions.token(acc.id)?.accessToken)
+        assertEquals("access-relogin", h.sessions.validAccessToken(acc.id))
+    }
+
+    @Test
+    fun lateRefreshRejectionDoesNotSignOutNewLogin() = runTest {
+        val g = GatedRefresh()
+        val h = gatedHarness(g) { envelope(40020, msg = "Invalid refresh token") }
+        val acc = h.accounts.addOrUpdate(SITE, user, token("old", 5.minutes, h.clock.now))
+        val pending = async { h.sessions.validAccessToken(acc.id) }
+        g.started.await()
+        h.accounts.addOrUpdate(SITE, user, token("relogin", 1.hours, h.clock.now))
+        h.accounts.authEvents.test {
+            g.gate.complete(Unit)
+            assertEquals("access-relogin", pending.await())
+            expectNoEvents()
+        }
+        assertEquals("access-relogin", h.sessions.token(acc.id)?.accessToken)
+        assertFalse(h.accounts.account(acc.id)!!.sessionExpired)
+    }
+
+    @Test
+    fun lateRefreshSuccessDoesNotRestoreSignedOutToken() = runTest {
+        val g = GatedRefresh()
+        val h = gatedHarness(g) { envelope(0, tokenJson(token("stale", 1.hours, it.clock.now))) }
+        val acc = h.accounts.addOrUpdate(SITE, user, token("old", 5.minutes, h.clock.now))
+        val pending = async { h.sessions.validAccessToken(acc.id) }
+        g.started.await()
+        h.accounts.signOut(acc.id)
+        g.gate.complete(Unit)
+        assertNull(pending.await())
+        assertNull(h.sessions.token(acc.id))
+        assertNull(h.secrets.get("token.${acc.id}"))
     }
 }
