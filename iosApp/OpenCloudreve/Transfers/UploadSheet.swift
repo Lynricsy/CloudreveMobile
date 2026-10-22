@@ -38,12 +38,12 @@ struct UploadSheetContent: View {
     let onDone: @MainActor () -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var candidates: [UploadCandidate] = []
+    /// 候选文件与收件箱副本的所有者：表单以任何方式关闭都会清理未移交的副本
+    @State private var draft = UploadDraft()
     @State private var importing = false
     @State private var pickingMedia = false
     @State private var mediaSelection: [PhotosPickerItem] = []
     @State private var capturing = false
-    @State private var loadingMedia = false
     @State private var errorMessage: String?
     @State private var rejected: [RejectedUpload] = []
     @State private var presentedPicker = false
@@ -51,10 +51,10 @@ struct UploadSheetContent: View {
     var body: some View {
         let state = host.state
         Form {
-            UploadFormSections(host: host, accountId: accountId, candidates: $candidates)
+            UploadFormSections(host: host, accountId: accountId, candidates: $draft.candidates)
             Section {
                 addButton
-                if loadingMedia {
+                if draft.loadingMedia {
                     HStack {
                         ProgressView()
                         Text("正在读取所选项目…")
@@ -68,23 +68,27 @@ struct UploadSheetContent: View {
             Section {
                 PrimaryActionButton(title: "开始上传", busy: state.enqueuing) {
                     host.send(UploadPickerIntentEnqueue(
-                        sources: candidates.map { $0.uploadSource() },
+                        sources: draft.handOff().map { $0.uploadSource() },
                         targetUri: nil,
                         overwrite: false
                     ))
                 }
-                .disabled(candidates.isEmpty || state.enqueuing || loadingMedia)
+                .disabled(draft.candidates.isEmpty || state.enqueuing || draft.loadingMedia)
                 .accessibilityIdentifier("upload.start")
             }
         }
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+        // 入队进行中不能下拉关闭：副本的所有权正在移交
+        .interactiveDismissDisabled(state.enqueuing)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("取消", role: .cancel) {
-                    candidates.forEach { $0.discard() }
+                    draft.close()
                     dismiss()
                 }
+                .disabled(state.enqueuing)
+                .accessibilityIdentifier("upload.cancel")
             }
         }
         .fileImporter(isPresented: $importing, allowedContentTypes: [.item], allowsMultipleSelection: true) { result in
@@ -93,7 +97,7 @@ struct UploadSheetContent: View {
                 var failed = 0
                 for url in urls {
                     if let candidate = try? UploadCandidate.pickedFile(url) {
-                        candidates.append(candidate)
+                        draft.add(candidate)
                     } else {
                         failed += 1
                     }
@@ -112,13 +116,20 @@ struct UploadSheetContent: View {
         .onChange(of: mediaSelection) { _, items in
             guard !items.isEmpty else { return }
             mediaSelection = []
-            Task { await loadMedia(items) }
+            draft.importMedia(count: items.count) { index in
+                try await items[index].loadTransferable(type: InboxMediaFile.self)?.url
+            } onFinish: { failed in
+                errorMessage = failed > 0 ? String(localized: "有 \(failed) 个项目无法读取", comment: "导入照片时失败的数量") : nil
+            }
         }
         .fullScreenCover(isPresented: $capturing) {
             CameraCapture { url in
                 capturing = false
-                if let url, let candidate = try? UploadCandidate.localFile(url) {
-                    candidates.append(candidate)
+                guard let url else { return }
+                if let candidate = try? UploadCandidate.localFile(url) {
+                    draft.add(candidate)
+                } else {
+                    TransferInbox.discard(sourceRef: url.path(percentEncoded: false))
                 }
             }
             .ignoresSafeArea()
@@ -143,6 +154,7 @@ struct UploadSheetContent: View {
                         rejected = enqueued.result.rejected
                     }
                 case let .failed(failure):
+                    draft.handOffFailed()
                     errorMessage = ErrorText.message(failure.error)
                 }
             }
@@ -189,23 +201,5 @@ struct UploadSheetContent: View {
     private func finish() {
         onDone()
         dismiss()
-    }
-
-    private func loadMedia(_ items: [PhotosPickerItem]) async {
-        loadingMedia = true
-        defer { loadingMedia = false }
-        var failed = 0
-        for item in items {
-            do {
-                guard let file = try await item.loadTransferable(type: InboxMediaFile.self) else {
-                    failed += 1
-                    continue
-                }
-                candidates.append(try UploadCandidate.localFile(file.url))
-            } catch {
-                failed += 1
-            }
-        }
-        errorMessage = failed > 0 ? String(localized: "有 \(failed) 个项目无法读取", comment: "导入照片时失败的数量") : nil
     }
 }
