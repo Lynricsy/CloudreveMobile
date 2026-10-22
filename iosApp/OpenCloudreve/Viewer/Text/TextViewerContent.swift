@@ -9,7 +9,8 @@ struct TextViewerContent: View {
     @AppStorage("viewer.text.wraps") private var wraps = true
     /// Markdown 的编辑/预览切换（nil = 按文件类型默认：Markdown 先预览）
     @State private var mode: TextViewerMode?
-    @State private var isDiscardPresented = false
+    /// 等待确认放弃未保存更改的离开动作（关闭 / 切换打开方式 / 用其他应用打开）
+    @State private var pendingLeave: ViewerLeaveAction?
     @State private var isSaveAsPresented = false
     @State private var saveAsName = ""
     @State private var failureMessage: String?
@@ -43,9 +44,9 @@ struct TextViewerContent: View {
                     .accessibilityIdentifier("text.saved")
             }
         }
-        .viewerToolbar(chrome, title: state.file.name) {
+        .viewerToolbar(chrome, title: state.file.name) { action in
             guard host.state.dirty else { return false }
-            isDiscardPresented = true
+            pendingLeave = action
             return true
         }
         .toolbar {
@@ -79,9 +80,16 @@ struct TextViewerContent: View {
                 }
             }
         }
-        .confirmationDialog("有未保存的更改", isPresented: $isDiscardPresented, titleVisibility: .visible) {
-            Button("放弃更改并关闭", role: .destructive) { chrome.close() }
+        .confirmationDialog(
+            "有未保存的更改",
+            isPresented: Binding(get: { pendingLeave != nil }, set: { if !$0 { pendingLeave = nil } }),
+            titleVisibility: .visible,
+            presenting: pendingLeave
+        ) { action in
+            Button(Self.discardTitle(action), role: .destructive) { chrome.perform(action) }
+                .accessibilityIdentifier("text.discard.confirm")
             Button("取消", role: .cancel) {}
+                .accessibilityIdentifier("text.discard.cancel")
         }
         .confirmationDialog("文件已在其他地方被修改", isPresented: $host.isStaleVersionPresented, titleVisibility: .visible) {
             Button("覆盖", role: .destructive) { host.send(ViewerTextIntentOverwrite.shared) }
@@ -135,6 +143,15 @@ struct TextViewerContent: View {
         let copy = String(localized: "\(base) 副本", comment: "另存为的默认文件名，参数为原文件名（不含扩展名）")
         saveAsName = ext.isEmpty ? copy : copy + "." + ext
         isSaveAsPresented = true
+    }
+
+    /// 放弃未保存更改后要执行的离开动作
+    static func discardTitle(_ action: ViewerLeaveAction) -> LocalizedStringKey {
+        switch action {
+        case .close: "放弃更改并关闭"
+        case .switchViewer: "放弃更改并切换打开方式"
+        case .openExternally: "放弃更改并用其他应用打开"
+        }
     }
 
     /// 40049 单独说明（在线编辑的大小上限），其余按通用规则

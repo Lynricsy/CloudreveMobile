@@ -14075,6 +14075,103 @@
           }
         }
       }
+    },
+    "放弃更改并切换打开方式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard Changes and Switch Viewer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放弃更改并切换打开方式"
+          }
+        }
+      }
+    },
+    "放弃更改并用其他应用打开": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard Changes and Open in Another App"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放弃更改并用其他应用打开"
+          }
+        }
+      }
+    },
+    "文件太大，无法在应用内查看": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File Too Large to View in the App"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件太大，无法在应用内查看"
+          }
+        }
+      }
+    },
+    "超过 %@ 的文本请用其他应用打开。": {
+      "comment": "文本预览上限，参数为大小（如 5 MB）",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text files larger than %@ must be opened in another app."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超过 %@ 的文本请用其他应用打开。"
+          }
+        }
+      }
+    },
+    "任务已不存在": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Task No Longer Exists"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任务已不存在"
+          }
+        }
+      }
+    },
+    "它可能已被删除或清理，以下是最后一次获取到的信息。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It may have been deleted or cleaned up. The information below is the last known state."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它可能已被删除或清理，以下是最后一次获取到的信息。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
