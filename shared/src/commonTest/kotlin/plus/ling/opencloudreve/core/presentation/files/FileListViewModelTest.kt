@@ -111,6 +111,7 @@ class FileListViewModelTest {
         vm.on(FileListIntent.ExitSelection)
         assertTrue(vm.state.value.selection.isEmpty())
         vm.dispose()
+        drainAfterDispose()
     }
 
     private fun upload(id: String, target: String, state: TransferState) = TransferItem(
@@ -165,5 +166,9 @@ class FileListViewModelTest {
         vm.on(FileListIntent.SetForeground(true))
         eventually { listCalls() > beforeForeground }
         vm.dispose()
+        drainAfterDispose()
     }
+
+    /** dispose 时仍在途的请求被取消后，其续体会回到主调度器；在 resetMain 之前等它们收尾 */
+    private suspend fun drainAfterDispose() = withContext(Dispatchers.Default) { delay(200) }
 }

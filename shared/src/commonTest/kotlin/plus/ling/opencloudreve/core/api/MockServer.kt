@@ -9,18 +9,24 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.headersOf
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 /** 测试用：记录请求并按处理函数返回响应的 MockEngine 封装 */
+@OptIn(ExperimentalAtomicApi::class)
 class MockServer(
     private val handler: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData,
 ) {
-    val requests = mutableListOf<HttpRequestData>()
-    private val lock = Mutex()
+    private val recorded = AtomicReference(emptyList<HttpRequestData>())
+
+    /** 已收到的请求快照（引擎线程追加、测试线程读取，读取的是不可变副本） */
+    val requests: List<HttpRequestData> get() = recorded.load()
 
     val engine = MockEngine { request ->
-        lock.withLock { requests += request }
+        while (true) {
+            val cur = recorded.load()
+            if (recorded.compareAndSet(cur, cur + request)) break
+        }
         handler(request)
     }
 
