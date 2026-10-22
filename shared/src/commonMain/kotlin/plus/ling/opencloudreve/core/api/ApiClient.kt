@@ -55,6 +55,12 @@ class ApiClient(
     /** 当前可用 access token（给需要自行发请求的模块使用，如本机分片上传、SSE） */
     suspend fun accessToken(): String? = auth?.validAccessToken()
 
+    /**
+     * 请求被 401 拒绝后刷新令牌（给自行发请求、需要按非信封方式解析响应的模块使用，如 SSE 搜索）；
+     * 返回可重放的新 token，无法刷新（匿名或会话失效）返回 null。调用方只应重放一次。
+     */
+    suspend fun renewAfterRejection(rejectedToken: String): String? = auth?.refreshAfterRejection(rejectedToken)
+
     /** 发送请求并返回原始信封（不按 code 抛错，只处理 401 刷新重放） */
     suspend fun envelope(
         method: HttpMethod,

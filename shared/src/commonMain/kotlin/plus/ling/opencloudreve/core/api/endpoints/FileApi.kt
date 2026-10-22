@@ -80,9 +80,35 @@ class FileApi(private val client: ApiClient) {
         return client.get("/file", query)
     }
 
-    /** 搜索可能被服务端切换为 SSE；先自行请求，非 SSE 时按信封处理，401 时交给常规路径刷新重放 */
+    /**
+     * 搜索可能被服务端切换为 SSE：自行请求，按 Content-Type 选择 SSE 或信封解析。
+     * 401 时刷新令牌并重放一次，重放响应同样按 Content-Type 解析（重放仍被拒绝则按信封报错）。
+     */
     private suspend fun listSearch(query: Map<String, Any?>): ListPage {
         val token = client.accessToken()
+        val first = searchOnce(query, token)
+        if (first !is SearchReply.Envelope || first.env.code != ErrorCode.LOGIN_REQUIRED || token == null) {
+            return first.page()
+        }
+        val renewed = client.renewAfterRejection(token) ?: return first.page()
+        return searchOnce(query, renewed).page()
+    }
+
+    /** 一次搜索请求的结果：SSE 已合并的列表，或待处理的信封 */
+    private sealed interface SearchReply {
+        class Sse(val list: ListPage) : SearchReply
+        class Envelope(val env: ApiEnvelope) : SearchReply
+
+        fun page(): ListPage = when (this) {
+            is Sse -> list
+            is Envelope -> {
+                ApiClient.throwIfError(env)
+                ApiClient.decodeData(env.data, ListPage.serializer())
+            }
+        }
+    }
+
+    private suspend fun searchOnce(query: Map<String, Any?>, token: String?): SearchReply {
         val response = try {
             client.http.request(client.apiBase + "/file") {
                 method = HttpMethod.Get
@@ -103,18 +129,14 @@ class FileApi(private val client: ApiClient) {
         }
         val contentType = response.headers[HttpHeaders.ContentType].orEmpty()
         if (contentType.startsWith("text/event-stream")) {
-            return parseSseList(text)
+            return SearchReply.Sse(parseSseList(text))
         }
         val env = try {
             CloudreveJson.decodeFromString(ApiEnvelope.serializer(), text)
         } catch (e: Exception) {
             throw TransportException("Unexpected response (HTTP ${response.status.value})", response.status.value, e)
         }
-        if (env.code == ErrorCode.LOGIN_REQUIRED && token != null) {
-            return client.get("/file", query)
-        }
-        ApiClient.throwIfError(env)
-        return ApiClient.decodeData(env.data, ListPage.serializer())
+        return SearchReply.Envelope(env)
     }
 
     /** `GET /file/info`：[uri] 与 [id] 二选一（仅 uri 为空时用 id） */

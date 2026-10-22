@@ -112,6 +112,52 @@ class EndpointsTest {
     }
 
     @Test
+    fun searchListingReplaysSseAfterTokenRefresh() = runTest {
+        // 首次 401 → 刷新 → 重放；重放响应是 SSE，仍须按 SSE 合并结果，而不是按信封解析报错
+        val sse = buildString {
+            append("event: file\n")
+            append("data:[{\"type\":0,\"id\":\"a\",\"name\":\"a.pdf\",\"size\":1,\"metadata\":{},\"path\":\"cloudreve://my/a.pdf\"}]\n\n")
+            append("event: list\n")
+            append("data:{\"files\":[],\"pagination\":{\"page\":0,\"page_size\":100,\"is_cursor\":true},\"props\":{\"max_page_size\":2000},\"mixed_type\":false}\n\n")
+        }
+        val server = MockServer { req ->
+            when (req.headers[io.ktor.http.HttpHeaders.Authorization]) {
+                "Bearer old" -> json("""{"code":401,"msg":"Login required"}""")
+                "Bearer new" -> json(sse, contentType = "text/event-stream")
+                else -> error("unexpected auth header")
+            }
+        }
+        var refreshes = 0
+        val auth = object : AuthProvider {
+            override suspend fun validAccessToken(): String = "old"
+            override suspend fun refreshAfterRejection(rejectedToken: String): String {
+                assertEquals("old", rejectedToken)
+                refreshes++
+                return "new"
+            }
+        }
+        val uri = CrUri.my().withSearch(SearchParams(names = listOf("*.pdf"))).toString()
+        val page = FileApi(server.client(auth)).list(uri)
+        assertEquals(listOf("a"), page.files.map { it.id })
+        assertEquals(1, refreshes)
+        assertEquals(2, server.requests.size)
+    }
+
+    @Test
+    fun searchListingReplaysOnlyOnceWhenStillRejected() = runTest {
+        val server = MockServer { json("""{"code":401,"msg":"Login required"}""") }
+        val auth = object : AuthProvider {
+            var n = 0
+            override suspend fun validAccessToken(): String = "old"
+            override suspend fun refreshAfterRejection(rejectedToken: String): String = "new${++n}"
+        }
+        val uri = CrUri.my().withSearch(SearchParams(names = listOf("x"))).toString()
+        val e = assertFailsWith<ApiException> { FileApi(server.client(auth)).list(uri) }
+        assertEquals(ErrorCode.LOGIN_REQUIRED, e.code)
+        assertEquals(2, server.requests.size)
+    }
+
+    @Test
     fun fileUrlSendsBodyAndContextHint() = runTest {
         val server = MockServer {
             json("""{"code":0,"msg":"","data":{"urls":[{"url":"https://s3/x?sig"},{"url":""}],"expires":"2026-10-20T12:00:00Z"}}""")
