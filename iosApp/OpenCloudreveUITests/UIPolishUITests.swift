@@ -107,8 +107,9 @@ final class UIPolishUITests: XCTestCase {
     // MARK: - iPad 布局与键盘快捷键
 
     @MainActor
-    func testIPadLayoutAndKeyboardShortcuts() throws {
+    func testIPadLayoutAndKeyboardShortcuts() async throws {
         try XCTSkipUnless(isPad, "只在 iPad 目标上运行")
+        let token = try await TestServerAPI.login(email: email, password: password)
         let app = launch(language: "zh-Hans")
         addTeardownBlock { @MainActor in
             UIPolishUITests.bestEffortSignOut(XCUIApplication())
@@ -129,16 +130,20 @@ final class UIPolishUITests: XCTestCase {
         capture(app, "iPad-02-cmd-n")
         newFolderAlert.buttons["取消"].tap()
 
-        // ⌘R 刷新（不应出错，列表仍在）
-        app.typeKey("r", modifierFlags: .command)
-        XCTAssertTrue(element(app, "file.文档").waitForExistence(timeout: 15), "⌘R 刷新后列表消失")
-
         // 推入子目录后 ⌘N 仍可用（命令目标随可见列表切换）
         element(app, "file.文档").tap()
         XCTAssertTrue(element(app, "file.note-001.txt").waitForExistence(timeout: 30), "文档目录未列出文件")
         capture(app, "iPad-03-folder")
         XCTAssertTrue(pressUntilAppears(app, "n", .command, app.alerts.firstMatch), "子目录中 ⌘N 未弹出新建文件夹")
         app.alerts.firstMatch.buttons["取消"].tap()
+
+        // ⌘R 刷新：其它客户端在当前目录新建文件后按 ⌘R，文件应在目录事件推送（服务端约 5 秒去抖）之前出现
+        let refreshed = "a-cmd-r-\(Int(Date.now.timeIntervalSince1970)).txt"
+        let refreshedUri = TestServerAPI.myUri("文档", refreshed)
+        try await TestServerAPI.create(token: token, uri: refreshedUri, type: "file")
+        addTeardownBlock { _ = try? await TestServerAPI.delete(token: token, uris: [refreshedUri]) }
+        app.typeKey("r", modifierFlags: .command)
+        XCTAssertTrue(element(app, "file." + refreshed).waitForExistence(timeout: 3), "⌘R 后 3 秒内未出现新文件（没有执行刷新）")
 
         // 多选 + 底栏“删除”的确认弹层（iPad 上为 popover；只到确认框，取消）。
         // ⌘⌫ 只能真机验证（docs/manual-qa-ios.md）：XCUITest 在 iPad 模拟器上合成的 Delete 键（⌘⌫/⌫，\u{7F} 或 \u{8}）

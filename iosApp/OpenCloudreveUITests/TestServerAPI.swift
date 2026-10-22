@@ -40,6 +40,11 @@ enum TestServerAPI {
         _ = try await call("POST", "/file/create", body: ["uri": uri, "type": type], token: token)
     }
 
+    /// 彻底删除文件或目录（清理测试数据）
+    static func delete(token: String, uris: [String]) async throws {
+        _ = try await call("DELETE", "/file", body: ["uris": uris, "skip_soft_delete": true], token: token)
+    }
+
     /// 新建分享；响应是 `<站点>/s/<id>[/<密码>]`
     static func createShare(token: String, uri: String, isPrivate: Bool) async throws -> Share {
         let data = try await call("PUT", "/share", body: ["uri": uri, "is_private": isPrivate], token: token)

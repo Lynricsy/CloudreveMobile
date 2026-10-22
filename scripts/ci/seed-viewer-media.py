@@ -191,7 +191,7 @@ def main():
             seed.upload(token, f"{base}/{urllib.parse.quote(name)}", content, mime)
             print(f"已上传 {FOLDER}/{name}（{len(content)} 字节）")
 
-    # 元数据（EXIF / 音乐标签）由服务端队列异步提取：等一会儿，取不到只告警
+    # 元数据（EXIF / 音乐标签）由服务端队列异步提取：ViewerUITests 断言 EXIF 面板的相机型号，取不到直接失败
     photo_uri = urllib.parse.quote(f"{base}/photo.jpg", safe="")
     for _ in range(30):
         info = seed.call("GET", f"/file/info?uri={photo_uri}", token=token)
@@ -200,7 +200,7 @@ def main():
             break
         time.sleep(1)
     else:
-        print("警告：30 秒内未提取到 EXIF 元数据", file=sys.stderr)
+        sys.exit("30 秒内未提取到 EXIF 元数据（ViewerUITests 依赖 exif:camera_model）")
 
 
 if __name__ == "__main__":

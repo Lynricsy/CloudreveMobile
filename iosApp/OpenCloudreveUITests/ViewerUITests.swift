@@ -2,7 +2,8 @@ import XCTest
 
 /// 端到端：预览器。依赖 CI 预置素材（`scripts/ci/seed-viewer-media.py`）：
 /// 「预览」目录下有 photo.jpg（EXIF）、clip.mp4 + clip.srt、song-a/b.mp3、manual.pdf、notes.md、bundle.zip。
-/// 覆盖：打开方式选择、图片 + EXIF 面板、视频外挂字幕、音乐播放与底部“正在播放”、PDF、Markdown 预览/编辑/保存、压缩包目录树。
+/// 覆盖：打开方式选择、图片 + EXIF 面板（核对预置的相机型号）、视频外挂字幕、音乐播放与底部“正在播放”、PDF、
+/// Markdown 预览/编辑/保存（未保存时“用其他应用打开”“打开方式”都要先确认放弃）、压缩包目录树。
 /// 结束时退出登录。
 final class ViewerUITests: XCTestCase {
     private let serverURL = "http://127.0.0.1:5212"
@@ -37,7 +38,12 @@ final class ViewerUITests: XCTestCase {
         capture(app, "viewer-02-image")
         element(app, "image.info").tap()
         XCTAssertTrue(app.buttons["image.infoDone"].waitForExistence(timeout: 10), "图片信息面板未出现")
-        _ = app.staticTexts["Model"].waitForExistence(timeout: 5)
+        // 预置 EXIF（scripts/ci/seed-viewer-media.py）：Model = "CI Camera"
+        let modelLabel = app.staticTexts["相机型号"]
+        // 面板为半高时 EXIF 行可能在屏幕外（懒加载列表不在层级中）：上滑展开后再找
+        if !modelLabel.waitForExistence(timeout: 10) { app.swipeUp() }
+        XCTAssertTrue(modelLabel.waitForExistence(timeout: 5), "EXIF 面板没有相机型号")
+        XCTAssertTrue(app.staticTexts["CI Camera"].exists, "EXIF 相机型号的值不是预置的 CI Camera")
         capture(app, "viewer-03-image-exif")
         app.buttons["image.infoDone"].tap()
         closeViewer(app)
@@ -57,11 +63,12 @@ final class ViewerUITests: XCTestCase {
         capture(app, "viewer-05-music")
         closeViewer(app)
         let nowPlaying = element(app, "nowPlaying.open")
-        if nowPlaying.waitForExistence(timeout: 10) {
-            capture(app, "viewer-06-now-playing")
-            let stop = element(app, "nowPlaying.stop")
-            if stop.exists { stop.tap() }
-        }
+        XCTAssertTrue(nowPlaying.waitForExistence(timeout: 10), "关闭音乐预览后底部没有“正在播放”")
+        capture(app, "viewer-06-now-playing")
+        let stop = element(app, "nowPlaying.stop")
+        XCTAssertTrue(stop.waitForExistence(timeout: 5), "“正在播放”没有停止按钮")
+        stop.tap()
+        XCTAssertTrue(nowPlaying.waitForNonExistence(timeout: 10), "停止后“正在播放”仍在")
 
         // PDF
         open(app, "manual.pdf")
@@ -85,6 +92,9 @@ final class ViewerUITests: XCTestCase {
         editor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85)).tap()
         app.typeText("\n来自 iOS UI 测试的修改")
         capture(app, "viewer-09-markdown-edit")
+        // 有未保存的更改时，“用其他应用打开”与“打开方式”都要先确认放弃；取消后草稿保留
+        assertLeaveIsGuarded(app, menuItem: "用其他应用打开", confirmTitle: "放弃更改并用其他应用打开")
+        assertLeaveIsGuarded(app, menuItem: "打开方式…", confirmTitle: "放弃更改并切换打开方式")
         let save = app.buttons["text.save"].firstMatch
         XCTAssertTrue(save.waitForExistence(timeout: 5) && save.isEnabled, "保存按钮不可用")
         save.tap()
@@ -112,6 +122,31 @@ final class ViewerUITests: XCTestCase {
         let row = element(app, "file." + name)
         XCTAssertTrue(row.waitForExistence(timeout: 15), "列表中没有 \(name)")
         row.tap()
+    }
+
+    /// 编辑器有未保存内容时从“更多”菜单离开：必须出现放弃确认，取消后仍在编辑器且可保存
+    @MainActor
+    private func assertLeaveIsGuarded(_ app: XCUIApplication, menuItem: String, confirmTitle: String) {
+        app.buttons["viewer.more"].firstMatch.tap()
+        let item = app.buttons[menuItem].firstMatch
+        XCTAssertTrue(item.waitForExistence(timeout: 5), "“更多”菜单中没有“\(menuItem)”")
+        item.tap()
+        let confirm = app.buttons["text.discard.confirm"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5), "“\(menuItem)”没有提示未保存的更改")
+        XCTAssertEqual(confirm.label, confirmTitle)
+        capture(app, "viewer-09-guard-\(menuItem == "打开方式…" ? "switch" : "external")", delay: 0.5)
+        let cancel = app.buttons["text.discard.cancel"].firstMatch
+        if cancel.exists {
+            cancel.tap()
+        } else {
+            // iOS 26 的确认弹层可能不显示“取消”按钮：点弹层外关闭
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.35)).tap()
+        }
+        XCTAssertTrue(confirm.waitForNonExistence(timeout: 5), "取消后确认弹层未关闭")
+        XCTAssertTrue(element(app, "text.editor").exists, "取消后离开了编辑器")
+        XCTAssertFalse(element(app, "external.quickLook").exists, "取消后仍切到了外部打开")
+        let save = app.buttons["text.save"].firstMatch
+        XCTAssertTrue(save.exists && save.isEnabled, "取消后草稿丢失（保存按钮不可用）")
     }
 
     @MainActor
