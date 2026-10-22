@@ -65,11 +65,11 @@ import plus.ling.opencloudreve.core.presentation.viewer.ViewerAudioIntent
 import plus.ling.opencloudreve.core.presentation.viewer.ViewerAudioViewModel
 import plus.ling.opencloudreve.core.presentation.viewer.ViewerParams
 
-/** 播放列表项：mediaId = 文件 URI，地址为 [MusicPlaybackService.trackUri] 占位 */
+/** 播放列表项：mediaId = [musicMediaId]（账户 + 链接目标 + 版本），地址为 [MusicPlaybackService.trackUri] 占位 */
 private fun AudioTrack.toMediaItem(accountId: String, version: String?): MediaItem {
     val uri = MusicPlaybackService.trackUri(accountId, file.linkedUri, version)
     return MediaItem.Builder()
-        .setMediaId(file.path)
+        .setMediaId(musicMediaId(accountId, file.linkedUri, version))
         .setUri(uri)
         .setRequestMetadata(MediaItem.RequestMetadata.Builder().setMediaUri(uri).build())
         .setMediaMetadata(
@@ -101,6 +101,7 @@ internal fun MusicViewerScreen(
     var currentIndex by remember { mutableIntStateOf(-1) }
     var position by remember { mutableLongStateOf(0L) }
     var duration by remember { mutableLongStateOf(0L) }
+    val trackId: (AudioTrack) -> String = { musicMediaId(params.accountId, it.file.linkedUri, params.version) }
 
     DisposableEffect(Unit) {
         val token = SessionToken(context, ComponentName(context, MusicPlaybackService::class.java))
@@ -123,7 +124,7 @@ internal fun MusicViewerScreen(
                     currentIndex = index
                     // 当前曲目在本页播放列表内时同步给 VM（预取封面与下一首）
                     val id = player.currentMediaItem?.mediaId
-                    val vmIndex = vm.state.value.tracks.indexOfFirst { it.file.path == id }
+                    val vmIndex = vm.state.value.tracks.indexOfFirst { trackId(it) == id }
                     if (vmIndex >= 0) vm.on(ViewerAudioIntent.Play(vmIndex))
                 }
             }
@@ -135,10 +136,10 @@ internal fun MusicViewerScreen(
     // 播放列表就绪后装载（同一列表已在播放则不打断）
     LaunchedEffect(c, state.loading) {
         if (c == null || state.loading) return@LaunchedEffect
-        val ids = state.tracks.map { it.file.path }
+        val ids = state.tracks.map(trackId)
         val playing = (0 until c.mediaItemCount).map { c.getMediaItemAt(it).mediaId }
         if (playing == ids) {
-            if (c.currentMediaItem?.mediaId != params.file.path) c.seekTo(state.index, 0)
+            if (c.currentMediaItem?.mediaId != ids.getOrNull(state.index)) c.seekTo(state.index, 0)
         } else {
             c.setMediaItems(state.tracks.map { it.toMediaItem(params.accountId, params.version) }, state.index, 0)
             c.prepare()
@@ -153,7 +154,7 @@ internal fun MusicViewerScreen(
             val cover = track.coverUrl ?: return@forEachIndexed
             if (i >= c.mediaItemCount) return@forEachIndexed
             val item = c.getMediaItemAt(i)
-            if (item.mediaId == track.file.path && item.mediaMetadata.artworkUri == null) {
+            if (item.mediaId == trackId(track) && item.mediaMetadata.artworkUri == null) {
                 c.replaceMediaItem(i, item.buildUpon().setMediaMetadata(item.mediaMetadata.buildUpon().setArtworkUri(cover.toUri()).build()).build())
             }
         }
@@ -167,7 +168,7 @@ internal fun MusicViewerScreen(
         }
     }
 
-    val current = state.tracks.firstOrNull { it.file.path == c?.currentMediaItem?.mediaId } ?: state.current
+    val current = state.tracks.firstOrNull { trackId(it) == c?.currentMediaItem?.mediaId } ?: state.current
     ViewerScaffold(title = params.file.name, menu = menu, onClose = onClose) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             Column(
@@ -242,7 +243,7 @@ internal fun MusicViewerScreen(
             )
             LazyColumn(Modifier.fillMaxWidth().weight(1f)) {
                 itemsIndexed(state.tracks, key = { _, t -> t.file.path }) { i, track ->
-                    val active = track.file.path == c?.currentMediaItem?.mediaId
+                    val active = trackId(track) == c?.currentMediaItem?.mediaId
                     ListItem(
                         modifier = Modifier.clickable(enabled = c != null && !state.loading) {
                             c?.seekTo(i, 0)
