@@ -117,7 +117,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= DEVELOPMENT_TEAM= \
             archive
       - name: ad-hoc 签名并打包 IPA
-        # 仓库没有 Apple 开发者证书：只做 ad-hoc 签名以嵌入 entitlements，安装前由 Sideloadly/AltStore 等重签（或用 TrollStore）
+        # 仓库没有 Apple 开发者证书：只做 ad-hoc 签名以嵌入 entitlements，安装前由 Sideloadly/AltStore 等重签
         run: |
           set -euo pipefail
           cd iosApp
@@ -183,7 +183,7 @@ jobs:
           ## 安装
 
           - **Android**：下载 \`OpenCloudreve-$VERSION.apk\` 直接安装（Android 9 及以上）。
-          - **iOS / iPadOS**：\`OpenCloudreve-$VERSION-unsigned.ipa\` 未经 Apple 开发者证书签名（iOS 26 及以上），需用 Sideloadly、AltStore 等工具以自己的 Apple ID 重签后安装，或使用 TrollStore。
+          - **iOS / iPadOS**：\`OpenCloudreve-$VERSION-unsigned.ipa\` 未经 Apple 开发者证书签名（iOS 26 及以上），需用 Sideloadly、AltStore 等工具以自己的 Apple ID 重签后安装。
           - 需要 OpenCloudreve 服务端 4.19.11 及以上；文件校验值见 \`SHA256SUMS.txt\`。
           EOF
           PRERELEASE=""

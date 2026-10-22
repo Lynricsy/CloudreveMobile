@@ -52,4 +52,4 @@ iOS 工程文件不入库，只提交 `iosApp/project.yml`；`iosApp/Frameworks/
 ## 发布签名
 
 - **Android**：发布 keystore 存在仓库 secrets（`ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASSWORD`、`ANDROID_KEY_ALIAS`），本地构建通过环境变量 `ANDROID_KEYSTORE_FILE` 等同名变量注入；未提供时 `assembleRelease` 产出未签名包。证书 SHA-256：`86:BD:E9:72:85:42:30:8A:69:79:A8:8B:82:1F:42:07:36:ED:51:3B:A7:FE:88:B7:59:C2:07:BA:AD:7F:E9:07`。要让发布版使用 Passkey，需在服务端设置项 `mobile_android_sha256_fingerprints` 中加入这个指纹（用于 `assetlinks.json`）。
-- **iOS**：没有 Apple 开发者证书，Release 中的 IPA 只做 ad-hoc 签名（嵌入 entitlements），安装前需用 Sideloadly / AltStore 等重签，或使用 TrollStore。重签后 App Group 由重签工具改写，分享扩展与文件提供程序能否与主 App 共享数据取决于该工具。
+- **iOS**：没有 Apple 开发者证书，Release 中的 IPA 只做 ad-hoc 签名（嵌入 entitlements），安装前需用 Sideloadly / AltStore 等以自己的 Apple ID 重签。重签后 App Group 由重签工具改写，分享扩展与文件提供程序能否与主 App 共享数据取决于该工具。
