@@ -41,8 +41,14 @@ final class FileBrowserUITests: XCTestCase {
 
         // 文档：65 项长列表 + 多选
         XCTAssertTrue(element(app, "file.文档").waitForExistence(timeout: 10))
-        element(app, "file.文档").tap()
-        XCTAssertTrue(element(app, "file.note-001.txt").waitForExistence(timeout: 30), "文档目录未列出文件")
+        // 返回动画中的点按可能不触发导航（run 39727636110 停在“我的文件”）：没进入就再点
+        let firstNote = element(app, "file.note-001.txt")
+        let folderRow = element(app, "file.文档")
+        for _ in 0..<3 where !firstNote.exists && folderRow.exists && folderRow.isHittable {
+            folderRow.tap()
+            _ = firstNote.waitForExistence(timeout: 10)
+        }
+        XCTAssertTrue(firstNote.waitForExistence(timeout: 20), "文档目录未列出文件")
         chooseViewMode(app, "列表")
         capture(app, "files-04-long-list")
         openMoreMenu(app)
