@@ -2,6 +2,7 @@ package plus.ling.opencloudreve.core.presentation.files
 
 import app.cash.turbine.test
 import io.ktor.http.HttpMethod
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -152,6 +153,44 @@ class FileToolsViewModelsTest {
             """{"uris":["cloudreve://my/dir"],"patches":[{"key":"customize:icon_color","value":"","remove":true}]}""",
             env.server.requests.last { it.apiPath == "/file/metadata" }.bodyText(),
         )
+        vm.dispose()
+    }
+
+    @Test
+    fun tagEditsDuringSaveSurviveSaveResponse() = runTest {
+        var metadata = """{"tag:old":""}"""
+        val patchGate = CompletableDeferred<Unit>()
+        val env = VmEnv { req ->
+            when {
+                req.apiPath == "/file/info" -> okData(
+                    """{"type":0,"id":"f","name":"a.txt","path":"cloudreve://my/a.txt","owned":true,"capability":"${BoolSet.of(8).toBase64()}","metadata":$metadata}""",
+                )
+                req.apiPath == "/file/metadata" && req.method == HttpMethod.Patch -> {
+                    patchGate.await()
+                    metadata = """{"tag:old":"","tag:a":""}"""
+                    okData()
+                }
+                req.apiPath == "/user/me" -> okData(userJson())
+                else -> err(404)
+            }
+        }
+        val vm = MetadataEditViewModel(ACCOUNT, listOf("cloudreve://my/a.txt"), env.files, env.site, env.userSettings)
+        eventually { vm.state.value.files.isNotEmpty() }
+        vm.on(MetadataEditIntent.AddTag("a"))
+        vm.on(MetadataEditIntent.SaveTags)
+        eventually { vm.state.value.saving && env.server.requests.any { it.apiPath == "/file/metadata" } }
+        // 保存请求在途时继续编辑：服务端只收到了 old+a
+        vm.on(MetadataEditIntent.AddTag("b"))
+        vm.effects.test {
+            patchGate.complete(Unit)
+            assertEquals(MetadataEditEffect.Updated, awaitItem())
+        }
+        assertEquals(listOf("old", "a", "b"), vm.state.value.tags.map { it.name })
+        assertTrue(vm.state.value.tagsDirty)
+        // 再次保存提交的是包含 b 的新草稿
+        vm.on(MetadataEditIntent.SaveTags)
+        eventually { env.server.requests.count { it.apiPath == "/file/metadata" } == 2 }
+        assertTrue(env.server.requests.last { it.apiPath == "/file/metadata" }.bodyText().contains("\"key\":\"tag:b\""))
         vm.dispose()
     }
 

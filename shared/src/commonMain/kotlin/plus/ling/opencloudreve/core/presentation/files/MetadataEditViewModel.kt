@@ -213,6 +213,9 @@ class MetadataEditViewModel(
     private var loadJob: Job? = null
     private var searchJob: Job? = null
 
+    /** 标签草稿修订号：每次增删改标签递增；保存回包只在草稿未再变化时覆盖草稿 */
+    private var tagRevision = 0L
+
     init {
         scope.launch {
             val explorer = try {
@@ -249,19 +252,17 @@ class MetadataEditViewModel(
             is MetadataEditIntent.AddTag -> {
                 val name = intent.name.trim()
                 if (name.isEmpty() || currentState.tags.any { it.name == name }) return
-                updateState { it.copy(tags = it.tags + FileTag(name, intent.color?.ifEmpty { null }), tagsDirty = true) }
+                editTags { it + FileTag(name, intent.color?.ifEmpty { null }) }
             }
-            is MetadataEditIntent.RemoveTag -> updateState { s ->
-                s.copy(tags = s.tags.filterNot { it.name == intent.name }, tagsDirty = true)
-            }
-            is MetadataEditIntent.SetTagColor -> updateState { s ->
-                s.copy(
-                    tags = s.tags.map { if (it.name == intent.name) it.copy(color = intent.color?.ifEmpty { null }) else it },
-                    tagsDirty = true,
-                )
+            is MetadataEditIntent.RemoveTag -> editTags { tags -> tags.filterNot { it.name == intent.name } }
+            is MetadataEditIntent.SetTagColor -> editTags { tags ->
+                tags.map { if (it.name == intent.name) it.copy(color = intent.color?.ifEmpty { null }) else it }
             }
             MetadataEditIntent.SaveTags -> saveTags()
-            MetadataEditIntent.ResetTags -> updateState { it.copy(tags = tagsOf(it.files), tagsDirty = false) }
+            MetadataEditIntent.ResetTags -> {
+                tagRevision++
+                updateState { it.copy(tags = tagsOf(it.files), tagsDirty = false) }
+            }
             is MetadataEditIntent.SetEmoji -> patch(listOf(optionalPatch(MetadataKeys.EMOJI, intent.emoji)))
             is MetadataEditIntent.SetIconColor -> {
                 if (!currentState.canChangeIconColor) return
@@ -279,6 +280,11 @@ class MetadataEditViewModel(
             }
             is MetadataEditIntent.SearchUsers -> searchUsers(intent.keyword)
         }
+    }
+
+    private fun editTags(change: (List<FileTag>) -> List<FileTag>) {
+        tagRevision++
+        updateState { it.copy(tags = change(it.tags), tagsDirty = true) }
     }
 
     private fun optionalPatch(key: String, value: String?): MetadataPatch =
@@ -300,16 +306,21 @@ class MetadataEditViewModel(
         }
     }
 
-    private suspend fun fetch(resetTags: Boolean) {
+    /**
+     * 重新读取文件。[resetTags] 为 true 时用服务端标签覆盖草稿；
+     * [savedTagRevision] 不为 null 时（保存标签的回包）仅当草稿在保存期间未再编辑才覆盖，否则保留新草稿并保持待保存。
+     */
+    private suspend fun fetch(resetTags: Boolean, savedTagRevision: Long? = null) {
         val loaded = currentState.uris.map { files.info(it) }
+        val reset = resetTags && (savedTagRevision == null || savedTagRevision == tagRevision)
         updateState { s ->
             val first = loaded.firstOrNull()
             s.copy(
                 files = loaded,
                 loading = false,
                 error = null,
-                tags = if (resetTags || !s.tagsDirty) tagsOf(loaded) else s.tags,
-                tagsDirty = if (resetTags) false else s.tagsDirty,
+                tags = if (reset || !s.tagsDirty) tagsOf(loaded) else s.tags,
+                tagsDirty = if (reset) false else s.tagsDirty,
                 emoji = first?.metadata?.get(MetadataKeys.EMOJI),
                 iconColor = first?.metadata?.get(MetadataKeys.ICON_COLOR),
             ).withProps()
@@ -357,7 +368,7 @@ class MetadataEditViewModel(
             updateState { it.copy(tagsDirty = false) }
             return
         }
-        patch(patches, resetTags = true)
+        patch(patches, savedTagRevision = tagRevision)
     }
 
     private fun setProp(id: String, value: String) {
@@ -373,14 +384,14 @@ class MetadataEditViewModel(
         patch(listOf(MetadataPatch(MetadataKeys.CUSTOM_PROPS_PREFIX + id, value)))
     }
 
-    private fun patch(patches: List<MetadataPatch>, resetTags: Boolean = false) {
+    private fun patch(patches: List<MetadataPatch>, savedTagRevision: Long? = null) {
         val s = currentState
         if (!s.canEdit || s.saving) return
         scope.launch {
             updateState { it.copy(saving = true) }
             try {
                 files.patchMetadata(s.uris, patches)
-                fetch(resetTags = resetTags)
+                fetch(resetTags = savedTagRevision != null, savedTagRevision = savedTagRevision)
                 updateState { it.copy(saving = false) }
                 sendEffect(MetadataEditEffect.Updated)
             } catch (e: CancellationException) {
