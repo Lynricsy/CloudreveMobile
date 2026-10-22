@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.webkit.RenderProcessGoneDetail
 import androidx.compose.foundation.layout.Spacer
 import android.graphics.BitmapFactory
-import android.os.Handler
-import android.os.Looper
 import android.util.Base64
 import android.view.ViewGroup
-import android.webkit.JavascriptInterface
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -176,22 +176,32 @@ private fun ImageCaptcha(
     }
 }
 
-/** 站点 `/captcha` 页注入的桥接对象；回调来自 JS 线程，切回主线程 */
-private class CaptchaBridge(private val deliver: (String) -> Unit) {
-    private val main = Handler(Looper.getMainLooper())
-
-    @JavascriptInterface
-    fun onToken(json: String) {
-        main.post { deliver(json) }
-    }
-}
+/** WebMessageListener 注入的通道名（只注入到站点 origin 的 frame） */
+private const val CAPTCHA_CHANNEL = "OcrCaptchaChannel"
 
 /**
- * 渲染进程崩溃/被回收时不让应用跟着崩溃；用户点“刷新验证码”会重建 WebView。
+ * 站点 `/captcha` 页调用的是 `window.CaptchaBridge.onToken(json)`：只在顶层 frame 定义它，转发到原生通道。
+ * 第三方验证码 iframe 不在允许的 origin 内，拿不到通道；同 origin 子 frame 不定义桥，原生侧也只收主 frame 的消息。
+ */
+private const val CAPTCHA_BRIDGE_SHIM = """
+(function () {
+  if (window !== window.top) return;
+  var channel = window.$CAPTCHA_CHANNEL;
+  if (!channel) return;
+  window.CaptchaBridge = { onToken: function (json) { channel.postMessage(String(json)); } };
+})();
+"""
+
+/**
+ * 主 frame 只允许停留在验证码页所在站点（服务商的 iframe/子资源不受限）；
+ * 渲染进程崩溃/被回收时不让应用跟着崩溃，用户点“刷新验证码”会重建 WebView。
  * （androidx.webkit 的 MissingOnRenderProcessGone 检查不识别 Kotlin 覆写，已实现仍误报）
  */
 @SuppressLint("MissingOnRenderProcessGone")
-private class CaptchaWebViewClient : WebViewClient() {
+private class CaptchaWebViewClient(private val captchaUrl: String) : WebViewClient() {
+    override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
+        request.isForMainFrame && !CaptchaPagePolicy.allowsMainFrame(request.url.toString(), captchaUrl)
+
     override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean = true
 }
 
@@ -210,8 +220,21 @@ private fun WebCaptcha(url: String, onToken: (String) -> Unit) {
                 setBackgroundColor(android.graphics.Color.TRANSPARENT)
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
-                addJavascriptInterface(CaptchaBridge { callback(it) }, "CaptchaBridge")
-                webViewClient = CaptchaWebViewClient()
+                val site = CaptchaPagePolicy.origin(url)
+                // 不支持按 origin 注入的旧 WebView 不提供桥（不退回到所有 frame 都能调用的 addJavascriptInterface）
+                if (site != null &&
+                    WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER) &&
+                    WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
+                ) {
+                    val rules = setOf(site)
+                    // 回调在主线程
+                    WebViewCompat.addWebMessageListener(this, CAPTCHA_CHANNEL, rules) { view, message, sourceOrigin, isMainFrame, _ ->
+                        val json = message.data ?: return@addWebMessageListener
+                        if (CaptchaPagePolicy.acceptsToken(view.url, url, isMainFrame, sourceOrigin.toString())) callback(json)
+                    }
+                    WebViewCompat.addDocumentStartJavaScript(this, CAPTCHA_BRIDGE_SHIM, rules)
+                }
+                webViewClient = CaptchaWebViewClient(url)
                 loadUrl(url)
             }
         },
