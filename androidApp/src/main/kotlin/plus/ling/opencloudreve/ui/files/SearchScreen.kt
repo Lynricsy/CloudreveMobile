@@ -40,9 +40,11 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -86,6 +88,8 @@ fun SearchScreen(
     baseUri: String,
     navigator: FileNavigator,
     navController: NavHostController,
+    pickResult: FolderPickResult?,
+    onPickResultConsumed: () -> Unit,
 ) {
     val vm: SearchViewModel = koinViewModel { parametersOf(accountId, baseUri) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -95,6 +99,15 @@ fun SearchScreen(
     var showFilters by rememberSaveable { mutableStateOf(false) }
     val loader = remember(vm) { ThumbnailLoader { vm.thumbnailUrl(it) } }
     val keyboard = LocalSoftwareKeyboardController.current
+    val consumed by rememberUpdatedState(onPickResultConsumed)
+
+    // 结果条目“移动/复制”选择目标目录后交回的结果：交给操作宿主执行，再清除
+    LaunchedEffect(pickResult) {
+        if (pickResult != null) {
+            controller.request(FileActionRequest.PickResult(pickResult))
+            consumed()
+        }
+    }
 
     SearchBar(
         inputField = {
