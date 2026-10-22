@@ -11,10 +11,14 @@ import Synchronization
 /// 下载：`DownloadPlanner.prepare` → `downloadTask`（有 resumeData 时续传）；完成时文件先移到暂存区，
 /// 再移到任务的目标路径（`Documents/Downloads/<账户>/`）；暂停时保存 resumeData（`setResumeBlob`）。
 ///
-/// 同一传输任务的所有回调经 `SerialTaskChains` 串行处理。主 App 同时连接分享扩展的会话，
-/// 扩展退出后由主 App 接收其分片完成事件并继续后续分片（`reattach` 也会查询两个会话）。
+/// 同一传输任务的所有回调经 `SerialTaskChains` 串行处理。暂停/取消经 `TransferRunControl` 立即作废
+/// 正在准备/物化的启动：作废后不再创建或启动平台任务，已物化未发送的分片退回规划器。
+///
+/// 会话：每个进程启动时只连接自己的后台会话（同一会话同时只能由一个进程使用）。分享扩展退出后，
+/// 系统以 `handleEventsForBackgroundURLSession` 把扩展会话的事件交给主 App，主 App 这时临时连接该会话，
+/// 事件处理完即释放；接管时按 `TransferOwnership` 跳过其他会话仍持有的任务。
 final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked Sendable {
-    // @unchecked：可变状态都在 `state`（Mutex）里；`sessions` 只在 init 中写入一次
+    // @unchecked：可变状态都在 `state`（Mutex）里；`primary` 只在 init 中写入一次
 
     private struct State {
         /// 上传响应体（按会话 + 任务编号）
@@ -27,22 +31,45 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
         var lastProgress: [String: Date] = [:]
         /// `handleEventsForBackgroundURLSession` 交来的完成回调
         var eventCompletions: [String: @Sendable () -> Void] = [:]
+        /// 为处理系统交来的事件而临时连接的其他进程会话（处理完即释放）
+        var attached: [String: URLSession] = [:]
+        /// 各任务的运行代次（暂停/取消作废准备中的启动）
+        var control = TransferRunControl()
+    }
+
+    /// 取消前的任务快照中清理需要的字段
+    private struct CancelledTask: Sendable {
+        let taskId: String
+        let isUpload: Bool
+        let sourceRef: String?
+        let destPath: String?
     }
 
     private static let installed = Mutex<BackgroundTransferExecutor?>(nil)
     private static let progressInterval: TimeInterval = 1
     /// File Provider 扩展自行执行的任务（其路径都在 App Group `tmp/FileProvider/` 下），本执行器不接管
     private static let fileProviderMarker = "/tmp/FileProvider/"
-    #if DEBUG
+
     /// UI 测试（仅 Debug）：启动参数 `-OCRUITestChunkDelay <秒>` 让每批分片发送前等待，便于截取进行中的上传
-    private static let debugChunkDelay = UserDefaults.standard.double(forKey: "OCRUITestChunkDelay")
-    #endif
+    static var defaultChunkDelay: Duration? {
+        #if DEBUG
+        let seconds = UserDefaults.standard.double(forKey: "OCRUITestChunkDelay")
+        return seconds > 0 ? .seconds(seconds) : nil
+        #else
+        return nil
+        #endif
+    }
 
     private let state = Mutex(State())
     private let chains = SerialTaskChains()
     private let delegateQueue: OperationQueue
     private let stagingDirectory: URL
-    private var sessions: [URLSession] = []
+    private let ownership: TransferOwnership
+    private let chunkDelay: Duration?
+    private let attachConfiguration: @Sendable (String) -> URLSessionConfiguration
+    /// 本进程会话标识（归属记录中的持有者）
+    private let owner: String
+    private var primary: URLSession?
 
     /// 当前进程安装的执行器
     static var current: BackgroundTransferExecutor? {
@@ -56,7 +83,7 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
         installed.withLock { current in
             if let current { return current }
             let executor = BackgroundTransferExecutor(
-                configurations: role.sessionIdentifiers.map(TransferSessionRole.backgroundConfiguration(identifier:))
+                configuration: TransferSessionRole.backgroundConfiguration(identifier: role.primaryIdentifier)
             )
             CoreGraph.shared.installExecutor(executor: executor)
             current = executor
@@ -64,28 +91,54 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
         }
     }
 
-    /// [configurations] 第一个为发起新请求的主会话；测试可传前台配置（`.ephemeral`），回调逻辑相同
-    init(configurations: [URLSessionConfiguration]) {
-        precondition(!configurations.isEmpty, "至少需要一个会话配置")
+    /// [configuration] 为本进程发起新请求的会话；测试可传前台配置（`.ephemeral`），回调逻辑相同。
+    /// [attachConfiguration] 为系统交来其他会话的事件时，按标识构造临时连接用的配置。
+    init(
+        configuration: URLSessionConfiguration,
+        ownership: TransferOwnership = .shared,
+        chunkDelay: Duration? = BackgroundTransferExecutor.defaultChunkDelay,
+        attachConfiguration: @escaping @Sendable (String) -> URLSessionConfiguration = {
+            TransferSessionRole.backgroundConfiguration(identifier: $0)
+        }
+    ) {
         let queue = OperationQueue()
         queue.name = "plus.ling.opencloudreve.transfer.delegate"
         queue.maxConcurrentOperationCount = 1
         delegateQueue = queue
         stagingDirectory = FileManager.default.temporaryDirectory
             .appending(path: "TransferDownloads", directoryHint: .isDirectory)
+        self.ownership = ownership
+        self.chunkDelay = chunkDelay
+        self.attachConfiguration = attachConfiguration
+        owner = configuration.identifier ?? "foreground"
         super.init()
-        sessions = configurations.map { URLSession(configuration: $0, delegate: self, delegateQueue: queue) }
+        primary = URLSession(configuration: configuration, delegate: self, delegateQueue: queue)
     }
 
-    private var primarySession: URLSession { sessions[0] }
+    private var primarySession: URLSession {
+        guard let primary else { preconditionFailure("会话在 init 中创建") }
+        return primary
+    }
+
+    /// 当前连接着的全部会话（本进程会话 + 临时连接的会话）
+    private var sessions: [URLSession] {
+        [primarySession] + state.withLock { Array($0.attached.values) }
+    }
+
+    /// 为处理系统交来的事件而临时连接的会话标识
+    var attachedSessionIdentifiers: Set<String> {
+        state.withLock { Set($0.attached.keys) }
+    }
 
     // MARK: - TransferExecutor
 
     func enqueue(taskId: String) {
-        chains.enqueue(taskId) { [self] in await start(taskId) }
+        let token = state.withLock { $0.control.begin(taskId) }
+        chains.enqueue(taskId) { [self] in await start(taskId, token: token) }
     }
 
     func pause(taskId: String) {
+        state.withLock { $0.control.stop(taskId) }
         Task { [self] in
             for task in await platformTasks(taskId) {
                 if let download = task as? URLSessionDownloadTask {
@@ -107,12 +160,19 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
         enqueue(taskId: taskId)
     }
 
-    func cancel(taskId: String) {
+    func cancel(task: TransferItem) {
+        let cancelled = CancelledTask(
+            taskId: task.id,
+            isUpload: task.kind == .upload,
+            sourceRef: task.sourceRef,
+            destPath: task.destPath
+        )
+        state.withLock { $0.control.stop(cancelled.taskId) }
         Task { [self] in
-            for task in await platformTasks(taskId) {
-                task.cancel()
+            for platformTask in await platformTasks(cancelled.taskId) {
+                platformTask.cancel()
             }
-            chains.enqueue(taskId) { [self] in await cleanUp(taskId) }
+            chains.enqueue(cancelled.taskId) { [self] in cleanUp(cancelled) }
         }
     }
 
@@ -122,14 +182,26 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
 
     // MARK: - 进程级入口
 
-    /// `application(_:handleEventsForBackgroundURLSession:completionHandler:)`：
-    /// 连接对应会话并保存回调，事件处理完（`urlSessionDidFinishEvents`）后调用
+    /// `application(_:handleEventsForBackgroundURLSession:completionHandler:)`：保存回调；
+    /// 不是本进程的会话（分享扩展的）时临时连接它，事件处理完（`urlSessionDidFinishEvents`）后释放
     func handleEvents(forSessionIdentifier identifier: String, completion: @escaping @Sendable () -> Void) {
         state.withLock { $0.eventCompletions[identifier] = completion }
-        if !sessions.contains(where: { $0.configuration.identifier == identifier }) {
-            // 不是本进程的会话（理论上不会发生）：立即结束，避免系统一直等待
-            let pending = state.withLock { $0.eventCompletions.removeValue(forKey: identifier) }
-            DispatchQueue.main.async { pending?() }
+        guard identifier != primarySession.configuration.identifier,
+              state.withLock({ $0.attached[identifier] == nil }) else { return }
+        let session = URLSession(configuration: attachConfiguration(identifier), delegate: self, delegateQueue: delegateQueue)
+        state.withLock { $0.attached[identifier] = session }
+    }
+
+    /// 某会话的事件已全部投递：等已排队的回调处理完（可能在本进程会话补发下一批分片），
+    /// 释放临时连接的会话，再让系统挂起进程
+    func finishEvents(forSessionIdentifier identifier: String) async {
+        await drain()
+        let (completion, released) = state.withLock { state in
+            (state.eventCompletions.removeValue(forKey: identifier), state.attached.removeValue(forKey: identifier))
+        }
+        released?.finishTasksAndInvalidate()
+        if let completion {
+            DispatchQueue.main.async { completion() }
         }
     }
 
@@ -145,69 +217,89 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
 
     // MARK: - 调度
 
-    private func start(_ taskId: String) async {
+    private func start(_ taskId: String, token: UInt64) async {
+        guard isValid(taskId, token) else { return }
         let repository = CoreGraph.shared.transferRepository()
         guard let item = try? await repository.task(id: taskId), Self.isActive(item.state) else { return }
         let inflight = await platformTasks(taskId)
         switch item.kind {
         case .upload:
             if inflight.isEmpty {
-                await prepareUpload(taskId)
+                await prepareUpload(taskId, token: token)
             } else {
-                await dispatchUpload(taskId)
+                await dispatchUpload(taskId, token: token)
             }
         case .download:
-            if inflight.isEmpty { await startDownload(taskId) }
+            if inflight.isEmpty { await startDownload(taskId, token: token) }
         }
     }
 
-    private func prepareUpload(_ taskId: String) async {
+    private func prepareUpload(_ taskId: String, token: UInt64) async {
+        ownership.claim(taskId, session: owner, handedOff: false)
         do {
             _ = try await CoreGraph.shared.uploadPlanner().prepare(taskId: taskId)
         } catch {
-            await failIfActive(taskId, error)
+            await failIfActive(taskId, error, token: token)
             return
         }
+        // 准备期间被暂停/取消：不再发送
+        guard isValid(taskId, token) else { return }
         await refreshCommitted(taskId)
-        await dispatchUpload(taskId)
+        await dispatchUpload(taskId, token: token)
     }
 
     /// 取规划器给出的空闲并发请求并发送；没有可发请求且没有在途分片时检查是否该收尾
-    private func dispatchUpload(_ taskId: String) async {
+    private func dispatchUpload(_ taskId: String, token: UInt64) async {
+        guard isValid(taskId, token) else { return }
         let planner = CoreGraph.shared.uploadPlanner()
         let requests: [ChunkRequest]
         do {
             requests = try await planner.nextRequests(taskId: taskId)
         } catch {
-            await failIfActive(taskId, error)
+            await failIfActive(taskId, error, token: token)
             return
         }
         if requests.isEmpty {
             guard await platformTasks(taskId).isEmpty else { return }
             if let done = try? await planner.allChunksDone(taskId: taskId), KotlinValues.bool(done) {
-                await finalizeUpload(taskId)
+                await finalizeUpload(taskId, token: token)
             }
             return
         }
-        #if DEBUG
-        if Self.debugChunkDelay > 0 {
-            try? await Task.sleep(for: .seconds(Self.debugChunkDelay))
+        if let chunkDelay {
+            try? await Task.sleep(for: chunkDelay)
         }
-        #endif
         let materializer = CoreGraph.shared.chunkMaterializer()
         for request in requests {
+            let chunk: MaterializedChunk
             do {
-                let chunk = try await materializer.materialize(request: request)
-                try send(chunk, taskId: taskId)
+                chunk = try await materializer.materialize(request: request)
             } catch {
-                await markFailed(taskId, code: TransferErrorCode.shared.SOURCE_UNAVAILABLE, message: KotlinValues.message(error))
+                await markFailed(taskId, code: TransferErrorCode.shared.SOURCE_UNAVAILABLE, message: KotlinValues.message(error), token: token)
                 await cancelPlatformTasks(taskId)
+                return
+            }
+            let sent: Bool
+            do {
+                sent = try send(chunk, taskId: taskId, token: token)
+            } catch {
+                _ = try? await materializer.discard(taskId: taskId, index: request.index)
+                await markFailed(taskId, code: TransferErrorCode.shared.SOURCE_UNAVAILABLE, message: KotlinValues.message(error), token: token)
+                await cancelPlatformTasks(taskId)
+                return
+            }
+            if !sent {
+                // 物化期间被暂停/取消：删掉这一片的临时文件，把本批未发送的分片退回规划器
+                _ = try? await materializer.discard(taskId: taskId, index: request.index)
+                await releaseUnsentChunks(taskId)
                 return
             }
         }
     }
 
-    private func send(_ chunk: MaterializedChunk, taskId: String) throws {
+    /// 创建并启动上传请求；令牌已失效时不启动并返回 false。
+    /// 先创建（挂起状态）再核对令牌后启动：核对之后才发生的暂停能在 `platformTasks` 中看到并取消它
+    private func send(_ chunk: MaterializedChunk, taskId: String, token: UInt64) throws -> Bool {
         let request = chunk.request
         guard let url = URL(string: request.url) else { throw URLError(.badURL) }
         var urlRequest = URLRequest(url: url)
@@ -216,35 +308,53 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
             urlRequest.setValue(value, forHTTPHeaderField: name)
         }
         let index = Int(request.index)
-        state.withLock { $0.sentBytes[taskId, default: [:]][index] = 0 }
         let task = primarySession.uploadTask(with: urlRequest, fromFile: URL(filePath: chunk.path))
         task.taskDescription = TransferTaskDescriptor.upload(taskId: taskId, index: index).encoded
+        let valid = state.withLock { state in
+            guard state.control.isValid(taskId, token) else { return false }
+            state.sentBytes[taskId, default: [:]][index] = 0
+            return true
+        }
+        guard valid else {
+            task.cancel()
+            return false
+        }
+        ownership.claim(taskId, session: owner, handedOff: true)
         task.resume()
+        return true
     }
 
-    private func finalizeUpload(_ taskId: String) async {
+    /// 把已标记为发送中、但没有对应平台任务的分片退回待发送（暂停/取消后不留下“发送中”的分片）
+    private func releaseUnsentChunks(_ taskId: String) async {
+        let inflight = await platformTasks(taskId).compactMap { task -> KotlinInt? in
+            guard case let .upload(_, index)? = TransferTaskDescriptor(parsing: task.taskDescription) else { return nil }
+            return KotlinInt(int: Int32(index))
+        }
+        _ = try? await CoreGraph.shared.uploadPlanner().releaseChunks(taskId: taskId, inFlight: inflight)
+    }
+
+    private func finalizeUpload(_ taskId: String, token: UInt64) async {
+        guard isValid(taskId, token) else { return }
         do {
             let item = try await CoreGraph.shared.uploadPlanner().finalize(taskId: taskId)
             if item.state == .completed {
                 clearProgress(taskId)
+                ownership.release(taskId)
                 if let source = item.sourceRef { TransferInbox.discard(sourceRef: source) }
             }
         } catch {
-            await failIfActive(taskId, error)
+            await failIfActive(taskId, error, token: token)
         }
     }
 
     private func uploadChunkCompleted(
         _ taskId: String,
         index: Int,
-        status: Int?,
-        etag: String?,
-        body: Data?,
-        failure: String?,
-        cancelled: Bool
+        response: ChunkCompletion,
+        token: UInt64?
     ) async {
         state.withLock { _ = $0.sentBytes[taskId]?.removeValue(forKey: index) }
-        if cancelled {
+        if response.cancelled {
             // 暂停/取消/重建会话时主动取消的请求：状态已由共享层处理，只清理临时文件
             await discardChunk(taskId, index: index)
             return
@@ -252,56 +362,60 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
         let planner = CoreGraph.shared.uploadPlanner()
         let outcome: TransferOutcome
         do {
-            if let status, failure == nil {
-                let response = ChunkResponse(
+            if let status = response.status, response.failure == nil {
+                let chunkResponse = ChunkResponse(
                     statusCode: Int32(status),
-                    etag: etag,
-                    body: body.flatMap { String(data: $0, encoding: .utf8) }
+                    etag: response.etag,
+                    body: response.body.flatMap { String(data: $0, encoding: .utf8) }
                 )
-                outcome = try await planner.onChunkDone(taskId: taskId, index: Int32(index), response: response)
+                outcome = try await planner.onChunkDone(taskId: taskId, index: Int32(index), response: chunkResponse)
             } else {
-                outcome = try await planner.onChunkFailed(taskId: taskId, index: Int32(index), message: failure ?? "network error")
+                outcome = try await planner.onChunkFailed(taskId: taskId, index: Int32(index), message: response.failure ?? "network error")
             }
         } catch {
             await discardChunk(taskId, index: index)
-            await failIfActive(taskId, error)
+            if let token { await failIfActive(taskId, error, token: token) }
             await cancelPlatformTasks(taskId)
             return
         }
         await discardChunk(taskId, index: index)
         await refreshCommitted(taskId)
-        await handle(outcome, taskId: taskId)
+        // 分片结果已交给规划器；任务已被暂停/取消时不再补发或收尾
+        guard let token, isValid(taskId, token) else { return }
+        await handle(outcome, taskId: taskId, token: token)
     }
 
-    private func handle(_ outcome: TransferOutcome, taskId: String) async {
+    private func handle(_ outcome: TransferOutcome, taskId: String, token: UInt64) async {
         switch onEnum(of: outcome) {
         case let .continue(next):
             if next.allChunksDone {
-                if await platformTasks(taskId).isEmpty { await finalizeUpload(taskId) }
+                if await platformTasks(taskId).isEmpty { await finalizeUpload(taskId, token: token) }
             } else {
-                await dispatchUpload(taskId)
+                await dispatchUpload(taskId, token: token)
             }
         case let .retryAfter(retry):
             try? await Task.sleep(for: .milliseconds(retry.delayMillis))
-            await dispatchUpload(taskId)
+            await dispatchUpload(taskId, token: token)
         case .restart:
             await cancelPlatformTasks(taskId)
-            await prepareUpload(taskId)
+            await prepareUpload(taskId, token: token)
         case .failed:
             // 状态已写入，停止本任务其余在途分片
             clearProgress(taskId)
+            ownership.release(taskId)
             await cancelPlatformTasks(taskId)
         }
     }
 
     // MARK: - 下载
 
-    private func startDownload(_ taskId: String) async {
+    private func startDownload(_ taskId: String, token: UInt64) async {
+        ownership.claim(taskId, session: owner, handedOff: false)
         let request: DownloadRequest
         do {
             request = try await CoreGraph.shared.downloadPlanner().prepare(taskId: taskId)
         } catch {
-            await failIfActive(taskId, error)
+            await failIfActive(taskId, error, token: token)
             return
         }
         let task: URLSessionDownloadTask
@@ -309,7 +423,7 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
             task = primarySession.downloadTask(withResumeData: KotlinValues.data(blob))
         } else {
             guard let url = URL(string: request.url) else {
-                await markFailed(taskId, code: ErrorCode.shared.TRANSPORT, message: "Invalid download url")
+                await markFailed(taskId, code: ErrorCode.shared.TRANSPORT, message: "Invalid download url", token: token)
                 return
             }
             var urlRequest = URLRequest(url: url)
@@ -320,25 +434,25 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
             task = primarySession.downloadTask(with: urlRequest)
         }
         task.taskDescription = TransferTaskDescriptor.download(taskId: taskId).encoded
+        // 准备期间被暂停/取消：不启动（先创建再核对，核对之后的暂停能看到并取消它）
+        guard isValid(taskId, token) else {
+            task.cancel()
+            return
+        }
+        ownership.claim(taskId, session: owner, handedOff: true)
         task.resume()
     }
 
-    private func downloadCompleted(
-        _ taskId: String,
-        status: Int?,
-        failure: String?,
-        cancelled: Bool,
-        resumeData: Data?
-    ) async {
+    private func downloadCompleted(_ taskId: String, response: ChunkCompletion, token: UInt64?) async {
         let repository = CoreGraph.shared.transferRepository()
         let planner = CoreGraph.shared.downloadPlanner()
         let staged = stagedURL(taskId)
         clearProgress(taskId)
-        if let resumeData {
+        if let resumeData = response.resumeData {
             _ = try? await repository.setResumeBlob(id: taskId, blob: KotlinValues.bytes(resumeData))
         }
-        if cancelled { return }
-        if failure == nil, let status, (200..<300).contains(status),
+        if response.cancelled { return }
+        if response.failure == nil, let status = response.status, (200..<300).contains(status),
            FileManager.default.fileExists(atPath: staged.path(percentEncoded: false)) {
             do {
                 guard let item = try await repository.task(id: taskId), let destPath = item.destPath else { return }
@@ -352,23 +466,33 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
                 let size = (try? fileManager.attributesOfItem(atPath: destination.path(percentEncoded: false))[.size] as? NSNumber)?
                     .int64Value ?? item.size
                 _ = try await planner.onCompleted(taskId: taskId, totalBytes: size)
+                ownership.release(taskId)
             } catch {
-                await markFailed(taskId, code: TransferErrorCode.shared.SOURCE_UNAVAILABLE, message: KotlinValues.message(error))
+                await markFailed(taskId, code: TransferErrorCode.shared.SOURCE_UNAVAILABLE, message: KotlinValues.message(error), token: token)
             }
             return
         }
         try? FileManager.default.removeItem(at: staged)
         let outcome: TransferOutcome
         do {
-            let httpStatus = failure == nil ? status.map { KotlinInt(int: Int32($0)) } : nil
-            outcome = try await planner.onFailed(taskId: taskId, httpStatus: httpStatus, message: failure ?? "HTTP \(status ?? 0)")
+            let httpStatus = response.failure == nil ? response.status.map { KotlinInt(int: Int32($0)) } : nil
+            outcome = try await planner.onFailed(
+                taskId: taskId,
+                httpStatus: httpStatus,
+                message: response.failure ?? "HTTP \(response.status ?? 0)"
+            )
         } catch {
-            await failIfActive(taskId, error)
+            if let token { await failIfActive(taskId, error, token: token) }
             return
         }
-        if case let .retryAfter(retry) = onEnum(of: outcome) {
+        switch onEnum(of: outcome) {
+        case let .retryAfter(retry):
             try? await Task.sleep(for: .milliseconds(retry.delayMillis))
-            await start(taskId)
+            if let token { await start(taskId, token: token) }
+        case .failed:
+            ownership.release(taskId)
+        case .continue, .restart:
+            break
         }
     }
 
@@ -385,6 +509,9 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
         for item in unfinished where !Self.belongsToFileProvider(item) {
             let taskId = item.id
             known.insert(taskId)
+            // 其他进程的会话仍持有：系统会在其请求结束后把事件交给本进程
+            guard ownership.mayTakeOver(taskId, session: owner),
+                  let token = state.withLock({ $0.control.current(taskId) }) else { continue }
             var indexes: [Int] = []
             var downloading = false
             for (descriptor, _) in tasks where descriptor.taskId == taskId {
@@ -401,19 +528,20 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
                     _ = try? await planner.releaseChunks(taskId: taskId, inFlight: inflight.map { KotlinInt(int: Int32($0)) })
                     await refreshCommitted(taskId)
                     if !inflight.isEmpty {
-                        await dispatchUpload(taskId)
+                        await dispatchUpload(taskId, token: token)
                     } else if let done = try? await planner.allChunksDone(taskId: taskId), KotlinValues.bool(done) {
-                        await finalizeUpload(taskId)
+                        await finalizeUpload(taskId, token: token)
                     } else {
-                        await prepareUpload(taskId)
+                        await prepareUpload(taskId, token: token)
                     }
                 }
             case .download:
                 if !downloading {
-                    chains.enqueue(taskId) { [self] in await startDownload(taskId) }
+                    chains.enqueue(taskId) { [self] in await startDownload(taskId, token: token) }
                 }
             }
         }
+        ownership.prune(keeping: known)
         // 数据库里已不存在或已结束的任务：取消残留的系统任务
         let repository = CoreGraph.shared.transferRepository()
         for (descriptor, task) in tasks where !known.contains(descriptor.taskId) {
@@ -426,6 +554,10 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
     }
 
     // MARK: - 辅助
+
+    private func isValid(_ taskId: String, _ token: UInt64) -> Bool {
+        state.withLock { $0.control.isValid(taskId, token) }
+    }
 
     /// 本执行器各会话中属于 [taskId] 且仍在运行的系统任务
     private func platformTasks(_ taskId: String) async -> [URLSessionTask] {
@@ -460,18 +592,15 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
         }
     }
 
-    /// 取消后的清理：下载删除暂存与未完成的目标文件；上传删除收件箱副本
-    private func cleanUp(_ taskId: String) async {
-        clearProgress(taskId)
-        try? FileManager.default.removeItem(at: stagedURL(taskId))
-        guard let item = try? await CoreGraph.shared.transferRepository().task(id: taskId) else { return }
-        switch item.kind {
-        case .upload:
-            if let source = item.sourceRef { TransferInbox.discard(sourceRef: source) }
-        case .download:
-            if item.state != .completed, let destPath = item.destPath {
-                try? FileManager.default.removeItem(at: DownloadDestination.resolve(destPath))
-            }
+    /// 取消后的清理（只依据取消前的快照）：下载删除暂存与未完成的目标文件；上传删除收件箱副本
+    private func cleanUp(_ task: CancelledTask) {
+        clearProgress(task.taskId)
+        ownership.release(task.taskId)
+        try? FileManager.default.removeItem(at: stagedURL(task.taskId))
+        if task.isUpload {
+            if let source = task.sourceRef { TransferInbox.discard(sourceRef: source) }
+        } else if let destPath = task.destPath {
+            try? FileManager.default.removeItem(at: DownloadDestination.resolve(destPath))
         }
     }
 
@@ -507,16 +636,18 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
         _ = try? await CoreGraph.shared.transferRepository().setBytesDone(id: taskId, bytesDone: total)
     }
 
-    private func failIfActive(_ taskId: String, _ error: Error) async {
-        await markFailed(taskId, code: ErrorCode.shared.TRANSPORT, message: KotlinValues.message(error))
+    private func failIfActive(_ taskId: String, _ error: Error, token: UInt64?) async {
+        await markFailed(taskId, code: ErrorCode.shared.TRANSPORT, message: KotlinValues.message(error), token: token)
     }
 
-    /// 任务仍在进行时标记失败（规划器已写入失败状态的保持不变）
-    private func markFailed(_ taskId: String, code: Int32, message: String) async {
+    /// 任务仍在进行（且未被本进程暂停/取消）时标记失败；规划器已写入失败或已停止的保持不变
+    private func markFailed(_ taskId: String, code: Int32, message: String, token: UInt64?) async {
         clearProgress(taskId)
+        if let token, !isValid(taskId, token) { return }
         let repository = CoreGraph.shared.transferRepository()
         guard let item = try? await repository.task(id: taskId), Self.isActive(item.state) else { return }
         _ = try? await repository.setState(id: taskId, state: .failed, errorCode: KotlinInt(int: code), errorMessage: message)
+        ownership.release(taskId)
     }
 
     private static func isActive(_ state: TransferState) -> Bool {
@@ -533,6 +664,16 @@ final class BackgroundTransferExecutor: NSObject, TransferExecutor, @unchecked S
     private static func sessionKey(_ session: URLSession, _ task: URLSessionTask) -> String {
         "\(session.configuration.identifier ?? "foreground")#\(task.taskIdentifier)"
     }
+}
+
+/// 一个平台任务结束时交给串行链的结果（全部为 Sendable 值）
+private struct ChunkCompletion: Sendable {
+    let status: Int?
+    let etag: String?
+    let body: Data?
+    let failure: String?
+    let cancelled: Bool
+    let resumeData: Data?
 }
 
 // MARK: - URLSession 回调
@@ -587,33 +728,31 @@ extension BackgroundTransferExecutor: URLSessionDataDelegate, URLSessionDownload
         let body = state.withLock { $0.bodies.removeValue(forKey: Self.sessionKey(session, task)) }
         guard let descriptor = TransferTaskDescriptor(parsing: task.taskDescription) else { return }
         let http = task.response as? HTTPURLResponse
-        let status = http?.statusCode
-        let etag = http?.value(forHTTPHeaderField: "ETag")
         let nsError = error as NSError?
-        let cancelled = nsError?.domain == NSURLErrorDomain && nsError?.code == NSURLErrorCancelled
-        let failure = error.map(KotlinValues.message)
-        let resumeData = nsError?.userInfo[NSURLSessionDownloadTaskResumeData] as? Data
+        let completion = ChunkCompletion(
+            status: http?.statusCode,
+            etag: http?.value(forHTTPHeaderField: "ETag"),
+            body: body,
+            failure: error.map(KotlinValues.message),
+            cancelled: nsError?.domain == NSURLErrorDomain && nsError?.code == NSURLErrorCancelled,
+            resumeData: nsError?.userInfo[NSURLSessionDownloadTaskResumeData] as? Data
+        )
+        // 回调发生时任务所处的运行（已暂停/取消为 nil）
+        let token = state.withLock { $0.control.current(descriptor.taskId) }
         switch descriptor {
         case let .upload(taskId, index):
             chains.enqueue(taskId) { [self] in
-                await uploadChunkCompleted(
-                    taskId, index: index, status: status, etag: etag, body: body, failure: failure, cancelled: cancelled
-                )
+                await uploadChunkCompleted(taskId, index: index, response: completion, token: token)
             }
         case let .download(taskId):
             chains.enqueue(taskId) { [self] in
-                await downloadCompleted(taskId, status: status, failure: failure, cancelled: cancelled, resumeData: resumeData)
+                await downloadCompleted(taskId, response: completion, token: token)
             }
         }
     }
 
     func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
         guard let identifier = session.configuration.identifier else { return }
-        Task { [self] in
-            // 先处理完已排队的回调（可能补发下一批分片），再让系统挂起进程
-            await drain()
-            let completion = state.withLock { $0.eventCompletions.removeValue(forKey: identifier) }
-            DispatchQueue.main.async { completion?() }
-        }
+        Task { [self] in await finishEvents(forSessionIdentifier: identifier) }
     }
 }

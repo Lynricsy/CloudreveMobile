@@ -1,7 +1,8 @@
 import Foundation
 
-/// 后台 `URLSession` 的归属进程。主 App 与分享扩展各用一个标识（同一标识不能被两个进程同时连接）；
-/// 主 App 还会接管分享扩展留下的会话（扩展退出后其后台任务的事件交给主 App 处理）。
+/// 后台 `URLSession` 的归属进程。主 App 与分享扩展各用一个标识：同一会话同时只能由一个进程连接，
+/// 所以每个进程启动时只连接自己的会话；扩展退出后系统以 `handleEventsForBackgroundURLSession`
+/// 把扩展会话的事件交给主 App，主 App 这时才临时连接扩展会话，处理完即释放（见 `BackgroundTransferExecutor`）。
 enum TransferSessionRole: Sendable {
     case app
     case shareExtension
@@ -9,19 +10,11 @@ enum TransferSessionRole: Sendable {
     static let appIdentifier = "plus.ling.opencloudreve.transfer"
     static let shareExtensionIdentifier = "plus.ling.opencloudreve.transfer.share"
 
-    /// 本进程发起新请求所用的会话
+    /// 本进程连接并发起新请求的会话
     var primaryIdentifier: String {
         switch self {
         case .app: Self.appIdentifier
         case .shareExtension: Self.shareExtensionIdentifier
-        }
-    }
-
-    /// 本进程需要连接的全部会话（第一个为主会话）
-    var sessionIdentifiers: [String] {
-        switch self {
-        case .app: [Self.appIdentifier, Self.shareExtensionIdentifier]
-        case .shareExtension: [Self.shareExtensionIdentifier]
         }
     }
 
