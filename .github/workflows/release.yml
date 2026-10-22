@@ -135,7 +135,13 @@ jobs:
           codesign --force --sign - --timestamp=none --entitlements "$ENT/FileProviderExtension.plist" "$APP/PlugIns/FileProviderExtension.appex"
           codesign --force --sign - --timestamp=none --entitlements "$ENT/OpenCloudreve.plist" "$APP"
           codesign --verify --deep --strict "$APP"
-          /usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' -c 'Print CFBundleVersion' "$APP/Info.plist"
+          # 主 App 与两个扩展的版本都必须等于 tag 版本（扩展版本不一致时系统会拒绝安装或告警）
+          for p in "$APP" "$APP/PlugIns/ShareExtension.appex" "$APP/PlugIns/FileProviderExtension.appex"; do
+            V=$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$p/Info.plist")
+            B=$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$p/Info.plist")
+            echo "$p: $V ($B)"
+            [ "$V" = "${{ needs.version.outputs.name }}" ] && [ "$B" = "${{ needs.version.outputs.code }}" ]
+          done
           lipo -info "$APP/OpenCloudreve"
           ls "$APP/PlugIns" "$APP/Frameworks"
           codesign -d --entitlements - --xml "$APP" | plutil -p -

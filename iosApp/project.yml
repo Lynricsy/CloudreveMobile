@@ -61,6 +61,9 @@ targets:
       path: OpenCloudreve/Info.plist
       properties:
         CFBundleDisplayName: OpenCloudreve
+        # XcodeGen 默认写死 1.0 / 1：改为跟随构建设置，发布流水线按 tag 覆盖
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: zh-Hans
         CFBundleLocalizations: [zh-Hans, en]
         UILaunchScreen: {}
@@ -139,6 +142,8 @@ targets:
       path: ShareExtension/Info.plist
       properties:
         CFBundleDisplayName: 上传到 OpenCloudreve
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupIdentifier: group.plus.ling.opencloudreve
         KeychainAccessGroup: $(AppIdentifierPrefix)plus.ling.opencloudreve.shared
         # 扩展是独立进程、独立 Info.plist：与主 App 一样允许自托管 HTTP 站点（ATS 按各自 plist 生效）
@@ -182,6 +187,8 @@ targets:
       path: FileProviderExtension/Info.plist
       properties:
         CFBundleDisplayName: OpenCloudreve
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupIdentifier: group.plus.ling.opencloudreve
         KeychainAccessGroup: $(AppIdentifierPrefix)plus.ling.opencloudreve.shared
         # 同上：系统“文件”中浏览 HTTP 站点账户
