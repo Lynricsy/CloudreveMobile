@@ -77,6 +77,7 @@ import plus.ling.opencloudreve.core.presentation.share.ShareListIntent
 import plus.ling.opencloudreve.core.presentation.share.ShareListState
 import plus.ling.opencloudreve.core.presentation.share.ShareListViewModel
 import plus.ling.opencloudreve.ui.common.CollectEffects
+import plus.ling.opencloudreve.ui.common.ScopedViewModels
 import plus.ling.opencloudreve.ui.common.message
 import plus.ling.opencloudreve.ui.files.CenteredMessage
 import plus.ling.opencloudreve.ui.files.FullError
@@ -187,12 +188,15 @@ fun SharesTab(accountId: String, openFilesAt: (String) -> Unit) {
     }
 
     editing?.let { id ->
-        ShareEditDialog(
-            accountId = accountId,
-            shareId = id,
-            onDismiss = { editing = null },
-            onSaved = { vm.on(ShareListIntent.Refresh) },
-        )
+        // 弹窗不是导航目的地：每次打开用独立作用域，关闭时清理（否则保存结果/草稿留在主界面 store，下次打开直接复用）
+        ScopedViewModels("share-edit:$accountId:$id") {
+            ShareEditDialog(
+                accountId = accountId,
+                shareId = id,
+                onDismiss = { editing = null },
+                onSaved = { vm.on(ShareListIntent.Refresh) },
+            )
+        }
     }
     qrShare?.let { share -> ShareQrDialog(share, onDismiss = { qrShare = null }) }
     confirmDelete?.let { ids ->

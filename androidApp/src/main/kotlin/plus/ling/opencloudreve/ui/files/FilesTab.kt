@@ -43,6 +43,7 @@ import plus.ling.opencloudreve.core.model.FileItem
 import plus.ling.opencloudreve.core.model.SiteExplorer
 import plus.ling.opencloudreve.core.model.User
 import plus.ling.opencloudreve.ui.common.LocalImmersiveState
+import plus.ling.opencloudreve.ui.common.ScopedViewModels
 import plus.ling.opencloudreve.core.model.CrUri
 import plus.ling.opencloudreve.core.site.SiteConfigRepository
 import plus.ling.opencloudreve.ui.transfer.UploadDialog
@@ -203,14 +204,18 @@ private fun FilesTabContent(
                         val close: () -> Unit = { scope.launch { pane.navigateBack() } }
                         // 手机单窗格时详情覆盖列表：系统返回关闭详情（注册晚于列表导航，优先级更高）
                         BackHandler(enabled = singlePane, onBack = close)
-                        FileInfoScreen(
-                            accountId = accountId,
-                            uri = key,
-                            onClose = close,
-                            revision = infoRevision,
-                            onOpenVersions = { uri -> openTool(key, VersionsRoute(uri)) },
-                            onEditMetadata = { uri -> openTool(key, MetadataEditRoute(listOf(uri))) },
-                        )
+                        // 详情窗格不在嵌套导航里：用独立作用域，关闭/换文件/切账户时清理，
+                        // 否则 VM 留在外层主界面的 store，下次同 URI（含其它账户的同路径）复用旧实例
+                        ScopedViewModels("info:$accountId:$key") {
+                            FileInfoScreen(
+                                accountId = accountId,
+                                uri = key,
+                                onClose = close,
+                                revision = infoRevision,
+                                onOpenVersions = { uri -> openTool(key, VersionsRoute(uri)) },
+                                onEditMetadata = { uri -> openTool(key, MetadataEditRoute(listOf(uri))) },
+                            )
+                        }
                     }
                 }
             },
@@ -250,6 +255,8 @@ private fun FilesNavHost(
                 baseUri = entry.toRoute<FileSearchRoute>().baseUri,
                 navigator = navigator,
                 navController = navController,
+                pickResult = entry.pickResult(),
+                onPickResultConsumed = { entry.savedStateHandle.remove<String>(FOLDER_PICK_RESULT_KEY) },
             )
         }
         composable<ShareVisitRoute> { entry ->
