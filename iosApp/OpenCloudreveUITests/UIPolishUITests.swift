@@ -110,6 +110,11 @@ final class UIPolishUITests: XCTestCase {
     func testIPadLayoutAndKeyboardShortcuts() async throws {
         try XCTSkipUnless(isPad, "只在 iPad 目标上运行")
         let token = try await TestServerAPI.login(email: email, password: password)
+        // ⌘R 用的空目录（目录排在文件之前，进入“文档”后就在顶部；列表按创建时间排序，新文件在大目录中会落到屏幕外）
+        let refreshFolder = "刷新-\(Int(Date.now.timeIntervalSince1970))"
+        let refreshFolderUri = TestServerAPI.myUri("文档", refreshFolder)
+        try await TestServerAPI.create(token: token, uri: refreshFolderUri, type: "folder")
+        addTeardownBlock { _ = try? await TestServerAPI.delete(token: token, uris: [refreshFolderUri]) }
         let app = launch(language: "zh-Hans")
         addTeardownBlock { @MainActor in
             UIPolishUITests.bestEffortSignOut(XCUIApplication())
@@ -137,13 +142,17 @@ final class UIPolishUITests: XCTestCase {
         XCTAssertTrue(pressUntilAppears(app, "n", .command, app.alerts.firstMatch), "子目录中 ⌘N 未弹出新建文件夹")
         app.alerts.firstMatch.buttons["取消"].tap()
 
-        // ⌘R 刷新：其它客户端在当前目录新建文件后按 ⌘R，文件应在目录事件推送（服务端约 5 秒去抖）之前出现
-        let refreshed = "a-cmd-r-\(Int(Date.now.timeIntervalSince1970)).txt"
-        let refreshedUri = TestServerAPI.myUri("文档", refreshed)
-        try await TestServerAPI.create(token: token, uri: refreshedUri, type: "file")
-        addTeardownBlock { _ = try? await TestServerAPI.delete(token: token, uris: [refreshedUri]) }
+        // ⌘R 刷新：进入空目录，其它客户端在其中新建文件后按 ⌘R，文件应在目录事件推送（服务端约 5 秒去抖）之前出现
+        element(app, "file." + refreshFolder).tap()
+        XCTAssertTrue(app.navigationBars[refreshFolder].waitForExistence(timeout: 15), "未进入 ⌘R 测试目录")
+        pause(2)
+        let refreshed = "cmd-r.txt"
+        try await TestServerAPI.create(token: token, uri: TestServerAPI.myUri("文档", refreshFolder, refreshed), type: "file")
         app.typeKey("r", modifierFlags: .command)
         XCTAssertTrue(element(app, "file." + refreshed).waitForExistence(timeout: 3), "⌘R 后 3 秒内未出现新文件（没有执行刷新）")
+        capture(app, "iPad-03b-cmd-r")
+        goBack(app, from: refreshFolder)
+        XCTAssertTrue(element(app, "file.note-001.txt").waitForExistence(timeout: 15), "未回到文档目录")
 
         // 多选 + 底栏“删除”的确认弹层（iPad 上为 popover；只到确认框，取消）。
         // ⌘⌫ 只能真机验证（docs/manual-qa-ios.md）：XCUITest 在 iPad 模拟器上合成的 Delete 键（⌘⌫/⌫，\u{7F} 或 \u{8}）

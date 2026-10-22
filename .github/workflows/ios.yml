@@ -130,6 +130,13 @@ jobs:
           xcrun simctl boot "$UDID" || true
           xcrun simctl bootstatus "$UDID" -b
           cd iosApp
+          # 开机刚完成时 xcodebuild 偶发看不到任何模拟器（“Unable to find a device matching the provided destination specifier”，
+          # 可用目标里连 iPhone 都没有）：等该模拟器出现在 scheme 的可用目标中再跑
+          for i in $(seq 1 24); do
+            if xcodebuild -project OpenCloudreve.xcodeproj -scheme OpenCloudreve -showdestinations 2>/dev/null | grep -q "$UDID"; then break; fi
+            echo "等待 iPad 模拟器出现在可用目标中（$i）"
+            sleep 5
+          done
           xcodebuild -project OpenCloudreve.xcodeproj -scheme OpenCloudreve \
             -destination "platform=iOS Simulator,id=$UDID" \
             -resultBundlePath build/OpenCloudreve-iPad.xcresult \
